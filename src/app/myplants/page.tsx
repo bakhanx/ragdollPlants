@@ -40,28 +40,28 @@ const myPlants = [
 
 export default function Page() {
   return (
-    <div className="flex flex-col items-center gap-6 px-[19px] py-[35px] bg-[#f9f9f9] w-full min-w-[430px] max-w-md mx-auto h-screen">
-      <div className="w-full  flex flex-col items-center gap-6">
-        {/* 상단 제목과 이미지 */}
+    <div className="relative flex flex-col items-center justify-center min-h-screen w-full px-6 py-12 bg-[#f9f9f9]">
+      {/* Contents */}
+      <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-md px-8 py-12 bg-white/10 backdrop-blur-md rounded-2xl shadow-lg">
+        {/* 헤더 */}
         <div className="flex items-center justify-between w-full max-w-[600px]">
-          <p className="text-[28px] font-bold text-[#12121d] leading-8">
+          <p className="text-[28px] font-bold text-[#12121d]">
             <span className="text-[#12121d]">My </span>
             <span className="text-[#5b8e55]">Plants</span>
           </p>
-
           <img
-            className="w-[44.46px] h-[44.46px] object-cover"
+            className="w-11 h-11 object-cover"  
             alt="Ellipse"
             src="https://c.animaapp.com/m8k13xvsWqaWls/img/ellipse-13.svg"
           />
         </div>
 
         {/* 식물 카드 부분 */}
-        <div className="flex flex-wrap justify-center gap-[20px] w-full">
+        <div className="flex flex-wrap justify-center gap-5 w-full">
           {myPlants.map((plant, index) => (
             <div
               key={index}
-              className="flex flex-col items-center gap-3 w-[168px] h-[230px] bg-[#ebebd2] rounded-[11px] relative p-[15px]"
+              className="flex flex-col items-center gap-3 w-40 h-[230px] bg-[#ebebd2] rounded-[11px] relative p-4 backdrop-blur-md hover:scale-105 transition-all duration-300"
             >
               <img
                 className="w-full h-[143px] object-cover rounded-[10px]"
@@ -71,17 +71,17 @@ export default function Page() {
 
               {/* 상태 아이콘 */}
               {plant.status && (
-                <div className="absolute top-0 right-0 w-[43px] h-[43px] flex items-center justify-center bg-[#ff735d] rounded-full shadow-lg backdrop-blur-lg">
+                <div className="absolute top-0 right-0 w-11 h-11 flex items-center justify-center bg-[#ff735d] rounded-full shadow-lg backdrop-blur-lg"> 
                   <img
-                    className="w-[18px] h-[18px]"
+                    className="w-4.5 h-4.5"
                     alt="Status Icon"
-                    src="https://c.animaapp.com/m8k13xvsWqaWls/img/group-49.png" // 상태 아이콘 이미지
+                    src="https://c.animaapp.com/m8k13xvsWqaWls/img/group-49.png"
                   />
                 </div>
               )}
 
               {/* 식물 이름 */}
-              <div className="text-center text-black font-medium text-lg tracking-[0] leading-[26px] mt-3">
+              <div className="text-center text-black font-medium text-lg mt-3">
                 {plant.name}
               </div>
             </div>
