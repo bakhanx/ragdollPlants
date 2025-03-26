@@ -25,7 +25,7 @@ export const BackgroundImage = ({
 
       {/* 어두운 오버레이 */}
       {overlay && (
-        <div className={`absolute inset-0 bg-black opacity-20 z-0`} />
+        <div className={`absolute inset-0 bg-black opacity-10 z-0`} />
       )}
     </div>
   );
