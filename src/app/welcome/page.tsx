@@ -1,20 +1,19 @@
 import React from "react";
 import BackgroundImage from "../_components/BackgroundImage";
 import Header from "../_components/Header";
-import Button from "../_components/Button";
+
+import ContentLayout from "../_components/ContentsLayout";
+import Link from "next/link";
+import { Button } from "../_components/Button";
 
 export default function Page() {
   return (
-    <div className="relative flex min-h-screen items-center justify-center ">
+    <>
       {/* 배경 이미지 */}
-      <BackgroundImage
-        src={"/images/welcome-bg-01.webp"}
-        overlay={true}
-        opacity={20}
-      />
+      <BackgroundImage src={"/images/welcome-bg-01.webp"} overlay={true} />
 
       {/* Contents */}
-      <div className="relative z-10 flex flex-col justify-center items-center w-full max-w-md px-6 py-10 bg-white/10 backdrop-blur-xl rounded-2xl shadow-lg min-h-[80vh]">
+      <ContentLayout>
         {/* 헤더 */}
         <Header mainText="RagdollPlants" subText="랙돌플랜츠" />
 
@@ -32,12 +31,16 @@ export default function Page() {
         </div>
 
         {/* 버튼 */}
-        <div className="flex flex-col gap-4 w-full max-w-xs">
-          <Button text="로그인" type="primary" />
+        <div className="flex flex-col gap-4 w-full">
+          <Link href="/login">
+            <Button text="로그인" type="primary" />
+          </Link>
           <Button text="Login With Google" />
-          <Button text="회원가입" />
+          <Link href="/signup">
+            <Button text="회원가입" />
+          </Link>
         </div>
-      </div>
-    </div>
+      </ContentLayout>
+    </>
   );
 }
