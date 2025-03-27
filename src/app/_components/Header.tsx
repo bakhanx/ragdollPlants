@@ -1,18 +1,24 @@
-// _components/Header.js
+import Image from "next/image";
 import React from "react";
+import { profileImg } from "../_temp/constants";
 
-type HeaderProps = {
-    mainText:string,
-    subText:string,
-}
-
-function Header({ mainText, subText } : HeaderProps) {
+const Header = () => {
   return (
-    <div className="flex items-center gap-3 mb-6 flex-col">
-      <h1 className="text-4xl font-semibold text-green-600">{mainText}</h1>
-      <h3 className="text-white text-lg">{subText}</h3>
+    <div className="flex items-center justify-between w-full max-w-md">
+      <p className="text-xl sm:text-2xl font-bold">
+        <span className="text-[#12121d]">New on </span>
+        <span className="text-[#5b8e55]">랙돌플랜츠</span>
+      </p>
+      <div className="w-10 h-10 sm:w-12 sm:h-12 relative">
+        <Image
+          src={profileImg}
+          alt="Proifle"
+          fill
+          style={{ objectFit: "cover", borderRadius: "50%" }}
+        />
+      </div>
     </div>
   );
-}
+};
 
 export default Header;
