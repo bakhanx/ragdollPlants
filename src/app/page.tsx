@@ -2,10 +2,10 @@ import React from "react";
 import { plantItems } from "./_temp/constants";
 import ContentLayout from "./_components/ContentsLayout";
 import BackgroundImage from "./_components/BackgroundImage";
-import PlantList from "./_components/PlantList";
 import Banner from "./_components/Banner";
 import { MenuList } from "./_components/MenuList";
 import Header from "./_components/Header";
+import { ArticleList } from "./_components/ArticleList";
 
 export default function Page() {
   return (
@@ -24,8 +24,8 @@ export default function Page() {
         {/* 배너 */}
         <Banner />
 
-        {/* 식물 리스트 */}
-        <PlantList items={plantItems} />
+        {/* 기사 리스트 */}
+        <ArticleList items={plantItems} />
       </ContentLayout>
     </>
   );
