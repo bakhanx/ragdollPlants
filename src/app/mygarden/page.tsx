@@ -3,7 +3,7 @@ import BackgroundImage from "../_components/BackgroundImage";
 import ContentLayout from "../_components/ContentsLayout";
 import Header from "../_components/Header";
 import { MenuList } from "../_components/MenuList";
-import PlantList from "../_components/PlantList";
+import { PlantList } from "../_components/PlantList";
 import { plantItems } from "../_temp/constants";
 import PlantTitle from "./_components/PlantTitle";
 
@@ -15,17 +15,12 @@ export default function Page() {
       {/* Contents */}
       <ContentLayout>
         {/* 헤더 */}
-        <Header />
-
-        {/* 메뉴 리스트 */}
+        <Header />ㄹ{/* 메뉴 리스트 */}
         <MenuList />
-
         {/* 칭호 */}
         <PlantTitle />
-
         {/* 내 식물 목록 (대표사진)*/}
         <PlantList items={plantItems} />
-
         {/* 유저 데이터 */}
         <section className="w-full py-2 my-2 rounded-md relative">
           <div className="absolute inset-0 bg-white opacity-30 rounded-md" />
@@ -37,7 +32,6 @@ export default function Page() {
           </div>
           <div></div>
         </section>
-
         {/* 유저 데이터 */}
         <section className="w-full py-2 my-2 rounded-md relative">
           <div className="absolute inset-0 bg-white opacity-30 rounded-md" />
@@ -49,7 +43,6 @@ export default function Page() {
           </div>
           <div></div>
         </section>
-        
         {/* 유저 데이터 */}
         <section className="w-full py-2 my-2 rounded-md relative">
           <div className="absolute inset-0 bg-white opacity-30 rounded-md" />
@@ -61,7 +54,6 @@ export default function Page() {
           </div>
           <div></div>
         </section>
-
         {/* 식물 상태 */}
         {/* {["Cactus Red", "Cactus Green"].map((plant) => (
           <div
