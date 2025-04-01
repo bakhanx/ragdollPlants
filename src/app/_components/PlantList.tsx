@@ -31,5 +31,3 @@ export const PlantList = ({ items }: PlantListProps) => {
     </div>
   );
 };
-
-export default PlantList;
