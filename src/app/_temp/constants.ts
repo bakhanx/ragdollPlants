@@ -25,19 +25,19 @@ export const myPlants = [
     name: "Cactus",
     image: "/images/welcome-bg-01.webp",
     isNew: true,
-    status: true
+    status: true,
   },
   {
     name: "Cactus Red",
     image: "/images/welcome-bg-02.webp",
     isNew: false,
-    status: true
+    status: true,
   },
   {
     name: "Unknown Plant",
     image: "/images/welcome-bg-03.webp",
     isNew: false,
-    status: false
+    status: false,
   },
   {
     name: "선인장",
@@ -49,19 +49,19 @@ export const myPlants = [
     name: "Cactus",
     image: "/images/welcome-bg-01.webp",
     isNew: true,
-    status: true
+    status: true,
   },
   {
     name: "Cactus Red",
     image: "/images/welcome-bg-02.webp",
     isNew: false,
-    status: true
+    status: true,
   },
   {
     name: "Unknown Plant",
     image: "/images/welcome-bg-03.webp",
     isNew: false,
-    status: false
+    status: false,
   },
   {
     name: "선인장",
@@ -77,13 +77,13 @@ export const userProfileData = {
   stats: {
     followers: 27,
     visitors: 12,
-    plants: 30
+    plants: 30,
   },
   levelProgress: 75,
   plantCare: {
-    todayWaterCount: 3,
-    weeklyNutrientCount: 2
-  }
+    waterCount: 3,
+    nutrientCount: 2,
+  },
 } as const;
 
 export const levelExpRequirements = {
