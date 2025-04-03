@@ -1,57 +1,75 @@
-import React from "react";
-import Water from "@/../public/svg/water.svg";
-import Plant from "@/../public/svg/plant.svg";
-import Garden from "@/../public/svg/garden.svg";
-import Link from "next/link";
+import Link from 'next/link';
+import React from 'react';
 
-const menuItems = [
-  {
-    label: "내 정원",
-    icon: Garden,
-    link: "/mygarden",
-  },
-  {
-    label: "내 식물",
-    icon: Plant,
-    link: "/myplants",
-  },
-  {
-    label: "물주기",
-    icon: Water,
-    link: "/water",
-  },
-  {
-    label: "내 게시글",
-    icon: Plant,
-    link: "/",
-  },
-];
+interface MenuListProps {
+  variant?: 'inline' | 'sidebar';
+  onItemClick?: () => void;
+}
 
-export const MenuList = () => {
+export const MenuList = ({
+  variant = 'inline',
+  onItemClick
+}: MenuListProps) => {
+  const menuItems = [
+    { icon: '🌱', label: '내 식물', href: '/myplants' },
+    { icon: '🌆', label: '갤러리', href: '/gallery' },
+    { icon: '💧', label: '물주기', href: '/water' },
+    { icon: '💊', label: '비료 주기', href: '/nutrients' },
+    { icon: '🏡', label: '내 정원', href: '/mygarden' },
+    { icon: '📝', label: '식물 기사', href: '/article' }
+  ];
+
+  const variants = {
+    inline: {
+      nav: 'grid grid-cols-2 sm:grid-cols-4 gap-4 w-full py-4',
+      link: `
+        group relative flex gap-x-2 items-center 
+        p-3 rounded-2xl
+        bg-white/60 hover:bg-white/80
+        border border-green-100/50
+        transition-all duration-200
+        hover:shadow-lg hover:-translate-y-0.5
+      `,
+      iconWrapper: `
+        flex items-center justify-center
+        text-xl
+        transition-transform duration-200
+        group-hover:scale-110
+      `,
+      label: 'text-sm font-medium text-gray-700'
+    },
+    sidebar: {
+      nav: 'space-y-1',
+      link: `
+        group relative flex items-center gap-3
+        px-4 py-3 rounded-xl
+        hover:bg-green-50/50
+        transition-all duration-200
+      `,
+      iconWrapper: `
+        flex items-center justify-center
+        text-2xl
+        transition-transform duration-200
+        group-hover:scale-105
+      `,
+      label: 'text-sm font-medium text-gray-700'
+    }
+  };
+
+  const styles = variants[variant];
+
   return (
-    <div className="flex items-center gap-4 py-4 w-full">
-      {menuItems.map((item) => {
-        const Icon = item.icon;
-        return (
-          <Link href={`${item.link}`} key={item.label}>
-            <div className="flex flex-col items-center gap-2 w-16">
-              <div className="w-14 h-14 bg-[#73c06b] rounded-full shadow-lg flex items-center justify-center relative">
-                {Icon && (
-                  <div className="relative size-8 ">
-                    <Icon
-                      className="w-full h-full"
-                      style={{ stroke: "white", }}
-                    />
-                  </div>
-                )}
-              </div>
-              <p className="text-[#8ee984] text-xs font-semibold text-center">
-                {item.label}
-              </p>
-            </div>
-          </Link>
-        );
-      })}
-    </div>
+    <nav className={styles.nav}>
+      {menuItems.map(item => (
+        <Link
+          key={item.href}
+          href={item.href}
+          onClick={onItemClick}
+          className={styles.link}>
+          <div className={styles.iconWrapper}>{item.icon}</div>
+          <span className={styles.label}>{item.label}</span>
+        </Link>
+      ))}
+    </nav>
   );
 };
