@@ -21,7 +21,7 @@ export const MenuList = ({
 
   const variants = {
     inline: {
-      nav: 'grid grid-cols-2 sm:grid-cols-4 gap-4 w-full py-4',
+      nav: 'grid grid-cols-2 gap-4 w-full py-4',
       link: `
         group relative flex gap-x-2 items-center 
         p-3 rounded-2xl
@@ -32,7 +32,7 @@ export const MenuList = ({
       `,
       iconWrapper: `
         flex items-center justify-center
-        text-xl
+        text-xl size-8
         transition-transform duration-200
         group-hover:scale-110
       `,
@@ -48,7 +48,7 @@ export const MenuList = ({
       `,
       iconWrapper: `
         flex items-center justify-center
-        text-2xl
+        text-2xl size-8
         transition-transform duration-200
         group-hover:scale-105
       `,
