@@ -1,55 +1,41 @@
-import React from "react";
-import { WaterCard } from "./_components/WaterCard";
+import React from 'react';
+import { myPlants } from '../_temp/constants';
+import Header from '../_components/Header';
+import ContentLayout from '../_components/ContentsLayout';
+import BackgroundImage from '../_components/BackgroundImage';
+import { WaterCardList } from './_components/WaterCardList';
 
-export default function Page() {
+// 나중에 실제 데이터 페칭 함수로 대체
+async function getWateringData() {
+  // 임시로 constants 데이터 사용
+  const todayPlants = myPlants.filter(plant => !plant.status);
+  const previousPlants = myPlants.filter(plant => plant.status).slice(0, 1);
+
+  return {
+    todayPlants,
+    previousPlants,
+    previousDate: 'Saturday, May 21'
+  };
+}
+
+export default async function Page() {
+  // 서버에서 데이터 페칭
+  const { todayPlants, previousPlants, previousDate } = await getWateringData();
+
   return (
-    <div className="flex min-h-screen items-center justify-center py-12 px-4 bg-[#f9f9f9]">
-      <div className="flex flex-col w-full max-w-md items-start gap-10 px-6 py-8 bg-white/10 backdrop-blur-xl rounded-2xl shadow-lg">
-        {/* 헤더 */}
-        <div className="flex items-center justify-between w-full">
-          <p className="text-3xl font-bold text-[#12121d]">
-            <span>Water </span>
-            <span className="text-green-600">Plants</span>
-          </p>
-        </div>
-
-        {/* 카드 */}
-        <WaterCard
-          backgroundColor="bg-[#e6bdbb]"
-          imageSrc=""
-          statusIcon=""
-          title="Create with Gardening App"
-          amount={150}
+    <>
+      <BackgroundImage src="/images/welcome-bg-03.webp" />
+      <ContentLayout>
+        <Header
+          title="물주기"
+          showNotification
         />
-
-        <WaterCard
-          backgroundColor="bg-[#e6c2a0]"
-          imageSrc=""
-          statusIcon=""
-          title="Create with Gardening App"
-          amount={150}
+        <WaterCardList
+          plants={todayPlants}
+          previousPlants={previousPlants}
+          previousDate={previousDate}
         />
-
-        <WaterCard
-          backgroundColor="bg-[#dfdfdf]"
-          imageSrc=""
-          title="Create with Gardening App"
-          amount={150}
-          statusIcon=""
-        />
-
-        {/* 지난 날 카드 */}
-        <div className="w-full">
-          <p className="text-2xl font-medium text-black">Saturday, May 21</p>
-          <WaterCard
-            backgroundColor="bg-[#dfdfdf]"
-            imageSrc=""
-            title="Create with Gardening App"
-            amount={150}
-            statusIcon=""
-          />
-        </div>
-      </div>
-    </div>
+      </ContentLayout>
+    </>
   );
 }
