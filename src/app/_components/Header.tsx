@@ -128,12 +128,12 @@ export default function Header({
         <>
           {/* 오버레이 */}
           <div
-            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm rounded-2xl"
             onClick={() => setIsMenuOpen(false)}
           />
 
           {/* 사이드바 */}
-          <div className="fixed top-0 left-0 z-50 h-full w-72 transform bg-white shadow-xl transition-transform">
+          <div className="fixed top-0 left-0 z-50 h-full w-72 transform bg-white shadow-xl transition-transform rounded-xl">
             <div className="p-4">
               {/* 메뉴 헤더 */}
               <div className="mb-6 flex items-center justify-between">
