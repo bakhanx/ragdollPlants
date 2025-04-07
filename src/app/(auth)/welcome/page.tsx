@@ -1,8 +1,8 @@
 import React from "react";
-import BackgroundImage from "../../_components/BackgroundImage";
+import BackgroundImage from "../../_components/layout/BackgroundImage";
 import Header from "../_components/Header";
 
-import ContentLayout from "../../_components/ContentsLayout";
+import ContentLayout from "../../_components/layout/ContentsLayout";
 import Link from "next/link";
 import { Button } from "../_components/Button";
 

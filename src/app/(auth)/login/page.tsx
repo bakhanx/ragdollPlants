@@ -1,6 +1,6 @@
 import React from "react";
-import BackgroundImage from "../../_components/BackgroundImage";
-import ContentLayout from "../../_components/ContentsLayout";
+import BackgroundImage from "../../_components/layout/BackgroundImage";
+import ContentLayout from "../../_components/layout/ContentsLayout";
 import { PasswordInput } from "../_components/PasswordInput";
 import { Input } from "../_components/Input";
 import Header from "../_components/Header";

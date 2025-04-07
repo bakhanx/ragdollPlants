@@ -1,6 +1,6 @@
 import React from "react";
-import ContentLayout from "../../_components/ContentsLayout";
-import BackgroundImage from "../../_components/BackgroundImage";
+import ContentLayout from "../../_components/layout/ContentsLayout";
+import BackgroundImage from "../../_components/layout/BackgroundImage";
 import Header from "../_components/Header";
 import { Input } from "../_components/Input";
 import { Checkbox } from "../_components/Checkbox";

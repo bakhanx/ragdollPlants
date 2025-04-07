@@ -1,11 +1,11 @@
 import React from "react";
 import { plantItems } from "./_temp/constants";
-import ContentLayout from "./_components/ContentsLayout";
-import BackgroundImage from "./_components/BackgroundImage";
-import Banner from "./_components/Banner";
-import { MenuList } from "./_components/MenuList";
-import Header from "./_components/Header";
-import { ArticleList } from "./_components/ArticleList";
+import ContentLayout from "./_components/layout/ContentsLayout";
+import BackgroundImage from "./_components/layout/BackgroundImage";
+import Banner from "./_components/layout/Banner";
+import { MenuList } from "./_components/lists/MenuList";
+import Header from "./_components/layout/Header";
+import { ArticleList } from "./_components/lists/ArticleList";
 
 export default function Page() {
   return (
@@ -16,7 +16,7 @@ export default function Page() {
       <ContentLayout>
         
         {/* 헤더 */}
-        <Header/>
+        <Header showNotification/>
 
         {/* 메뉴 리스트 */}
         <MenuList />
