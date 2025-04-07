@@ -81,10 +81,10 @@ export const myPlants = [
 
 export const userProfileData = {
   id: "user_1",
-  nickname: "초록이의 정원",
+  nickname: "초록이",
   level: 5,
   stats: {
-    followers: 27,
+    galleries: 27,
     visitors: 12,
     plants: 30,
     totalWatering: 150,
@@ -113,3 +113,35 @@ export const levelExpRequirements = {
 } as const;
 
 export const profileImg = "/images/Profile.png";
+
+export type DiaryPost = {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  imageUrl: string;
+};
+
+export const diaryPosts = [
+  {
+    id: 'post1',
+    title: '몬스테라 일지 02',
+    content: '오늘 아침에 일어나보니 몬스테라에서 새로운 잎이 나오고 있었어요. 2주 전부터 뿌리가 나오기 시작했는데, 드디어 새 잎이 나왔네요.',
+    date: '2024.04.07',
+    imageUrl: '/images/welcome-bg-04.webp'
+  },
+  {
+    id: 'post2',
+    title: '몬스테라 일지 01',
+    content: '봄을 맞이하여 다육이들 분갈이를 했습니다. 새로운 흙과 예쁜 화분으로 갈아주니 더 건강해 보이네요.',
+    date: '2024.04.05',
+    imageUrl: '/images/welcome-bg-03.webp'
+  },
+  {
+    id: 'post3',
+    title: '베란다 정원 만들기',
+    content: '작은 베란다지만 나만의 정원을 만들어보았어요. 허브와 작은 채소들을 심어 가꾸고 있답니다.',
+    date: '2024.04.03',
+    imageUrl: '/images/welcome-bg-02.webp'
+  }
+] as const;
