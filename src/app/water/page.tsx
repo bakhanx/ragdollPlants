@@ -1,8 +1,8 @@
 import React from 'react';
 import { myPlants } from '../_temp/constants';
-import Header from '../_components/Header';
-import ContentLayout from '../_components/ContentsLayout';
-import BackgroundImage from '../_components/BackgroundImage';
+import Header from '../_components/layout/Header';
+import ContentLayout from '../_components/layout/ContentsLayout';
+import BackgroundImage from '../_components/layout/BackgroundImage';
 import { WaterCardList } from './_components/WaterCardList';
 
 // 나중에 실제 데이터 페칭 함수로 대체

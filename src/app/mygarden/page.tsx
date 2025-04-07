@@ -1,12 +1,10 @@
 import React from 'react';
-import BackgroundImage from '../_components/BackgroundImage';
-import ContentLayout from '../_components/ContentsLayout';
-import Header from '../_components/Header';
-import { MenuList } from '../_components/MenuList';
-import { PlantList } from '../_components/PlantList';
-import PlantTitle from './_components/PlantTitle';
-import UserProfile from '../_components/UserProfile';
-import { plantItems, userProfileData } from '../_temp/constants';
+import BackgroundImage from '../_components/layout/BackgroundImage';
+import ContentLayout from '../_components/layout/ContentsLayout';
+import Header from '../_components/layout/Header';
+import { MenuList } from '../_components/lists/MenuList';
+import UserProfile from './_components/profile/UserProfile';
+import { userProfileData } from '../_temp/constants';
 
 export default function Page() {
   const userData = userProfileData;
@@ -16,7 +14,7 @@ export default function Page() {
       <ContentLayout>
         <Header
           showBackButton
-          title="나의 프로필"
+          title="초록이님의 정원"
           showNotification
         />
 
