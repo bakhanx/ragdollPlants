@@ -2,7 +2,7 @@ import React from 'react';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons';
 import Card from '@/app/_components/common/Card';
 import ProfileImage from './ProfileImage';
-import StatCard from './StatCard';
+import CountStatCard from './CountStatCard';
 import LevelProgress from './LevelProgress';
 import CareStatusCard from './CareStatusCard';
 import PlantTitle from '../PlantTitle';
@@ -51,17 +51,17 @@ export default function UserProfile({
 
             {/* 통계 그리드 */}
             <div className="grid grid-cols-3 gap-3">
-              <StatCard
+              <CountStatCard
+                value={stats.visitors}
+                label="다이어리"
+                href="/diary"
+              />
+              <CountStatCard
                 value={stats.galleries}
                 label="갤러리"
                 href="/gallery"
               />
-              <StatCard
-                value={stats.visitors}
-                label="보유식물"
-                href="/myplants"
-              />
-              <StatCard
+              <CountStatCard
                 value={stats.plants}
                 label="물준횟수"
                 href="/water"
