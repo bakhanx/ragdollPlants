@@ -30,9 +30,9 @@ export default async function DiaryDetail(props: {
           showBackButton
         />
 
-        <div className=" w-full overflow-hidden rounded-2xl">
+        <div className="w-full overflow-hidden rounded-2xl">
           {/* 이미지 */}
-          <div className="relative aspect-[4/3] w-full">
+          <div className="relative h-[calc(60vh-16px)] w-full">
             <Image
               src={post.imageUrl}
               alt={post.title}
@@ -42,29 +42,29 @@ export default async function DiaryDetail(props: {
               priority
             />
             {/* 그라데이션 오버레이 추가 */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40"/>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
           </div>
 
           {/* 콘텐츠 */}
-          <div className="relative z-10 -mt-10 rounded-t-3xl bg-white/90 p-8 shadow-lg backdrop-blur-sm">
+          <div className="relative z-10 -mt-10 min-h-[calc(40vh+40px)] rounded-t-3xl bg-white/90 p-8 shadow-lg backdrop-blur-sm">
             <div className="mb-5 flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-800">
-                {post.title}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-800">{post.title}</h1>
               <time className="text-sm text-gray-500">{post.date}</time>
             </div>
-            
+
             <div className="mb-6 flex items-center">
-              <span className="text-sm font-medium text-gray-500">작성자: 초롱이</span>
+              <span className="text-sm font-medium text-gray-500">
+                작성자: 초롱이
+              </span>
             </div>
 
-            <div className="mb-6 rounded-xl ">
+            <div className="mb-6 rounded-xl">
               <h2 className="mb-1 text-lg font-semibold text-gray-700">
                 상태 : 좋음😀
               </h2>
             </div>
 
-            <p className="whitespace-pre-line text-base leading-relaxed text-gray-600">
+            <p className="text-base leading-relaxed whitespace-pre-line text-gray-600">
               {post.content}
             </p>
           </div>

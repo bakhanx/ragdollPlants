@@ -11,7 +11,7 @@ export default function ContentLayout({
 }: ContentLayoutProps) {
   return (
     <div
-      className={`relative z-10 flex min-h-[80vh] w-full max-w-md flex-col items-center my-2 mx-2 rounded-2xl bg-white/10 shadow-lg backdrop-blur-xl ${noPadding ? '' : 'px-4 py-4'} `}>
+      className={`relative z-10 mx-2 flex min-h-[calc(100vh-16px)] my-2 w-full max-w-md flex-col items-center rounded-2xl bg-white/10 shadow-lg backdrop-blur-xl ${noPadding ? '' : 'px-4 py-4'} `}>
       {children}
     </div>
   );
