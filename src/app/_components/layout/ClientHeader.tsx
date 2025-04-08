@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect } from 'react';
 import DiaryMenu from '@/app/diary/_components/DiaryMenu';
 
 interface ClientHeaderProps {
@@ -10,19 +10,24 @@ interface ClientHeaderProps {
   showBackButton?: boolean;
 }
 
-export default function ClientHeader({ 
-  title, 
+export default function ClientHeader({
+  title,
   postId,
   showBackButton = false
 }: ClientHeaderProps) {
   const router = useRouter();
+
+  // 페이지 로드 시 스크롤을 맨 위로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleBack = () => {
     router.back();
   };
 
   return (
-    <div className="w-full flex items-center justify-between py-3 px-2 fixed z-10 bg-white/1 shadow-lg backdrop-blur-sm rounded-t-2xl">
+    <div className="fixed z-10 flex w-full items-center justify-between rounded-t-2xl bg-white/1 px-2 py-3 shadow-lg backdrop-blur-sm">
       <div className="w-12 flex-shrink-0">
         {showBackButton && (
           <button
@@ -46,14 +51,12 @@ export default function ClientHeader({
       </div>
 
       <div className="flex-1 text-center">
-        <h1 className="text-lg font-bold text-gray-800 truncate">
-          {title}
-        </h1>
+        <h1 className="truncate text-lg font-bold text-gray-100">{title}</h1>
       </div>
 
-      <div className="w-12 flex-shrink-0 flex justify-end">
+      <div className="flex w-12 flex-shrink-0 justify-end">
         {postId && <DiaryMenu postId={postId} />}
       </div>
     </div>
   );
-} 
+}
