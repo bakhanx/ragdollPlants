@@ -1,12 +1,12 @@
 import Card from '@/app/_components/common/Card';
 
-type StatCardProps = {
+type CountStatCardProps = {
   value: number;
   label: string;
   href: string;
 };
 
-export default function StatCard({ value, label, href }: StatCardProps) {
+export default function CountStatCard({ value, label, href }: CountStatCardProps) {
   return (
     <Card href={href} className="px-1.5 py-2">
       <div className="flex flex-col items-center">
