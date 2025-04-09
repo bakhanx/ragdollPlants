@@ -31,9 +31,15 @@ export const myPlants = [
     image: "/images/welcome-bg-01.webp",
     isNew: true,
     status: true,
+    waterStatus: true,
+    nutrientStatus: false,
     waterAmount: 150,
-    lastWateredDate: "2024-03-20",
-    nextWateringDate: "2024-03-27",
+    lastWateredDate: "2025-04-08",
+    nextWateringDate: "2025-04-10",
+    waterInterval: 3, // 1주일마다 물주기
+    lastNutrientDate: "2025-03-12",
+    nextNutrientDate: "2025-04-12",
+    nutrientInterval: 10, // 30일마다 비료주기
     temperature: 22,
     humidity: 45,
     sunlight: "bright"
@@ -44,9 +50,15 @@ export const myPlants = [
     image: "/images/welcome-bg-02.webp",
     isNew: false,
     status: true,
+    waterStatus: true,
+    nutrientStatus: true,
     waterAmount: 120,
-    lastWateredDate: "2024-03-19",
-    nextWateringDate: "2024-03-26",
+    lastWateredDate: "2025-03-19",
+    nextWateringDate: "2025-04-20",
+    waterInterval: 7, // 1주일마다 물주기
+    lastNutrientDate: "2025-03-15",
+    nextNutrientDate: "2025-04-15",
+    nutrientInterval: 7, // 30일마다 비료주기
     temperature: 23,
     humidity: 40,
     sunlight: "direct"
@@ -57,9 +69,15 @@ export const myPlants = [
     image: "/images/welcome-bg-03.webp",
     isNew: false,
     status: false,
+    waterStatus: false,
+    nutrientStatus: false,
     waterAmount: 200,
-    lastWateredDate: "2024-03-18",
-    nextWateringDate: "2024-03-25",
+    lastWateredDate: "2025-03-18",
+    nextWateringDate: "2025-04-30",
+    waterInterval: 5, // 1주일마다 물주기
+    lastNutrientDate: "2025-04-01",
+    nextNutrientDate: "2025-04-30",
+    nutrientInterval: 30, // 30일마다 비료주기
     temperature: 20,
     humidity: 60,
     sunlight: "indirect"
@@ -70,9 +88,15 @@ export const myPlants = [
     image: "/images/welcome-bg-04.webp",
     isNew: true,
     status: false,
+    waterStatus: false,
+    nutrientStatus: false,
     waterAmount: 100,
-    lastWateredDate: "2024-03-17",
-    nextWateringDate: "2024-03-24",
+    lastWateredDate: "2025-03-23",
+    nextWateringDate: "2025-03-30",
+    waterInterval: 7, // 1주일마다 물주기
+    lastNutrientDate: "2025-04-09",
+    nextNutrientDate: "2025-05-09",
+    nutrientInterval: 30, // 30일마다 비료주기
     temperature: 21,
     humidity: 50,
     sunlight: "bright"
@@ -133,14 +157,14 @@ export const diaryPosts = [
   {
     id: 'post2',
     title: '몬스테라 일지 01',
-    content: '봄을 맞이하여 다육이들 분갈이를 했습니다. 새로운 흙과 예쁜 화분으로 갈아주니 더 건강해 보이네요.',
+    content: '봄을 맞이하여 다육이들 분갈이를 했습니다. 새로운 흙과 예쁜 화분으로 갈아주니 더 건강해 보이네요.봄을 맞이하여 다육이들 분갈이를 했습니다. 새로운 흙과 예쁜 화분으로 갈아주니 더 건강해 보이네요.봄을 맞이하여 다육이들 분갈이를 했습니다. 새로운 흙과 예쁜 화분으로 갈아주니 더 건강해 보이네요.봄을 맞이하여 다육이들 분갈이를 했습니다. 새로운 흙과 예쁜 화분으로 갈아주니 더 건강해 보이네요.봄을 맞이하여 다육이들 분갈이를 했습니다. 새로운 흙과 예쁜 화분으로 갈아주니 더 건강해 보이네요.',
     date: '2024.04.05',
     imageUrl: '/images/welcome-bg-03.webp'
   },
   {
     id: 'post3',
     title: '베란다 정원 만들기',
-    content: '작은 베란다지만 나만의 정원을 만들어보았어요. 허브와 작은 채소들을 심어 가꾸고 있답니다.',
+    content: '작은 베란다지만 나만의 정원을 만들어보았어요. 허브와 작은 채소들을 심어 가꾸고 있답니다.작은 베란다지만 나만의 정원을 만들어보았어요. 허브와 작은 채소들을 심어 가꾸고 있답니다.작은 베란다지만 나만의 정원을 만들어보았어요. 허브와 작은 채소들을 심어 가꾸고 있답니다.작은 베란다지만 나만의 정원을 만들어보았어요. 허브와 작은 채소들을 심어 가꾸고 있답니다.',
     date: '2024.04.03',
     imageUrl: '/images/welcome-bg-02.webp'
   }
