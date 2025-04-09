@@ -34,7 +34,7 @@ interface CareCardProps {
   isNutrientUpdating?: boolean;
 }
 
-export default function CareCard({
+export const CareCard = ({
   plant,
   waterProgress,
   nutrientProgress,
@@ -42,7 +42,7 @@ export default function CareCard({
   onNutrientClick,
   isWaterUpdating = false,
   isNutrientUpdating = false
-}: CareCardProps) {
+}: CareCardProps) => {
   // 남은 일수 계산 (정확한 D-day 값)
   const calcRemainingDays = (nextDate: string): number => {
     const today = new Date();
