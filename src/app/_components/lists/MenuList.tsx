@@ -14,8 +14,7 @@ export const MenuList = ({
     { icon: '🏡', label: '내 정원', href: '/mygarden' },
     { icon: '📗', label: '다이어리', href: '/diary' },
     { icon: '🌷', label: '식물 갤러리', href: '/gallery' },
-    { icon: '💧', label: '물주기', href: '/water' },
-    { icon: '💊', label: '비료 주기', href: '/nutrients' },
+    { icon: '🌱', label: '식물 케어', href: '/care' },
     { icon: '📝', label: '식물 뉴스', href: '/article' }
   ];
 
