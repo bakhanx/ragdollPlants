@@ -3,7 +3,7 @@ import { myPlants } from '../_temp/constants';
 import Header from '../_components/layout/Header';
 import ContentLayout from '../_components/layout/ContentsLayout';
 import BackgroundImage from '../_components/layout/BackgroundImage';
-import CareCardList from './_components/CareCardList';
+import { CareCardList } from './_components/CareCardList';
 
 // 나중에 실제 데이터 페칭 함수로 대체
 async function getCarePlantsData() {
