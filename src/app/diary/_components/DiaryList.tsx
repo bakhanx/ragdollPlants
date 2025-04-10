@@ -17,12 +17,11 @@ type DiaryListProps = {
 export default function DiaryList({ posts, className = '' }: DiaryListProps) {
   return (
     <div className={`space-y-6 ${className}`}>
-      {posts.map((post) => (
+      {posts.map(post => (
         <Link
           key={post.id}
           href={`/diary/${post.id}`}
-          className="block overflow-hidden rounded-2xl bg-white/50 shadow-sm transition-all hover:bg-white/60 hover:shadow-md"
-        >
+          className="block overflow-hidden rounded-2xl bg-white/50 shadow-sm transition-all hover:bg-white/60 hover:shadow-md">
           <article className="relative">
             {/* 이미지 */}
             <div className="relative h-48 w-full overflow-hidden">
@@ -40,10 +39,12 @@ export default function DiaryList({ posts, className = '' }: DiaryListProps) {
               <h2 className="mb-2 text-lg font-bold text-gray-800">
                 {post.title}
               </h2>
-              <p className="mb-3 text-sm text-gray-600 line-clamp-2">
+              <p className="mb-3 line-clamp-2 text-sm text-gray-600">
                 {post.content}
               </p>
-              <time className="text-xs text-gray-500">{post.date}</time>
+              <div className="w-full text-end text-xs text-gray-500">
+                {post.date}
+              </div>
             </div>
           </article>
         </Link>
