@@ -1,38 +1,30 @@
 import Image from 'next/image';
 import React from 'react';
 
-type PlantListProps = {
+type ArticleListProps = {
   items: {
-    name: string;
+    id: string;
+    title: string;
     image: string;
-    isNew: boolean;
+    date: string;
   }[];
 };
 
-export const ArticleList = ({ items }: PlantListProps) => {
+export const ArticleList = ({ items }: ArticleListProps) => {
   return (
-    <div className="w-full py-6">
-      <div className="text-lg font-bold">Article</div>
+    <div className="w-full">
+      <div className="py-2 text-lg font-bold">Article</div>
 
       <div className="flex w-full max-w-md flex-col gap-4">
-        {items.map((plant, index) => (
+        {items.slice(0, 4).map((plant, index) => (
           <div
             key={index}
             className="relative flex gap-x-2 rounded-md bg-[#ffffffa5] shadow-xl">
-            <div className="relative flex size-24 shrink-0 rounded-lg object-cover">
-              <Image
-                fill
-                src={plant.image}
-                alt={plant.name || 'New Plant'}
-                style={{ objectFit: 'cover', borderRadius: '5%' }}
-              />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="font-semibold">{plant.name}</h2>
-              <p className="text-sm text-gray-600">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Molestias expedita et amet consectetur
-              </p>
+            <div className="flex w-full items-center justify-between px-3">
+              <h2 className="cursor-pointer truncate py-2 font-semibold underline hover:text-green-600">
+                {plant.title}
+              </h2>
+              <div className="text-sm text-gray-600">{plant.date}</div>
             </div>
           </div>
         ))}
