@@ -1,5 +1,3 @@
-import React from 'react';
-
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import ContentLayout from '../_components/layout/ContentsLayout';
 import Header from '../_components/layout/Header';
@@ -13,7 +11,10 @@ export default function Page() {
       {/* Contents */}
       <ContentLayout>
         {/* 헤더 */}
-        <Header title='식물 일기'/>
+        <Header
+          title="식물 일기"
+          showNotification
+        />
 
         {/* 일기 목록 */}
         <div className="py-4">

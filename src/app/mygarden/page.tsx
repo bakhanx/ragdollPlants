@@ -13,7 +13,6 @@ export default function Page() {
       <BackgroundImage src="/images/welcome-bg-06.webp" />
       <ContentLayout>
         <Header
-          showBackButton
           title="초록이님의 정원"
           showNotification
         />
