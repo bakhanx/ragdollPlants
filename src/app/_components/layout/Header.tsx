@@ -6,6 +6,7 @@ import { MenuList } from '../lists/MenuList';
 import Image from 'next/image';
 import { profileImg } from '../../_temp/constants';
 import Link from 'next/link';
+import Notification from './Notification';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -28,12 +29,21 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const variants = {
     default: 'w-full flex items-center gap-3 py-2',
     transparent: 'w-full flex items-center gap-3 py-3',
     glass:
       'w-full flex items-center gap-3 py-3 px-4 bg-white/20 backdrop-blur-sm rounded-xl shadow-sm'
+  };
+
+  const handleNotificationClick = () => {
+    if (onNotificationClick) {
+      onNotificationClick();
+    } else {
+      setIsNotificationOpen(true);
+    }
   };
 
   return (
@@ -104,7 +114,7 @@ export default function Header({
         <div className="flex w-10 justify-end">
           {showNotification && !showMenuButton && (
             <button
-              onClick={onNotificationClick}
+              onClick={handleNotificationClick}
               className="group relative flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all hover:bg-white/70 hover:shadow-md"
               aria-label="알림">
               <svg
@@ -157,7 +167,7 @@ export default function Header({
           />
 
           {/* 사이드바 */}
-          <div className="fixed top-0 left-0 z-50 h-full w-72 transform bg-white shadow-xl transition-transform rounded-xl">
+          <div className="fixed top-0 left-0 z-50 h-[90vh] w-72 transform bg-white shadow-xl transition-transform rounded-xl">
             <div className="p-4">
               {/* 메뉴 헤더 */}
               <div className="mb-6 flex items-center justify-between">
@@ -190,6 +200,12 @@ export default function Header({
           </div>
         </>
       )}
+
+      {/* 알림 패널 */}
+      <Notification 
+        isOpen={isNotificationOpen} 
+        onClose={() => setIsNotificationOpen(false)} 
+      />
     </>
   );
 }
