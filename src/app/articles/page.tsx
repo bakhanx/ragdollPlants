@@ -1,32 +1,26 @@
-import React from 'react';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import ContentLayout from '../_components/layout/ContentsLayout';
 import Header from '../_components/layout/Header';
+import ArticleList from './components/ArticleList';
+import { articleItems } from '../_temp/articleData';
 
-const Page = () => {
-  const handleNotificationClick = () => {
-    // 알림 클릭 처리
-    console.log('알림 클릭됨');
-  };
-
+export default function Page() {
   return (
     <>
-      <BackgroundImage
-        src="/images/welcome-bg-07.webp"
-        overlay={true}
-      />
+      <BackgroundImage src="/images/welcome-bg-06.webp" />
+      {/* Contents */}
       <ContentLayout>
+        {/* 헤더 */}
         <Header
-          showBackButton={true}
-          title="식물 기사"
-          variant="glass"
-          showNotification={true}
-          
+          title="식물 뉴스"
+          showNotification
         />
-        {/* 나머지 컴포넌트들 */}
+
+        {/* 일기 목록 */}
+        <div className="py-4">
+          <ArticleList posts={articleItems} />
+        </div>
       </ContentLayout>
     </>
   );
-};
-
-export default Page;
+}
