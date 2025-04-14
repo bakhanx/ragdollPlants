@@ -6,7 +6,7 @@ import Banner from './_components/layout/Banner';
 import { MenuList } from './_components/lists/MenuList';
 import Header from './_components/layout/Header';
 import { ArticleList } from './_components/lists/ArticleList';
-import { articleItems } from './_temp/constants';
+import { articleItems } from './_temp';
 
 export default function Page() {
   return (
