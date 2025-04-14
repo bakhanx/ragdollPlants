@@ -17,7 +17,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full pt-4 mt-4 text-xs text-gray-600">
+    <footer className="w-full pt-4 mt-4 text-xs text-gray-600 px-2">
       <div className="border-t border-gray-200/50 pt-4">
         {/* 간소화된 링크 섹션 */}
         <div className="mb-3 grid grid-cols-3 gap-2">

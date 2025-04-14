@@ -3,7 +3,7 @@ import React from "react";
 
 export const Banner = () => {
   return (
-    <div className="relative w-full max-w-md h-48 rounded-lg text-white p-4 flex flex-col justify-end">
+    <div className="relative w-full max-w-md h-48 rounded-lg text-white p-4 flex flex-col justify-end my-2">
       {/* 배경 이미지 */}
       <Image
         src="/images/welcome-bg-02.webp"
