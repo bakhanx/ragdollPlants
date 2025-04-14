@@ -39,7 +39,7 @@ const Titles = [
 const PlantTitle = () => {
   const mTitles = Titles.slice(20);
   return (
-    <div className="flex flex-wrap gap-x-[5px] gap-y-1 text-[10px] w-full py-2">
+    <div className="flex flex-wrap gap-x-[5px] gap-y-1 text-[10px] w-full">
       {mTitles.map((title) => (
         <div
           className="text-white bg-[#3082ce] rounded-sm p-1 shadow-lg"
