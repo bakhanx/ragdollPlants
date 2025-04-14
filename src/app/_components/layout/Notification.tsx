@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { notifications } from '../../_temp/constants';
+import { notifications } from '../../_temp';
 
 // 타입을 constants.ts에서 가져오도록 수정
-import type { NotificationType } from '../../_temp/constants';
+import type { NotificationType } from '../../_temp';
 
 interface NotificationProps {
   isOpen: boolean;

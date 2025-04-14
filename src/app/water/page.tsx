@@ -1,5 +1,5 @@
 import React from 'react';
-import { myPlants } from '../_temp/constants';
+import { myPlants } from '../_temp';
 import Header from '../_components/layout/Header';
 import ContentLayout from '../_components/layout/ContentsLayout';
 import BackgroundImage from '../_components/layout/BackgroundImage';

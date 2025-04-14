@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { MenuList } from '../lists/MenuList';
 import Image from 'next/image';
-import { profileImg } from '../../_temp/constants';
+import { profileImg } from '../../_temp';
 import Link from 'next/link';
 import Notification from './Notification';
 
