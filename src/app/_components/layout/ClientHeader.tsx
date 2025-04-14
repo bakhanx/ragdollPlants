@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
-import DiaryMenu from '@/app/diary/_components/DiaryMenu';
+import DiaryMenu from '@/app/diaries/_components/DiaryMenu';
 
 interface ClientHeaderProps {
   title: string;
