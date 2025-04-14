@@ -13,7 +13,7 @@ export const BackgroundImage = ({
   return (
     <div>
       {/* 배경 이미지 */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 z-0">
         <Image
           alt="background"
           src={src}
