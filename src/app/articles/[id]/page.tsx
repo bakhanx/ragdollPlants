@@ -6,8 +6,9 @@ import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ContentLayout from '@/app/_components/layout/ContentsLayout';
 import ClientHeader from '@/app/_components/layout/ClientHeader';
 
-export default async function ArticleDetail(props: { params: { id: string } }) {
-  const { id } = props.params;
+export default async function ArticleDetail(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const { id } = params;
   // 문자열 ID를 숫자로 변환
   const numericId = parseInt(id, 10);
 
