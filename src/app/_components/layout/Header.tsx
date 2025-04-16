@@ -16,6 +16,7 @@ interface HeaderProps {
   onNotificationClick?: () => void;
   showMenuButton?: boolean;
   onMenuClick?: () => void;
+  onBackClick?: () => void;
 }
 
 export default function Header({
@@ -25,7 +26,8 @@ export default function Header({
   showNotification = false,
   onNotificationClick,
   showMenuButton = false,
-  onMenuClick
+  onMenuClick,
+  onBackClick
 }: HeaderProps) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -46,6 +48,14 @@ export default function Header({
     }
   };
 
+  const handleBackClick = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else {
+      router.back();
+    }
+  };
+
   return (
     <>
       <div className={variants[variant]}>
@@ -53,7 +63,7 @@ export default function Header({
         <div className="w-10">
           {showBackButton ? (
             <button
-              onClick={() => router.back()}
+              onClick={handleBackClick}
               className="group flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all hover:bg-white/70 hover:shadow-md"
               aria-label="뒤로 가기">
               <svg
