@@ -4,11 +4,17 @@ import Link from 'next/link';
 type CardProps = {
   children: ReactNode;
   href?: string;
+  isHover?: boolean;
   className?: string;
 };
 
-export default function Card({ children, href, className = '' }: CardProps) {
-  const baseClasses = 'rounded-xl border border-green-100 bg-white/50 transition-colors hover:bg-white/70';
+export default function Card({
+  children,
+  href,
+  isHover = true,
+  className = ''
+}: CardProps) {
+  const baseClasses = `rounded-xl border border-green-100 bg-white/50 transition-colors ${isHover ? 'hover:bg-white/70' : ''}`;
   const combinedClasses = `${baseClasses} ${className}`;
 
   if (href) {
@@ -20,4 +26,4 @@ export default function Card({ children, href, className = '' }: CardProps) {
   }
 
   return <div className={combinedClasses}>{children}</div>;
-} 
+}
