@@ -6,6 +6,7 @@ import CountStatCard from './CountStatCard';
 import LevelProgress from './LevelProgress';
 import CareStatusCard from './CareStatusCard';
 import PlantTitle from '../PlantTitle';
+import Link from 'next/link';
 
 type UserProfileProps = {
   nickname: string;
@@ -18,6 +19,7 @@ type UserProfileProps = {
   levelProgress?: number;
   todayWaterCount?: number;
   nutrientCount?: number;
+  interests?: string[];
 };
 
 export default function UserProfile({
@@ -26,17 +28,25 @@ export default function UserProfile({
   stats,
   levelProgress = 0,
   todayWaterCount = 0,
-  nutrientCount = 0
+  nutrientCount = 0,
+  interests = []
 }: UserProfileProps) {
   return (
     <section className="mx-auto w-full max-w-2xl space-y-6 py-4">
       {/* 프로필 카드 */}
-      <Card className="p-5">
+      <Card
+        className="p-5"
+        isHover={false}>
         <div className="relative flex gap-5">
-          <ProfileImage
-            src="/images/Profile.png"
-            alt={nickname}
-          />
+          <Link
+            href="/mygarden/profile"
+            className="hover:opacity-80">
+            <ProfileImage
+              src="/images/Profile.png"
+              alt={nickname}
+              showEditHint={true}
+            />
+          </Link>
 
           {/* 유저 정보 */}
           <div className="min-w-0 flex-1">
@@ -71,9 +81,12 @@ export default function UserProfile({
         </div>
 
         <LevelProgress progress={levelProgress} />
+        
+        {/* 관심사 태그 */}
+        <div className="mt-4">
+          <PlantTitle interests={interests} />
+        </div>
       </Card>
-
-      <PlantTitle />
 
       {/* 식물 관리 상태 요약 */}
       <div className="grid grid-cols-2 gap-3">
