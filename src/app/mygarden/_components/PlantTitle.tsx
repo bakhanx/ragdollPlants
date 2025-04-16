@@ -1,6 +1,6 @@
 import React from "react";
 
-const Titles = [
+export const PlantTitles = [
   "관엽",
   "침엽수",
   "다육",
@@ -34,13 +34,20 @@ const Titles = [
   "채소",
   "곡물",
   "리톱스",
+  "초보",
 ];
 
-const PlantTitle = () => {
-  const mTitles = Titles.slice(20);
+interface PlantTitleProps {
+  interests?: string[];
+}
+
+const PlantTitle: React.FC<PlantTitleProps> = ({ interests = [] }) => {
+  // 표시할 관심사가 없으면 후반부 카테고리를 기본값으로 사용
+  const titlesToShow = interests.length > 0 ? interests : PlantTitles.slice(20);
+  
   return (
     <div className="flex flex-wrap gap-x-[5px] gap-y-1 text-[10px] w-full">
-      {mTitles.map((title) => (
+      {titlesToShow.map((title) => (
         <div
           className="text-white bg-[#3082ce] rounded-sm p-1 shadow-lg"
           key={title}
