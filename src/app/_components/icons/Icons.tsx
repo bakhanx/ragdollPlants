@@ -3,6 +3,7 @@ import Water from '@/../public/svg/water.svg';
 import Water2 from '@/../public/svg/water2.svg';
 import Nutrient from '@/../public/svg/vape-kit.svg';
 import Pin from '@/../public/svg/pin.svg';
+import Edit from '@/../public/svg/edit.svg';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
@@ -26,3 +27,4 @@ export const WaterIcon = createIcon(Water, 'WaterIcon');
 export const Water2Icon = createIcon(Water2, 'Water2Icon');
 export const NutrientIcon = createIcon(Nutrient, 'NutrientIcon');
 export const PinIcon = createIcon(Pin, 'PinIcon');
+export const EditIcon = createIcon(Edit, 'EditIcon');
