@@ -1,1 +1,1 @@
-export { WaterIcon, NutrientIcon } from './Icons'; 
+export { WaterIcon, NutrientIcon, PinIcon, EditIcon } from './Icons'; 
