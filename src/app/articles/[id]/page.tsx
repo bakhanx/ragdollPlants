@@ -6,7 +6,9 @@ import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ContentLayout from '@/app/_components/layout/ContentsLayout';
 import ClientHeader from '@/app/_components/layout/ClientHeader';
 
-export default async function ArticleDetail(props: { params: Promise<{ id: string }> }) {
+export default async function ArticleDetail(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = await props.params;
   const { id } = params;
   // 문자열 ID를 숫자로 변환
@@ -51,11 +53,13 @@ export default async function ArticleDetail(props: { params: Promise<{ id: strin
               {article.title}
             </h1>
 
-            <div className="mb-6 flex items-center pt-12 justify-between">
+            <div className="mb-6 flex items-center justify-between pt-12">
               <span className="text-sm font-medium text-gray-500">
                 작성자: {article.author || '익명'}
               </span>
-              <time className="text-sm text-gray-500 text-end">{article.date}</time>
+              <time className="text-end text-sm text-gray-500">
+                {article.date}
+              </time>
             </div>
 
             {article.tags && article.tags.length > 0 && (
