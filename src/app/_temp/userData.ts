@@ -14,7 +14,8 @@ export const userProfileData = [
     plantCare: {
       waterCount: 3,
       nutrientCount: 2
-    }
+    },
+    interests: ["관엽", "다육", "허브", "공기정화", "식충"]
   },
   {
     id: 'user_2',
@@ -31,7 +32,8 @@ export const userProfileData = [
     plantCare: {
       waterCount: 1,
       nutrientCount: 0
-    }
+    },
+    interests: ["관엽", "다육", "수경"]
   },
   {
     id: 'user_3',
@@ -48,7 +50,8 @@ export const userProfileData = [
     plantCare: {
       waterCount: 5,
       nutrientCount: 3
-    }
+    },
+    interests: ["다육", "리톱스", "테라리움", "비바리움", "모종"]
   },
   {
     id: 'user_4',
@@ -65,7 +68,8 @@ export const userProfileData = [
     plantCare: {
       waterCount: 2,
       nutrientCount: 1
-    }
+    },
+    interests: ["모종", "채소", "허브", "과일나무", "곡물"]
   },
   {
     id: 'user_5',
@@ -82,7 +86,8 @@ export const userProfileData = [
     plantCare: {
       waterCount: 4,
       nutrientCount: 3
-    }
+    },
+    interests: ["행잉", "테라리움", "관엽", "공기정화", "수경", "수생"]
   },
   {
     id: 'user_6',
@@ -99,7 +104,8 @@ export const userProfileData = [
     plantCare: {
       waterCount: 1,
       nutrientCount: 1
-    }
+    },
+    interests: ["채소", "허브", "씨앗", "약용", "곡물"]
   },
   {
     id: 'user_7',
@@ -116,7 +122,8 @@ export const userProfileData = [
     plantCare: {
       waterCount: 3,
       nutrientCount: 2
-    }
+    },
+    interests: ["꽃나무", "화초", "관화", "정원", "덩굴"]
   },
   {
     id: 'user_8',
@@ -133,6 +140,7 @@ export const userProfileData = [
     plantCare: {
       waterCount: 6,
       nutrientCount: 4
-    }
+    },
+    interests: ["관엽", "관화", "서양란", "동양란", "야생화", "분재", "이끼"]
   }
 ]; 
