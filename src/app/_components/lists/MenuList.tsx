@@ -15,7 +15,8 @@ export const MenuList = ({
     { icon: '📗', label: '다이어리', href: '/diaries' },
     { icon: '🌷', label: '식물 갤러리', href: '/galleries' },
     { icon: '🌱', label: '식물 케어', href: '/care' },
-    { icon: '📝', label: '식물 뉴스', href: '/articles' }
+    { icon: '📝', label: '식물 뉴스', href: '/articles' },
+    { icon: '🎉', label: '이벤트', href: '/events' }
   ];
 
   const variants = {
