@@ -17,8 +17,8 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full pt-4 mt-4 text-xs text-gray-600 px-2">
-      <div className="border-t border-gray-200/50 pt-4">
+    <footer className="w-full pt-4 mt-4 text-xs text-gray-50 px-2">
+      <div className="border-t border-gray-50 pt-4">
         {/* 간소화된 링크 섹션 */}
         <div className="mb-3 grid grid-cols-3 gap-2">
           <div>
@@ -47,7 +47,7 @@ export default function Footer() {
         </div>
         
         {/* 저작권 */}
-        <div className="mt-3 flex items-center justify-between border-t border-gray-200/50 pt-3 text-[10px] text-gray-500">
+        <div className="mt-3 flex items-center justify-between border-t border-gray-50 pt-3 text-[10px] text-gray-50">
           <div>© 2024 RagdollPlants</div>
           <div className="flex space-x-3">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-green-600">
