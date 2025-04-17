@@ -11,7 +11,7 @@ export default function Page() {
   return (
     <>
       {/* 배경 이미지 */}
-      <BackgroundImage src={"/images/welcome-bg-01.webp"} overlay={true} />
+      <BackgroundImage src={"/images/welcome-bg-01.webp"} />
 
       {/* Contents */}
       <ContentLayout>

@@ -24,10 +24,7 @@ export default function Page() {
   return (
     <>
       {/* 배경이미지 */}
-      <BackgroundImage
-        src="/images/welcome-bg-07.webp"
-        overlay={true}
-      />
+      <BackgroundImage src="/images/welcome-bg-07.webp" />
 
       <ContentLayout>
         {/* 헤더 */}
@@ -40,15 +37,7 @@ export default function Page() {
         <Banner />
 
         {/* 기사 리스트 - 최신 3개 표시 */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between">
-            <h2 className="py-2 text-lg font-bold">최신 기사</h2>
-            <Link href="/articles" className="text-sm text-green-700 hover:text-green-500 hover:underline">
-              더보기
-            </Link>
-          </div>
-          <ArticleList items={latestArticles} />
-        </div>
+        <ArticleList items={latestArticles} />
       </ContentLayout>
     </>
   );
