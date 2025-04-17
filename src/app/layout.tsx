@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./_components/layout/Navbar";
+import { NavigationScrollManager } from "./_components/utils/navigationScrollManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
         <main className="relative flex min-h-screen items-center justify-center">
           {children}
         </main>
+        <NavigationScrollManager/>
       </body>
     </html>
   );
