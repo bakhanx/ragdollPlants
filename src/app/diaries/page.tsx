@@ -18,7 +18,7 @@ export default function Page() {
         />
 
         {/* 일기 목록 */}
-        <div className="py-4">
+        <div className="py-8">
           <DiaryList posts={diaryPosts} />
         </div>
       </ContentLayout>
