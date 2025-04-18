@@ -11,7 +11,7 @@ import { EditIcon } from '../_components/icons';
 export default function Page() {
   // 0번째 인덱스의 사용자 데이터 사용
   const user = userProfileData[0];
-  
+
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
@@ -35,14 +35,16 @@ export default function Page() {
             nutrientCount={user.plantCare.nutrientCount}
             interests={user.interests}
           />
-          
+
           {/* 프로필 편집 버튼 */}
-          <Link 
-            href="/mygarden/profile" 
-            className="absolute top-7 right-5 rounded-full bg-white/80 p-2 shadow-sm hover:bg-white/100 transition-colors"
-            aria-label="프로필 편집"
-          >
-            <EditIcon size={20} className="text-gray-600" />
+          <Link
+            href="/mygarden/profile"
+            className="absolute top-7 right-5 rounded-full bg-white/80 p-2 shadow-sm transition-colors hover:bg-white/100"
+            aria-label="프로필 편집">
+            <EditIcon
+              size={20}
+              className="text-gray-600"
+            />
           </Link>
         </div>
 
