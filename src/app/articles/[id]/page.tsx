@@ -4,7 +4,8 @@ import React from 'react';
 import { articleItems } from '@/app/_temp';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import ClientHeader from '@/app/_components/layout/ClientHeader';
+import Header from '@/app/_components/layout/Header';
+import ShareButton from '@/app/_components/common/ShareButton';
 
 export default async function ArticleDetail(props: {
   params: Promise<{ id: string }>;
@@ -26,10 +27,14 @@ export default async function ArticleDetail(props: {
       <BackgroundImage src="/images/welcome-bg-06.webp" />
       <ContentLayout noPadding>
         {/* 클라이언트 컴포넌트로 헤더 분리 */}
-        <ClientHeader
+        <Header
           title={article.title}
-          postId={id}
+          id={id}
           showBackButton
+          showMenuButton
+          showNotification
+          variant="glass"
+          contentType="article"
         />
 
         <div className="w-full overflow-hidden rounded-2xl">
@@ -43,6 +48,12 @@ export default async function ArticleDetail(props: {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority
             />
+            <div className="absolute z-20 bottom-12 right-4">
+              <ShareButton
+                url={`${process.env.NEXT_PUBLIC_APP_URL}/articles/${id}`}
+                title={article.title}
+              />
+            </div>
             {/* 그라데이션 오버레이 추가 */}
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
           </div>
