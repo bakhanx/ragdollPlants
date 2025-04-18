@@ -64,17 +64,17 @@ export default function UserProfile({
               <CountStatCard
                 value={stats.visitors}
                 label="다이어리"
-                href="/diary"
+                href="/diaries"
               />
               <CountStatCard
                 value={stats.galleries}
                 label="갤러리"
-                href="/gallery"
+                href="/galleries"
               />
               <CountStatCard
                 value={stats.plants}
-                label="물준횟수"
-                href="/water"
+                label="관리횟수"
+                href="/care"
               />
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function UserProfile({
           iconColor="[&_path]:stroke-blue-600"
           title="물 주기"
           count={todayWaterCount}
-          href="/water"
+          href="/care"
           textColor="text-blue-600"
         />
         <CareStatusCard
@@ -103,7 +103,7 @@ export default function UserProfile({
           iconColor="[&_path]:stroke-yellow-600"
           title="영양 관리"
           count={nutrientCount}
-          href="/nutrients"
+          href="/care"
           textColor="text-yellow-600"
         />
       </div>
