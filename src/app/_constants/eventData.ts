@@ -4,6 +4,7 @@ export type BannerItem = {
   subtitle: string;
   imageUrl: string;
   link: string;
+  isEnded?: boolean;
 };
 
 export const bannerItems: BannerItem[] = [
@@ -37,6 +38,33 @@ export const bannerItems: BannerItem[] = [
   }
 ];
 
+export const endedEvents: BannerItem[] = [
+  {
+    id: 5,
+    title: "겨울 식물관리 특강",
+    subtitle: "추운 겨울을 나는 식물 관리법",
+    imageUrl: "/images/welcome-bg-05.webp",
+    link: "/events/winter-care",
+    isEnded: true
+  },
+  {
+    id: 6,
+    title: "식물 마켓 플레이스",
+    subtitle: "희귀식물 거래 행사",
+    imageUrl: "/images/welcome-bg-06.webp",
+    link: "/events/plant-marketplace",
+    isEnded: true
+  },
+  {
+    id: 7,
+    title: "그린 인테리어 전시회",
+    subtitle: "식물과 함께하는 공간 연출",
+    imageUrl: "/images/welcome-bg-07.webp",
+    link: "/events/green-interior",
+    isEnded: true
+  }
+];
+
 export type EventDetail = {
   id: string;
   title: string;
@@ -45,6 +73,7 @@ export type EventDetail = {
   period: string;
   description: string;
   content: string;
+  isEnded?: boolean;
 };
 
 export const eventDetails: EventDetail[] = [
@@ -83,5 +112,35 @@ export const eventDetails: EventDetail[] = [
     period: "2024.06.15 ~ 2024.07.15",
     description: "실내 공기 질 개선에 도움을 주는 다양한 공기정화 식물을 소개합니다. 도시 생활 속에서 깨끗한 공기와 함께 하는 친환경 라이프스타일을 제안합니다.",
     content: "• 인기 공기정화 식물 20% 할인\n• 공기정화 효과 TOP 10 식물 소개\n• 식물 배치와 관리 방법 가이드북 증정\n• 2개 이상 구매 시 미니 가습기 증정 (선착순 100명)"
+  },
+  {
+    id: "winter-care",
+    title: "겨울 식물관리 특강",
+    subtitle: "추운 겨울을 나는 식물 관리법",
+    imageUrl: "/images/welcome-bg-05.webp",
+    period: "2023.12.01 ~ 2023.12.31",
+    description: "추운 겨울철, 식물들을 건강하게 관리하는 방법을 알려드립니다. 온도 관리부터 급수 방법, 병해충 예방까지 식물이 따뜻한 겨울을 날 수 있도록 도와주세요.",
+    content: "• 겨울철 식물 관리의 기본 원칙\n• 실내 난방 환경에서의 식물 관리법\n• 겨울철 자주 발생하는 병해충과 대처법\n• 겨울을 이겨내는 식물 종류 소개",
+    isEnded: true
+  },
+  {
+    id: "plant-marketplace",
+    title: "식물 마켓 플레이스",
+    subtitle: "희귀식물 거래 행사",
+    imageUrl: "/images/welcome-bg-06.webp",
+    period: "2024.01.15 ~ 2024.02.15",
+    description: "국내 희귀 식물을 한자리에서 만나볼 수 있는 특별한 기회입니다. 식물 컬렉터들과 교류하며 새로운 식물을 만나보세요.",
+    content: "• 국내 탑 식물 셀러 30팀 참가\n• 희귀 아로이드, 비기닝 등 다양한 식물 판매\n• 식물 컬렉터들과의 교류 시간\n• 식물 관련 굿즈 및 화분 판매",
+    isEnded: true
+  },
+  {
+    id: "green-interior",
+    title: "그린 인테리어 전시회",
+    subtitle: "식물과 함께하는 공간 연출",
+    imageUrl: "/images/welcome-bg-07.webp",
+    period: "2024.02.01 ~ 2024.03.01",
+    description: "식물을 활용한 다양한 인테리어 스타일을 만나보세요. 작은 공간부터 넓은 공간까지, 식물과 함께 하는 아름다운 생활 공간을 제안합니다.",
+    content: "• 다양한 스타일의 플랜테리어 전시\n• 공간별 맞춤형 식물 배치 제안\n• 인테리어 전문가의 스타일링 강연\n• 플랜테리어 포토존 및 SNS 이벤트",
+    isEnded: true
   }
 ]; 
