@@ -1,4 +1,4 @@
-import { DiaryMoodStatus } from '../_components/diary/DiaryStatus';
+import { DiaryMoodStatus } from '../diaries/_components/DiaryStatus';
 
 export type DiaryPost = {
   id: string;
