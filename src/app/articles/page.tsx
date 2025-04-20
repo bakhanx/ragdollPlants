@@ -3,6 +3,7 @@ import ContentLayout from '../_components/layout/ContentsLayout';
 import Header from '../_components/layout/Header';
 import ArticleList from './components/ArticleList';
 import { articleItems } from '../_temp/articleData';
+import FloatingButton from "@/app/_components/common/UploadButton";
 
 export default function Page() {
   return (
@@ -21,6 +22,8 @@ export default function Page() {
           <ArticleList posts={articleItems} />
         </div>
       </ContentLayout>
+
+      <FloatingButton link="/articles/create" adminOnly={true} />
     </>
   );
 }

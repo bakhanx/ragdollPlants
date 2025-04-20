@@ -4,6 +4,7 @@ import ContentLayout from '../_components/layout/ContentsLayout';
 import Header from '../_components/layout/Header';
 import { bannerItems, endedEvents } from '@/app/_constants/eventData';
 import { EventList } from './_components';
+import FloatingButton from '@/app/_components/common/UploadButton';
 
 export default function EventsPage() {
   return (
@@ -29,6 +30,8 @@ export default function EventsPage() {
           />
         </div>
       </ContentLayout>
+      
+      <FloatingButton link="/events/create" adminOnly={true} />  
     </>
   );
 }

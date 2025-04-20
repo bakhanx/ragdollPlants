@@ -2,6 +2,7 @@ import BackgroundImage from '../_components/layout/BackgroundImage';
 import ContentLayout from '../_components/layout/ContentsLayout';
 import Header from '../_components/layout/Header';
 import { diaryPosts } from '../_temp';
+import FloatingButton from '@/app/_components/common/UploadButton';
 import DiaryList from './_components/DiaryList';
 
 
@@ -22,6 +23,8 @@ export default function Page() {
           <DiaryList posts={diaryPosts} />
         </div>
       </ContentLayout>
+
+      <FloatingButton link="/diaries/create" />
     </>
   );
 }
