@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { ArrowUpIcon } from '../icons/Icons';
 
 export default function ScrollToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
@@ -38,16 +38,12 @@ export default function ScrollToTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-50 flex size-12 items-center justify-center rounded-full bg-white/80 shadow-lg transition-all hover:bg-white hover:shadow-xl"
-      aria-label="페이지 상단으로 이동"
-    >
-      <Image 
-        src="/svg/arrow-up.svg" 
-        alt="위로 가기" 
-        width={24} 
-        height={24}
-        className="opacity-70"
+      className="fixed right-1/2 bottom-6 z-50 flex size-10 items-center justify-center rounded-full bg-white/80 shadow-lg transition-all hover:bg-white hover:shadow-xl translate-x-[calc(224px-0.5rem)]"
+      aria-label="페이지 상단으로 이동">
+      <ArrowUpIcon
+        size={20}
+        className="opacity-70 [&_path]:stroke-gray-700"
       />
     </button>
   );
-} 
+}
