@@ -4,8 +4,8 @@ import { diaryPosts } from '@/app/_temp/diaryData';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ContentLayout from '@/app/_components/layout/ContentsLayout';
 import Header from '@/app/_components/layout/Header';
-import DiaryImage from '@/app/_components/diary/DiaryImage';
-import DiaryContent from '@/app/_components/diary/DiaryContent';
+import DiaryImage from '@/app/diaries/_components/DiaryImage';
+import DiaryContent from '@/app/diaries/_components/DiaryContent';
 
 export default async function DiaryDetail(props: {
   params: Promise<{ id: string }>;
