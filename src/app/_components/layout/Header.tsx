@@ -17,7 +17,7 @@ type HeaderVariant = 'default' | 'transparent' | 'glass';
 // 헤더 속성 인터페이스
 interface HeaderProps {
   id?: string;
-  showBackButton?: boolean;
+  showBack?: boolean;
   title?: string;
   variant?: HeaderVariant;
   contentType?: 'article' | 'diary' | 'event';
@@ -31,16 +31,13 @@ interface HeaderProps {
 const variantClasses: Record<HeaderVariant, string> = {
   default: 'w-full flex items-center gap-3',
   transparent: 'w-full flex items-center gap-3',
-  glass: 'fixed z-10 flex w-full items-center justify-between rounded-t-2xl bg-black/20 px-4 py-4 shadow-lg backdrop-blur-sm'
+  glass:
+    'fixed z-10 flex w-full items-center justify-between rounded-t-2xl bg-black/20 px-4 py-4 shadow-lg backdrop-blur-sm'
 };
 
-/**
- * 헤더 컴포넌트
- * 네비게이션, 타이틀, 알림/메뉴 등의 기능을 제공하는 애플리케이션 상단 헤더
- */
 export default function Header({
   id = '1',
-  showBackButton = false,
+  showBack = false,
   title = '랙돌플랜츠',
   variant = 'default',
   contentType = 'article',
@@ -75,20 +72,20 @@ export default function Header({
     <>
       <div className={variantClasses[variant]}>
         {/* 왼쪽: 메뉴 버튼 또는 뒤로가기 */}
-        <HeaderLeft 
-          showBackButton={showBackButton} 
-          onBackClick={handleBackClick} 
-          onMenuOpen={() => setIsMenuOpen(true)} 
+        <HeaderLeft
+          showBack={showBack}
+          onBackClick={handleBackClick}
+          onMenuOpen={() => setIsMenuOpen(true)}
         />
 
         {/* 중앙: 타이틀 - 절대 위치로 중앙 배치 */}
-        <HeaderCenter 
-          title={title} 
-          logoSrc={profileImg} 
+        <HeaderCenter
+          title={title}
+          logoSrc={profileImg}
         />
 
         {/* 오른쪽: 알림, 메뉴 버튼 */}
-        <HeaderRight 
+        <HeaderRight
           showNotification={showNotification}
           onNotificationClick={handleNotificationClick}
           showMenuButton={showMenuButton}
@@ -98,9 +95,9 @@ export default function Header({
       </div>
 
       {/* 메뉴 사이드바 패널 */}
-      <MenuSidebar 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)} 
+      <MenuSidebar
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
       />
 
       {/* 알림 패널 */}
