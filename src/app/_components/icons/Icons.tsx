@@ -11,14 +11,22 @@ import ThreeHline from '@/../public/svg/menu.svg';
 import Bell from '@/../public/svg/bell.svg';
 import Share from '@/../public/svg/share.svg';
 import ArrowUp from '@/../public/svg/arrow-up.svg';
+import Schedule from '@/../public/svg/schedule.svg';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
   className?: string;
 }
 
-const createIcon = (SvgComponent: ComponentType<SVGProps<SVGSVGElement>>, displayName: string) => {
-  const IconComponent = ({ size = 16, className = '', ...props }: IconProps) => (
+const createIcon = (
+  SvgComponent: ComponentType<SVGProps<SVGSVGElement>>,
+  displayName: string
+) => {
+  const IconComponent = ({
+    size = 16,
+    className = '',
+    ...props
+  }: IconProps) => (
     <SvgComponent
       width={size}
       height={size}
@@ -38,9 +46,10 @@ export const EditIcon = createIcon(Edit, 'EditIcon');
 
 // UI 관련 아이콘 추가
 export const BackIcon = createIcon(ChevronLeft, 'BackIcon');
-export const CloseIcon = createIcon(Cross, 'CloseIcon'); 
+export const CloseIcon = createIcon(Cross, 'CloseIcon');
 export const MenuIcon = createIcon(MoreVertical, 'MenuIcon');
 export const HamburgerIcon = createIcon(ThreeHline, 'HamburgerIcon');
 export const BellIcon = createIcon(Bell, 'BellIcon');
 export const ShareIcon = createIcon(Share, 'ShareIcon');
 export const ArrowUpIcon = createIcon(ArrowUp, 'ArrowUpIcon');
+export const ScheduleIcon = createIcon(Schedule, 'ScheduleIcon');
