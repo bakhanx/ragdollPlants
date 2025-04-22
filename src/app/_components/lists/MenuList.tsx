@@ -12,9 +12,10 @@ export const MenuList = ({
 }: MenuListProps) => {
   const menuItems = [
     { icon: '🏡', label: '내 정원', href: '/mygarden' },
+    { icon: '🌱', label: '내 식물', href: '/myplants' },
     { icon: '📗', label: '다이어리', href: '/diaries' },
-    { icon: '🌷', label: '식물 갤러리', href: '/galleries' },
-    { icon: '🌱', label: '식물 케어', href: '/care' },
+    { icon: '🌷', label: '식물 전시관', href: '/galleries' },
+    { icon: '💊', label: '식물 케어', href: '/care' },
     { icon: '📝', label: '식물 뉴스', href: '/articles' },
     { icon: '🎉', label: '이벤트', href: '/events' }
   ];
