@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ContentLayout from '@/app/_components/layout/ContentsLayout';
 import Header from '@/app/_components/layout/Header';
-import Image from 'next/image';
-import { ScheduleIcon, CloseIcon } from '@/app/_components/icons/Icons';
+import { ScheduleIcon } from '@/app/_components/icons/Icons';
+import ImageUploader from '@/app/_components/common/ImageUploader';
 
 // 식물 종류 옵션 배열
 const plantTypeOptions = [
@@ -27,40 +27,22 @@ export default function RegisterPlantPage() {
   const [location, setLocation] = useState('');
   const [acquiredDate, setAcquiredDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  // 이미지 업로드 처리
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // 이미지 변경 핸들러
+  const handleImageChange = (file: File | null) => {
+    setImageFile(file);
+
     if (file) {
+      // 이미지 미리보기 생성
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  // 이미지 삭제 처리
-  const handleRemoveImage = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 이벤트 버블링 방지
-    setImagePreview(null);
-    // 파일 입력 필드 초기화
-    const fileInput = document.getElementById(
-      'plant-image'
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  };
-
-  // 이미지 영역 클릭 핸들러
-  const handleImageAreaClick = () => {
-    const fileInput = document.getElementById(
-      'plant-image'
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.click();
+    } else {
+      setImagePreview(null);
     }
   };
 
@@ -94,8 +76,8 @@ export default function RegisterPlantPage() {
       plantType,
       location,
       acquiredDate,
-      notes
-      // image는 실제로는 파일 업로드 처리가 필요
+      notes,
+      imageFile
     });
 
     // 등록 완료 후 내 식물 목록 페이지로 이동
@@ -116,46 +98,12 @@ export default function RegisterPlantPage() {
           className="mt-4 w-full">
           {/* 이미지 업로드 섹션 */}
           <div className="mb-6">
-            <div
-              className="relative mx-auto mb-3 aspect-square w-full cursor-pointer overflow-hidden rounded-md border-2 border-dashed border-gray-300"
-              onClick={handleImageAreaClick}>
-              {imagePreview ? (
-                <>
-                  <Image
-                    src={imagePreview}
-                    alt="식물 미리보기"
-                    fill
-                    className="object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="bg-opacity-50 hover:bg-opacity-70 absolute top-2 right-2 z-10 rounded-full p-1.5 text-white">
-                    <CloseIcon
-                      size={28}
-                      className="rounded-full bg-red-500 p-1 [&_path]:stroke-white"
-                    />
-                  </button>
-                </>
-              ) : (
-                <div className="flex h-full items-center justify-center text-center text-sm text-gray-200">
-                  <div>
-                    <p>식물 사진 업로드</p>
-                    <p className="text-xs">(선택사항)</p>
-                    <div className="mx-auto mt-2 flex h-10 w-10 items-center justify-center rounded-full border-2 text-2xl">
-                      +
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <input
-              id="plant-image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
+            <ImageUploader
+              imagePreview={imagePreview}
+              onImageChange={handleImageChange}
+              aspectRatio="square"
+              label="식물 사진"
+              required={false}
             />
           </div>
 
@@ -249,20 +197,18 @@ export default function RegisterPlantPage() {
                     />
                   </div>
                 </div>
+
                 <input
                   ref={dateInputRef}
-                  id="acquired-date"
                   type="date"
+                  id="acquired-date"
                   value={acquiredDate}
                   onChange={e => setAcquiredDate(e.target.value)}
+                  className="absolute inset-0 cursor-pointer opacity-0"
                   max={today}
                   required
-                  className="absolute inset-0 cursor-pointer text-gray-50 opacity-0"
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-100">
-                오늘 기준으로 이전 날짜만 선택 가능합니다
-              </p>
             </div>
 
             <div>
@@ -275,18 +221,18 @@ export default function RegisterPlantPage() {
                 id="notes"
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
+                placeholder="특이사항이나 관리 방법 등을 적어주세요"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
                 rows={3}
-                placeholder="식물에 대한 추가 정보를 입력해주세요."
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
               />
             </div>
           </div>
 
           {/* 등록 버튼 */}
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 mb-8">
             <button
               type="submit"
-              className="w-full rounded-md bg-green-600 py-2 text-white hover:bg-green-700">
+              className="w-full rounded-md bg-green-600 py-3 text-center text-white hover:bg-green-700">
               식물 등록하기
             </button>
           </div>
