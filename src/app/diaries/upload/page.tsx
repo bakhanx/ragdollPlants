@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ContentLayout from '@/app/_components/layout/ContentsLayout';
 import Header from '@/app/_components/layout/Header';
-import Image from 'next/image';
 import { useAuth } from '@/app/_hooks/useAuth';
-import { CloseIcon } from '@/app/_components/icons/Icons';
+import ImageUploader from '@/app/_components/common/ImageUploader';
+import { useImageUpload } from '@/app/_hooks/useImageUpload';
 
 const MAX_FREE_PHOTO_DIARIES = 3; // 무료 회원이 사진 첨부 가능한 일기 수
 const MAX_PAID_PHOTO_COUNT = 5; // 최대 사진 개수
@@ -39,8 +39,12 @@ export default function CreateDiaryPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mood, setMood] = useState(moodOptions[0].value);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  // 이미지 업로드 훅 사용
+  const { imageFiles, imagePreviews, handleMultiImageChange } = useImageUpload({
+    maxFiles: isPaidUser ? MAX_PAID_PHOTO_COUNT : MAX_FREE_PHOTO_DIARIES,
+    onError: message => alert(message)
+  });
 
   // 사용자 제한 관련 상태
   const [photoLimit, setPhotoLimit] = useState({
@@ -73,62 +77,6 @@ export default function CreateDiaryPage() {
       canAddPhotos: mockUserPhotoUsage < MAX_FREE_PHOTO_DIARIES || isPaidUser
     });
   }, [plantId, isPaidUser]);
-
-  // 특정 슬롯에 이미지 업로드 처리
-  const handleImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    slotIndex: number
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const newFiles = [...imageFiles];
-    const newPreviews = [...imagePreviews];
-
-    // 파일 슬롯 채우기
-    if (newFiles.length <= slotIndex) {
-      // 새 슬롯 추가
-      while (newFiles.length < slotIndex) {
-        newFiles.push(null as unknown as File);
-        newPreviews.push('');
-      }
-      newFiles.push(file);
-
-      // 미리보기 생성
-      const reader = new FileReader();
-      reader.onload = () => {
-        newPreviews[slotIndex] = reader.result as string;
-        setImagePreviews([...newPreviews]);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      // 기존 슬롯 교체
-      newFiles[slotIndex] = file;
-
-      // 미리보기 업데이트
-      const reader = new FileReader();
-      reader.onload = () => {
-        newPreviews[slotIndex] = reader.result as string;
-        setImagePreviews([...newPreviews]);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    setImageFiles(newFiles);
-  };
-
-  // 이미지 삭제 처리
-  const handleRemoveImage = (index: number) => {
-    const newFiles = [...imageFiles];
-    const newPreviews = [...imagePreviews];
-
-    // 해당 인덱스에서 제거
-    newFiles.splice(index, 1);
-    newPreviews.splice(index, 1);
-
-    setImageFiles(newFiles);
-    setImagePreviews(newPreviews);
-  };
 
   // 폼 제출 처리
   const handleSubmit = (e: React.FormEvent) => {
@@ -287,7 +235,7 @@ export default function CreateDiaryPage() {
               {photoLimit.canAddPhotos ? (
                 <div className="mb-3">
                   {!isPaidUser && (
-                    <p className="mb-2 text-xs text-gray-300">
+                    <p className="mb-2 text-xs text-gray-200">
                       무료 회원은 최대 {MAX_FREE_PHOTO_DIARIES}개의 일기에만
                       사진을 첨부할 수 있습니다.
                       <br />
@@ -296,66 +244,27 @@ export default function CreateDiaryPage() {
                     </p>
                   )}
 
-                  {/* 이미지 슬롯 그리드 */}
+                  {/* 이미지 슬롯 그리드 - ImageUploader 사용 */}
                   <div className="mb-3 grid grid-cols-3 gap-2">
                     {Array.from({ length: maxPhotoCount }).map((_, index) => {
                       const hasImage =
-                        index < imagePreviews.length && imagePreviews[index];
+                        index < imagePreviews.length && !!imagePreviews[index];
+                      const isNextSlot = index === imagePreviews.length;
 
                       return (
-                        <div
+                        <ImageUploader
                           key={index}
-                          className={`relative aspect-square cursor-pointer rounded-md border-2 border-dashed ${
-                            hasImage ? 'border-transparent' : 'border-gray-300'
-                          }`}
-                          onClick={() => {
-                            if (index <= imagePreviews.length) {
-                              document
-                                .getElementById(`image-slot-${index}`)
-                                ?.click();
-                            }
-                          }}>
-                          {hasImage ? (
-                            <>
-                              <Image
-                                src={imagePreviews[index]}
-                                alt={`이미지 ${index + 1}`}
-                                fill
-                                className="rounded-md object-cover"
-                              />
-                              <button
-                                type="button"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleRemoveImage(index);
-                                }}
-                                className="bg-opacity-50 hover:bg-opacity-70 absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
-                                <CloseIcon
-                                  size={16}
-                                  className="[&_path]:stroke-white"
-                                />
-                              </button>
-                            </>
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-center text-sm text-gray-400">
-                              {index === imagePreviews.length ? (
-                                <div>
-                                  <span className="block text-2xl">+</span>
-                                  <span className="block text-xs">
-                                    사진 추가
-                                  </span>
-                                </div>
-                              ) : null}
-                            </div>
-                          )}
-                          <input
-                            id={`image-slot-${index}`}
-                            type="file"
-                            accept="image/*"
-                            onChange={e => handleImageUpload(e, index)}
-                            className="hidden"
-                          />
-                        </div>
+                          imagePreview={hasImage ? imagePreviews[index] : null}
+                          onImageChange={file =>
+                            handleMultiImageChange(file, index)
+                          }
+                          multiMode={true}
+                          index={index}
+                          isAddButton={isNextSlot}
+                          aspectRatio="square"
+                          showRemoveButton={hasImage}
+                          className='text-xs'
+                        />
                       );
                     })}
                   </div>
