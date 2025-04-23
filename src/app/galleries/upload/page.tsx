@@ -1,21 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ContentLayout from '@/app/_components/layout/ContentsLayout';
 import Header from '@/app/_components/layout/Header';
-import Image from 'next/image';
-import { CloseIcon } from '@/app/_components/icons/Icons';
+import ImageUploader from '@/app/_components/common/ImageUploader';
 
 // 최대 갤러리 사진 개수
 const MAX_GALLERY_PHOTOS = 10;
 
 export default function UploadGalleryPage() {
   const router = useRouter();
-
-  // useRef로 파일 입력 요소 참조 생성
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 갤러리 사용 현황
   const [galleryUsage, setGalleryUsage] = useState({
@@ -41,33 +37,19 @@ export default function UploadGalleryPage() {
     });
   }, []);
 
-  // 이미지 업로드 처리
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // 이미지 변경 핸들러
+  const handleImageChange = (file: File | null) => {
+    setImageFile(file);
+    
     if (file) {
-      setImageFile(file);
-
       // 이미지 미리보기 생성
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  // 이미지 삭제 처리
-  const handleRemoveImage = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 이벤트 버블링 방지
-    setImageFile(null);
-    setImagePreview(null);
-  };
-
-  // 이미지 영역 클릭 핸들러
-  const handleImageAreaClick = () => {
-    if (!imagePreview) {
-      // useRef를 사용하여 파일 입력 요소에 접근
-      fileInputRef.current?.click();
+    } else {
+      setImagePreview(null);
     }
   };
 
@@ -123,7 +105,7 @@ export default function UploadGalleryPage() {
                 className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
                   showOverlay
                     ? 'bg-green-500 text-white'
-                    : 'bg-gray-300 text-gray-800'
+                    : 'bg-gray-300 text-gray-200'
                 }`}>
                 {showOverlay ? '오버레이 ON' : '오버레이 OFF'}
               </button>
@@ -137,72 +119,37 @@ export default function UploadGalleryPage() {
         <form
           onSubmit={handleSubmit}
           className="mx-auto w-full max-w-md px-4 pb-20">
-          {/* 갤러리 프리뷰 */}
-          <div className="mb-8">
-            <div
-              className="relative overflow-hidden rounded-lg border-2 border-dashed border-gray-300 shadow-lg transition-all duration-500 hover:cursor-pointer hover:shadow-xl"
-              onClick={handleImageAreaClick}>
-              <div className="relative aspect-square">
-                {imagePreview ? (
-                  <>
-                    <Image
-                      src={imagePreview}
-                      alt="갤러리 미리보기"
-                      fill
-                      className="object-cover transition-transform duration-700"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="bg-opacity-50 hover:bg-opacity-70 absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white">
-                      <CloseIcon
-                        size={18}
-                        className="[&_path]:stroke-white"
-                      />
-                    </button>
-
-                    {/* 오버레이 및 정보 - 프리뷰 */}
-                    {showOverlay && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
-                        <div className="absolute bottom-0 w-full p-4 text-white">
-                          <h3 className="mb-1 text-lg font-semibold">
-                            {title || '제목을 입력해주세요'}
-                          </h3>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs opacity-80">
-                              {new Date().toLocaleDateString('ko-KR', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="bg-opacity-30 flex h-full flex-col items-center justify-center text-center text-white">
-                    <div className="border-opacity-50 mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white">
-                      <span className="text-3xl">+</span>
-                    </div>
-                    <p className="mb-1 text-lg">이미지를 업로드하세요</p>
-                    <p className="text-xs opacity-70">
-                      고품질 이미지를 권장합니다
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <input
-              ref={fileInputRef}
-              id="gallery-image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-              required
+          {/* 갤러리 프리뷰 - ImageUploader 컴포넌트 사용 */}
+          <div className="mb-8 relative">
+            <ImageUploader 
+              imagePreview={imagePreview}
+              onImageChange={handleImageChange}
+              aspectRatio="square"
+              label=""
+              placeholder="이미지를 업로드하세요"
+              infoText="고품질 이미지를 권장합니다"
+              className="shadow-lg transition-all duration-500 hover:shadow-xl"
             />
+            
+            {/* 오버레이 및 정보 - 프리뷰 (이미지가 있고 오버레이가 활성화된 경우만 표시) */}
+            {imagePreview && showOverlay && (
+              <div className="absolute inset-0 top-2 rounded-lg bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+                <div className="absolute bottom-0 w-full p-4 text-white">
+                  <h3 className="mb-1 text-lg font-semibold">
+                    {title || '제목을 입력해주세요'}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs opacity-80">
+                      {new Date().toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 제목 및 설명 폼 */}
@@ -224,26 +171,6 @@ export default function UploadGalleryPage() {
                 className="bg-opacity-20 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder-gray-400 focus:border-white focus:ring-1 focus:ring-white focus:outline-none"
               />
             </div>
-
-            {/* <div>
-              <label
-                htmlFor="description"
-                className="mb-1 block text-sm font-medium text-gray-50">
-                설명
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                rows={3}
-                placeholder="사진에 대한 설명을 입력해주세요 (선택사항)"
-                maxLength={200}
-                className="w-full rounded-md border border-gray-300 bg-opacity-20 px-3 py-2 text-sm text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white"
-              />
-              <p className="mt-1 text-right text-xs text-gray-300">
-                {description.length}/200
-              </p>
-            </div> */}
           </div>
 
           {/* 등록 버튼 */}
