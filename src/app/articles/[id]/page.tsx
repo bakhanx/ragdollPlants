@@ -30,7 +30,7 @@ export default async function ArticleDetail(props: {
         <Header
           title={article.title}
           id={id}
-          showBackButton
+          showBack
           showMenuButton
           showNotification
           variant="glass"
