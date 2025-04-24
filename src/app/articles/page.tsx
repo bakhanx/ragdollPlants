@@ -23,7 +23,7 @@ export default function Page() {
         </div>
       </ContentLayout>
 
-      <FloatingButton link="/articles/create" adminOnly={true} />
+      <FloatingButton link="/articles/upload" adminOnly={true} />
     </>
   );
 }
