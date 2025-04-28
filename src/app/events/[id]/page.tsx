@@ -29,8 +29,8 @@ export default async function EventDetailPage(props: {
       <ContentLayout>
         <Header
           title={eventDetail.title}
-          showBackButton
           showNotification
+          showBack
           showMenuButton
         />
 
