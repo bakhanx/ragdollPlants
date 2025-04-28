@@ -13,6 +13,7 @@ import Share from '@/../public/svg/share.svg';
 import ArrowUp from '@/../public/svg/arrow-up.svg';
 import Schedule from '@/../public/svg/schedule.svg';
 import Image from '@/../public/svg/image.svg';
+import Search from '@/../public/svg/search.svg';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
@@ -55,3 +56,4 @@ export const ShareIcon = createIcon(Share, 'ShareIcon');
 export const ArrowUpIcon = createIcon(ArrowUp, 'ArrowUpIcon');
 export const ScheduleIcon = createIcon(Schedule, 'ScheduleIcon');
 export const ImageIcon = createIcon(Image, 'ImageIcon');
+export const SearchIcon = createIcon(Search, 'SearchIcon');
