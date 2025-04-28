@@ -1,29 +1,25 @@
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import ContentLayout from '../_components/layout/ContentsLayout';
 import Header from '../_components/layout/Header';
-import ArticleList from './components/ArticleList';
+import FloatingButton from '@/app/_components/common/UploadButton';
 import { articleItems } from '../_temp/articleData';
-import FloatingButton from "@/app/_components/common/UploadButton";
+import ArticleList from './_components/ArticleList';
 
-export default function Page() {
+export default function ArticlesPage() {
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-06.webp" />
-      {/* Contents */}
+      <BackgroundImage src="/images/welcome-bg-04.webp" />
       <ContentLayout>
-        {/* 헤더 */}
         <Header
-          title="식물 뉴스"
+          title="식물 관련 기사"
           showNotification
         />
-
-        {/* 일기 목록 */}
-        <div className="py-4">
-          <ArticleList posts={articleItems} />
-        </div>
+        <ArticleList initialArticles={articleItems} />
       </ContentLayout>
-
-      <FloatingButton link="/articles/upload" adminOnly={true} />
+      <FloatingButton
+        link="/articles/upload"
+        adminOnly={true}
+      />
     </>
   );
 }
