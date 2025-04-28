@@ -6,6 +6,7 @@ export type Article = {
   date: string;
   author?: string;
   tags?: string[];
+  category: 'tips' | 'news' | 'guide';
 };
 
 export const articleItems: Article[] = [
@@ -16,6 +17,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-01.webp',
     date: '2024.04.07',
     author: '김식물',
+    category: 'news',
     tags: ['겨울관리', '봄준비', '식물점검', '회복']
   },
   {
@@ -25,6 +27,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-02.webp',
     date: '2024.04.05',
     author: '이분갈',
+    category: 'news',
     tags: ['분갈이', '화분선택', '흙선택', '봄식물관리']
   },
   {
@@ -34,6 +37,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-03.webp',
     date: '2024.04.05',
     author: '박물주',
+    category: 'guide',
     tags: ['물주기', '계절전환', '식물관리', '봄식물']
   },
   {
@@ -43,6 +47,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-04.webp',
     date: '2024.04.05',
     author: '최빛나',
+    category: 'tips',
     tags: ['빛관리', '식물배치', '간접광', '직사광선']
   },
   {
@@ -52,6 +57,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-01.webp',
     date: '2024.04.03',
     author: '정씨앗',
+    category: 'guide',
     tags: ['씨앗심기', '발아', '새싹', '가드닝입문']
   },
   {
@@ -60,7 +66,8 @@ export const articleItems: Article[] = [
     content: '식물 질병은 초기에 발견하면 치료가 훨씬 쉽습니다. 정기적으로 식물의 잎, 줄기, 뿌리 상태를 확인하세요. 잎에 나타나는 반점, 변색, 구멍 등은 질병이나 해충의 징후일 수 있습니다. 줄기가 물러지거나 색이 변하는 것도 주의해야 할 신호입니다. 식물병 예방을 위해서는 적절한 환경 관리가 중요합니다. 과습, 과건조, 통풍 불량 등이 병의 원인이 될 수 있습니다. 또한 새로운 식물을 들이기 전에는 반드시 검역 기간을 두어 기존 식물에 영향을 주지 않도록 해야 합니다. 질병이 발견되면 즉시 격리하고, 상황에 맞는 적절한 처치를 해주세요. 심각한 경우에는 감염된 부분을 제거하거나 전문 약품을 사용할 필요가 있습니다.',
     image: '/images/welcome-bg-02.webp',
     date: '2024.04.01',
-    author: '한병치',
+    author: '한병치', 
+    category: 'tips',
     tags: ['식물질병', '병해충', '예방관리', '식물건강']
   },
   {
@@ -70,6 +77,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-03.webp',
     date: '2024.03.30',
     author: '이환경',
+    category: 'tips',
     tags: ['실내환경', '온도관리', '습도조절', '식물환경']
   },
   {
@@ -79,6 +87,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-04.webp',
     date: '2024.03.28',
     author: '김천연',
+    category: 'tips',
     tags: ['천연비료', '재활용', '친환경', '식물영양']
   },
   {
@@ -88,6 +97,7 @@ export const articleItems: Article[] = [
     image: '/images/welcome-bg-01.webp',
     date: '2024.03.26',
     author: '박베란',
+    category: 'news',
     tags: ['베란다가드닝', '작은정원', '도시농업', '홈가드닝']
   }
 ]; 
