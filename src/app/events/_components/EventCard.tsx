@@ -12,7 +12,6 @@ interface EventCardProps {
 export default function EventCard({ event }: EventCardProps) {
   return (
     <Link
-      key={event.id}
       href={event.link}
       className="block">
       <div
