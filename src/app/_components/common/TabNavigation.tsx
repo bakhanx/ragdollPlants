@@ -15,21 +15,21 @@ interface TabNavigationProps<T extends string> {
   className?: string;
 }
 
-export default function TabNavigation<T extends string>({
+export const TabNavigation = <T extends string>({
   tabs,
   activeTab,
   onTabChange,
   className = ''
-}: TabNavigationProps<T>) {
+}: TabNavigationProps<T>) => {
   return (
     <div className={`flex border-b border-gray-700 mb-6 ${className}`}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          className={`px-4 py-2 text-sm font-medium ${
+          className={`px-4 py-2 text-sm font-medium cursor-pointer ${
             activeTab === tab.id
               ? 'text-green-500 border-b-2 border-green-500'
-              : 'text-gray-400 hover:text-gray-300'
+              : 'text-gray-300 hover:text-gray-200'
           }`}
           onClick={() => onTabChange(tab.id)}
         >
