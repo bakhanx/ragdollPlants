@@ -2,17 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
-import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import Header from '@/app/_components/layout/Header';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
 import { useRouter } from 'next/navigation';
-import ImageUploader from '@/app/_components/common/ImageUploader';
+import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import dynamic from 'next/dynamic';
 
 // 에디터는 클라이언트 사이드에서만 로드하도록 dynamic import 사용
-const RichTextEditor = dynamic(() => import('@/app/_components/common/editor/RichTextEditor'), {
-  ssr: false,
-  loading: () => <div className="h-96 w-full animate-pulse rounded-md bg-gray-200"></div>
-});
+const RichTextEditor = dynamic(
+  () => import('@/app/_components/common/editor/RichTextEditor'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-96 w-full animate-pulse rounded-md bg-gray-200"></div>
+    )
+  }
+);
 
 export default function UploadArticlePage() {
   const router = useRouter();
@@ -135,7 +140,7 @@ export default function UploadArticlePage() {
     return (
       <>
         <BackgroundImage src="/images/welcome-bg-06.webp" />
-        <ContentLayout>
+        <ContentsLayout>
           <Header
             title="식물 뉴스 작성"
             showBack={true}
@@ -143,7 +148,7 @@ export default function UploadArticlePage() {
           <div className="flex h-[80vh] items-center justify-center">
             <p className="text-center text-lg">로딩 중...</p>
           </div>
-        </ContentLayout>
+        </ContentsLayout>
       </>
     );
   }
@@ -152,7 +157,7 @@ export default function UploadArticlePage() {
     return (
       <>
         <BackgroundImage src="/images/welcome-bg-06.webp" />
-        <ContentLayout>
+        <ContentsLayout>
           <Header
             title="식물 뉴스 작성"
             showBack={true}
@@ -162,15 +167,15 @@ export default function UploadArticlePage() {
               관리자만 접근할 수 있는 페이지입니다.
             </p>
           </div>
-        </ContentLayout>
+        </ContentsLayout>
       </>
     );
   }
 
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-06.webp" />
-      <ContentLayout>
+      <BackgroundImage src="/images/welcome-bg-04.webp" />
+      <ContentsLayout showFooter={false}>
         <Header
           title="식물 뉴스 작성"
           showBack={true}
@@ -182,7 +187,9 @@ export default function UploadArticlePage() {
             className="space-y-6">
             {/* 썸네일 이미지 업로드 */}
             <div className="mb-8">
-              <h2 className="mb-4 text-lg font-medium text-gray-50">대표 이미지 (썸네일)</h2>
+              <h2 className="mb-4 text-lg font-medium text-gray-50">
+                대표 이미지 (썸네일)
+              </h2>
               <ImageUploader
                 imagePreview={thumbnailPreview}
                 onImageChange={handleThumbnailChange}
@@ -206,7 +213,7 @@ export default function UploadArticlePage() {
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-3 text-lg focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-md border border-gray-300 p-3 text-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
                 placeholder="제목을 입력하세요"
                 required
               />
@@ -224,7 +231,7 @@ export default function UploadArticlePage() {
                 type="text"
                 value={author}
                 onChange={e => setAuthor(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
                 placeholder="작성자명 (입력하지 않으면 '익명'으로 표시)"
               />
             </div>
@@ -244,7 +251,7 @@ export default function UploadArticlePage() {
                 type="text"
                 value={keywords}
                 onChange={handleKeywordsChange}
-                className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
                 placeholder="예: 식물관리, 분갈이, 햇빛"
               />
               {getKeywordsArray().length > 0 && (
@@ -266,7 +273,7 @@ export default function UploadArticlePage() {
                 내용 <span className="text-red-500">*</span>
               </label>
               <div className="min-h-[400px] rounded-md border border-gray-300 bg-white">
-                <RichTextEditor 
+                <RichTextEditor
                   onChange={handleEditorChange}
                   initialContent=""
                 />
@@ -294,7 +301,7 @@ export default function UploadArticlePage() {
             </div>
           </form>
         </div>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }
