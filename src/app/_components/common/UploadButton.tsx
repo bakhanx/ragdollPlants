@@ -1,30 +1,46 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/app/_hooks/useAuth';
 
-type FloatingButtonProps = {
+interface UploadButtonProps {
   link: string;
-  adminOnly?: boolean;
-};
+  disabled?: boolean;
+  count?: number;
+  maxCount?: number;
+  className?: string;
+  title?: string;
+}
 
-export default function FloatingButton({
+export const UploadButton = ({
   link,
-  adminOnly = false
-}: FloatingButtonProps) {
-  const { isAdmin } = useAuth();
-
-  // 관리자 전용 버튼인 경우 회색, 일반 버튼은 녹색 사용
-  const bgColor = adminOnly
-    ? 'bg-gray-500 hover:bg-gray-600'
-    : 'bg-green-600 hover:bg-green-700';
-
+  disabled = false,
+  count,
+  maxCount,
+  className = '',
+  title = '등록'
+}: UploadButtonProps) => {
   return (
-    <div className="fixed right-1/2 bottom-18 z-50 translate-x-[calc(224px-2.5rem)] sm:right-auto">
-      <button
-        className={`flex size-16 items-center justify-center rounded-full ${bgColor} text-4xl text-white`}>
-        <Link href={link}>+</Link>
-      </button>
+    <div className={`flex flex-col items-center justify-center ${className}`}>
+      {disabled ? (
+        <button
+          className="flex aspect-square w-10 cursor-not-allowed items-center justify-center rounded-md border-2 border-gray-300 bg-gray-500 text-xl text-white"
+          disabled
+          title={title + ' (최대 개수 도달)'}>
+          <span className="text-2xl">+</span>
+        </button>
+      ) : (
+        <Link
+          href={link}
+          className="flex aspect-square w-10 items-center justify-center rounded-md border-2 border-gray-300 text-xl text-white hover:bg-green-900"
+          title={title}>
+          <span className="text-2xl">+</span>
+        </Link>
+      )}
+      {typeof count === 'number' && typeof maxCount === 'number' && (
+        <span className="mt-1 text-xs text-gray-300">
+          {count} / {maxCount}
+        </span>
+      )}
     </div>
   );
 }
