@@ -9,13 +9,13 @@ interface SearchInputProps {
   debounceTime?: number;
 }
 
-export default function SearchInput({
+export const SearchInput = ({
   onSearch,
   placeholder = '검색하기',
   className = '',
   defaultValue = '',
-  debounceTime = 300,
-}: SearchInputProps) {
+  debounceTime = 300
+}: SearchInputProps) => {
   const [searchQuery, setSearchQuery] = useState(defaultValue);
 
   // 디바운스 처리를 통해 검색 성능 최적화
@@ -42,21 +42,23 @@ export default function SearchInput({
       <input
         type="text"
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={e => setSearchQuery(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border-2 border-gray-50 p-2 pl-9 text-sm text-gray-700 focus:border-green-500 focus:outline-none"
+        className="w-full rounded-md border-2 border-gray-50 p-2 pl-9 text-sm focus:border-green-500 focus:outline-none"
       />
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 transform">
-        <SearchIcon size={18} className="text-gray-400" />
+      <div className="absolute top-1/2 left-2 -translate-y-1/2 transform">
+        <SearchIcon
+          size={20}
+          className="[&_path]:stroke-gray-50"
+        />
       </div>
       {searchQuery && (
         <button
           onClick={() => setSearchQuery('')}
-          className="absolute right-2 top-1/2 -translate-y-1/2 transform rounded-full p-1 text-gray-400 hover:bg-gray-100"
-        >
+          className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-xl text-gray-200">
           ×
         </button>
       )}
     </div>
   );
-} 
+}
