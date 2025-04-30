@@ -2,14 +2,16 @@
 
 import { useMemo } from 'react';
 import { useTabItems } from '@/app/_hooks/useTabItems';
-import SearchInput from '@/app/_components/common/SearchInput';
-import LoadMoreButton from '@/app/_components/common/LoadMoreButton';
-import TabNavigation from '@/app/_components/common/TabNavigation';
+import { SearchInput } from '@/app/_components/common/SearchInput';
+import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
+import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import {
   inferArticleCategory,
   ArticleCategory
 } from '@/app/_utils/categoryUtils';
 import { ArticleItem } from './ArticleItem';
+import { UploadButton } from '@/app/_components/common/UploadButton';
+import { useAuth } from '@/app/_hooks/useAuth';
 
 // 탭 타입 정의
 export type ArticleTabType = 'all' | ArticleCategory;
@@ -77,6 +79,8 @@ export default function ArticleList({
     initialTab: 'all'
   });
 
+  const { isAdmin } = useAuth();
+
   // 탭 정보
   const tabs: { id: ArticleTabType; label: string; count: number }[] = [
     { id: 'all', label: '전체', count: filteredItemsCount.all },
@@ -88,12 +92,18 @@ export default function ArticleList({
   return (
     <>
       <div className="mt-4 mb-6 flex items-center justify-between">
-        <div className="max-w-xs">
+        <div className="w-full max-w-xs">
           <SearchInput
             onSearch={handleSearch}
             placeholder="기사 검색"
           />
         </div>
+        {isAdmin && (
+          <UploadButton
+            link="/articles/upload"
+            title="기사 등록"
+          />
+        )}
       </div>
       <TabNavigation
         tabs={tabs}
