@@ -8,7 +8,7 @@ type ShareButtonProps = {
   title?: string;
 };
 
-export default function ShareButton({ url, title = '랙돌플랜츠' }: ShareButtonProps) {
+export const ShareButton = ({ url, title = '랙돌플랜츠' }: ShareButtonProps) => {
   const [showToast, setShowToast] = useState(false);
   
   const handleShare = async () => {

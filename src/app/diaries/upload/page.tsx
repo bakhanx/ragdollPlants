@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
-import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import Header from '@/app/_components/layout/Header';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
 import { useAuth } from '@/app/_hooks/useAuth';
-import ImageUploader from '@/app/_components/common/ImageUploader';
+import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import { useImageUpload } from '@/app/_hooks/useImageUpload';
 
 const MAX_FREE_PHOTO_DIARIES = 3; // 무료 회원이 사진 첨부 가능한 일기 수
@@ -115,7 +115,7 @@ export default function CreateDiaryPage() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
-      <ContentLayout>
+      <ContentsLayout showFooter={false}>
         <Header
           title="일기 작성"
           showBack
@@ -263,7 +263,7 @@ export default function CreateDiaryPage() {
                           isAddButton={isNextSlot}
                           aspectRatio="square"
                           showRemoveButton={hasImage}
-                          className='text-xs'
+                          className="text-xs"
                         />
                       );
                     })}
@@ -295,7 +295,7 @@ export default function CreateDiaryPage() {
             </button>
           </div>
         </form>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

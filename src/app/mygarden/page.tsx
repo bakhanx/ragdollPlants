@@ -1,7 +1,7 @@
 import React from 'react';
 import BackgroundImage from '../_components/layout/BackgroundImage';
-import ContentLayout from '../_components/layout/ContentsLayout';
-import Header from '../_components/layout/Header';
+import { ContentsLayout } from '../_components/layout/ContentsLayout';
+import { Header } from '../_components/header/Header';
 import { MenuList } from '../_components/lists/MenuList';
 import UserProfile from './_components/profile/UserProfile';
 import { userProfileData } from '../_temp/userData';
@@ -15,7 +15,7 @@ export default function Page() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
-      <ContentLayout>
+      <ContentsLayout>
         <Header
           title={`${user.name}님의 정원`}
           showNotification
@@ -49,7 +49,7 @@ export default function Page() {
         </div>
 
         <MenuList />
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

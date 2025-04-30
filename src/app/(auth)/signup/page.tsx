@@ -1,5 +1,5 @@
 import React from "react";
-import ContentLayout from "../../_components/layout/ContentsLayout";
+import { ContentsLayout } from "../../_components/layout/ContentsLayout";
 import BackgroundImage from "../../_components/layout/BackgroundImage";
 import Header from "../_components/Header";
 import { Input } from "../_components/Input";
@@ -13,7 +13,7 @@ export default function Page() {
       {/* Contents */}
       <BackgroundImage src={"/images/welcome-bg-01.webp"} overlay={true} />
 
-      <ContentLayout>
+      <ContentsLayout showFooter={false}>
         {/* 헤더 */}
         <Header mainText="RagdollPlants" subText="랙돌플랜츠" />
 
@@ -41,7 +41,7 @@ export default function Page() {
 
         {/* 버튼 */}
         <Button text="회원가입" type="primary" />
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

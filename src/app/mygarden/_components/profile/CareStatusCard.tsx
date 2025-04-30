@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import Card from '@/app/_components/common/Card';
+import { Card } from '@/app/_components/common/Card';
 
 type CareStatusCardProps = {
   icon: ReactNode;
@@ -33,4 +33,4 @@ export default function CareStatusCard({
       </p>
     </Card>
   );
-} 
+}

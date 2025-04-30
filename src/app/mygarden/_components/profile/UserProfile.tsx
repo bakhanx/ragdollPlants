@@ -1,6 +1,6 @@
 import React from 'react';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons';
-import Card from '@/app/_components/common/Card';
+import { Card } from '@/app/_components/common/Card';
 import ProfileImage from './ProfileImage';
 import CountStatCard from './CountStatCard';
 import LevelProgress from './LevelProgress';
@@ -81,7 +81,7 @@ export default function UserProfile({
         </div>
 
         <LevelProgress progress={levelProgress} />
-        
+
         {/* 관심사 태그 */}
         <div className="mt-4">
           <PlantTitle interests={interests} />

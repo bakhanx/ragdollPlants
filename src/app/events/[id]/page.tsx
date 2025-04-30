@@ -1,12 +1,12 @@
 import React from 'react';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
-import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import Header from '@/app/_components/layout/Header';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
 import Image from 'next/image';
 import Link from 'next/link';
 import { eventDetails } from '@/app/_constants/eventData';
 import { notFound } from 'next/navigation';
-import ShareButton from '@/app/_components/common/ShareButton';
+import { ShareButton } from '@/app/_components/common/ShareButton';
 
 export default async function EventDetailPage(props: {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ export default async function EventDetailPage(props: {
   return (
     <>
       <BackgroundImage src={eventDetail.imageUrl} />
-      <ContentLayout>
+      <ContentsLayout>
         <Header
           title={eventDetail.title}
           showNotification
@@ -99,7 +99,7 @@ export default async function EventDetailPage(props: {
             </Link>
           </div>
         </div>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

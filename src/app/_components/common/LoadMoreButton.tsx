@@ -8,11 +8,11 @@ interface LoadMoreButtonProps {
   className?: string;
 }
 
-export default function LoadMoreButton({
+export const LoadMoreButton = ({
   onClick,
   label = '더 보기',
   className = ''
-}: LoadMoreButtonProps) {
+}: LoadMoreButtonProps) => {
   return (
     <div className={`mt-6 flex justify-center ${className}`}>
       <button

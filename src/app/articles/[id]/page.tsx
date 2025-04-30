@@ -3,9 +3,9 @@ import Image from 'next/image';
 import React from 'react';
 import { articleItems } from '@/app/_temp';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
-import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import Header from '@/app/_components/layout/Header';
-import ShareButton from '@/app/_components/common/ShareButton';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
+import { ShareButton } from '@/app/_components/common/ShareButton';
 import CategoryBadge from '../_components/CategoryBadge';
 
 export default async function ArticleDetail(props: {
@@ -26,7 +26,7 @@ export default async function ArticleDetail(props: {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
-      <ContentLayout noPadding>
+      <ContentsLayout noPadding>
         {/* 클라이언트 컴포넌트로 헤더 분리 */}
         <Header
           title={article.title}
@@ -49,7 +49,7 @@ export default async function ArticleDetail(props: {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority
             />
-           
+
             <div className="absolute right-4 bottom-12 z-20">
               <ShareButton
                 url={`${process.env.NEXT_PUBLIC_APP_URL}/articles/${id}`}
@@ -62,8 +62,8 @@ export default async function ArticleDetail(props: {
 
           {/* 콘텐츠 */}
           <div className="relative z-10 -mt-10 min-h-[calc(40vh+40px)] rounded-t-3xl bg-white/90 p-8 shadow-lg backdrop-blur-sm">
-          <div className="absolute top-2 right-4 z-20">
-              <CategoryBadge category={article.category}  />
+            <div className="absolute top-2 right-4 z-20">
+              <CategoryBadge category={article.category} />
             </div>
             <h1 className="text-2xl font-bold text-gray-800">
               {article.title}
@@ -95,7 +95,7 @@ export default async function ArticleDetail(props: {
             </p>
           </div>
         </div>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { myPlants } from '../_temp';
-import Header from '../_components/layout/Header';
-import ContentLayout from '../_components/layout/ContentsLayout';
+import { Header } from '../_components/header/Header';
+import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { CareCardList } from './_components/CareCardList';
 
@@ -28,14 +28,14 @@ export default async function Page() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-03.webp" />
-      <ContentLayout>
+      <ContentsLayout>
         <Header
           title="식물 케어"
           showNotification
         />
 
         <CareCardList plants={plants} />
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

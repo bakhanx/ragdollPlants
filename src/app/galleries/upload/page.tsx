@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
-import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import Header from '@/app/_components/layout/Header';
-import ImageUploader from '@/app/_components/common/ImageUploader';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
+import { ImageUploader } from '@/app/_components/common/ImageUploader';
 
 // 최대 갤러리 사진 개수
 const MAX_GALLERY_PHOTOS = 10;
@@ -83,7 +83,7 @@ export default function UploadGalleryPage() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
-      <ContentLayout noPadding>
+      <ContentsLayout showFooter={false}>
         <Header
           title="갤러리 업로드"
           showBack
@@ -183,7 +183,7 @@ export default function UploadGalleryPage() {
             </button>
           </div>
         </form>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

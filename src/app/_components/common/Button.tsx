@@ -8,13 +8,13 @@ type ButtonProps = {
   disabled?: boolean;
 };
 
-export default function Button({
+export const Button = ({
   children,
   type = 'button',
   className = '',
   onClick,
   disabled = false,
-}: ButtonProps) {
+}: ButtonProps) => {
   return (
     <button
       type={type}
@@ -25,4 +25,4 @@ export default function Button({
       {children}
     </button>
   );
-} 
+}; 

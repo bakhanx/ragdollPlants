@@ -18,12 +18,7 @@ type ContentMenuProps = {
   ariaLabel?: string;      // 접근성 레이블
 };
 
-export default function ContentMenu({ 
-  id, 
-  contentType, 
-  customItems,
-  ariaLabel 
-}: ContentMenuProps) {
+export const ContentMenu = ({ id, contentType, customItems, ariaLabel }: ContentMenuProps) => {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
 
@@ -100,4 +95,4 @@ export default function ContentMenu({
       )}
     </div>
   );
-}
+};

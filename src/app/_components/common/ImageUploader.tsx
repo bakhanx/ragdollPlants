@@ -25,7 +25,7 @@ type ImageUploaderProps = {
   isAddButton?: boolean;
 };
 
-export default function ImageUploader({
+export const ImageUploader = ({
   // 기본 설정
   imagePreview,
   onImageChange,
@@ -44,7 +44,7 @@ export default function ImageUploader({
   multiMode = false,
   index = 0,
   isAddButton = true
-}: ImageUploaderProps) {
+}: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 이미지 선택 영역 클릭 핸들러
@@ -150,4 +150,5 @@ export default function ImageUploader({
       />
     </div>
   );
-}
+};
+

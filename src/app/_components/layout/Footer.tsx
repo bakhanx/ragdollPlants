@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-export default function Footer() {
+export const Footer = () => {
   const pathname = usePathname();
   
   // 푸터를 표시하지 않을 경로 목록

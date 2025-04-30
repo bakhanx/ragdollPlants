@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowUpIcon } from '../icons/Icons';
 
-export default function ScrollToTopButton() {
+export const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   // 스크롤 위치에 따라 버튼 표시 여부 결정

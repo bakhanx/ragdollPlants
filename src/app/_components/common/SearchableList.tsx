@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, ReactNode } from 'react';
-import SearchInput from './SearchInput';
+import { SearchInput } from './SearchInput';
 
 interface SearchableListProps<T> {
   items: T[];
@@ -17,7 +17,7 @@ interface SearchableListProps<T> {
   loadMoreButtonLabel?: string;
 }
 
-export default function SearchableList<T>({
+export const SearchableList = <T,>({
   items,
   renderList,
   filterFn,
@@ -29,7 +29,7 @@ export default function SearchableList<T>({
   itemsToLoadMore = 5,
   emptyResultMessage = '검색 결과가 없습니다.',
   loadMoreButtonLabel = '더보기'
-}: SearchableListProps<T>) {
+}: SearchableListProps<T>) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredItems, setFilteredItems] = useState<T[]>(items);
   const [visibleItemsCount, setVisibleItemsCount] = useState(initialItemsToShow);

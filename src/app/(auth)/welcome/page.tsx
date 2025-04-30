@@ -2,7 +2,7 @@ import React from "react";
 import BackgroundImage from "../../_components/layout/BackgroundImage";
 import Header from "../_components/Header";
 
-import ContentLayout from "../../_components/layout/ContentsLayout";
+import { ContentsLayout } from "../../_components/layout/ContentsLayout";
 import Link from "next/link";
 import { Button } from "../_components/Button";
 
@@ -10,10 +10,10 @@ export default function Page() {
   return (
     <>
       {/* 배경 이미지 */}
-      <BackgroundImage src={"/images/welcome-bg-01.webp"} overlay={true} />
+      <BackgroundImage src={"/images/welcome-bg-01.webp"} />
 
       {/* Contents */}
-      <ContentLayout>
+      <ContentsLayout showFooter={false}>
         {/* 헤더 */}
         <Header mainText="RagdollPlants" subText="랙돌플랜츠" />
 
@@ -40,7 +40,7 @@ export default function Page() {
             <Button text="회원가입" />
           </Link>
         </div>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

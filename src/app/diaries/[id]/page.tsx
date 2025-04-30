@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import React from 'react';
 import { diaryPosts } from '@/app/_temp/diaryData';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
-import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import Header from '@/app/_components/layout/Header';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
 import DiaryImage from '@/app/diaries/_components/DiaryImage';
 import DiaryContent from '@/app/diaries/_components/DiaryContent';
 
@@ -31,11 +31,10 @@ export default async function DiaryDetail(props: {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
-      <ContentLayout noPadding>
+      <ContentsLayout noPadding>
         {/* 헤더 */}
         <Header
           title={post.title}
-          showBackButton
           showMenuButton
           showNotification
           variant="glass"
@@ -54,7 +53,7 @@ export default async function DiaryDetail(props: {
           {/* 일기 콘텐츠 */}
           <DiaryContent diary={diaryDetail} />
         </div>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

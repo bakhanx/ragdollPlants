@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { NavigationScrollManager } from './_components/utils/navigationScrollManager';
-import ScrollToTopButton from './_components/common/ScrollToTopButton';
+import { ScrollToTopButton } from './_components/common/ScrollToTopButton';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import SearchInput from './SearchInput';
+import { SearchInput } from './SearchInput';
 
 interface FilterableListProps<T> {
   items: T[];
@@ -11,13 +11,13 @@ interface FilterableListProps<T> {
   className?: string;
 }
 
-export default function FilterableList<T>({
+export const FilterableList = <T,>({
   items,
   renderList,
   filterFn,
   searchPlaceholder = '검색하기',
   className = ''
-}: FilterableListProps<T>) {
+}: FilterableListProps<T>) => {
   const [filteredItems, setFilteredItems] = useState<T[]>(items);
 
   // items prop이 변경될 경우 필터링된 목록도 업데이트

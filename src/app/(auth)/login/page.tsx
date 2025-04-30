@@ -1,6 +1,6 @@
 import React from "react";
 import BackgroundImage from "../../_components/layout/BackgroundImage";
-import ContentLayout from "../../_components/layout/ContentsLayout";
+import { ContentsLayout } from "../../_components/layout/ContentsLayout";
 import { PasswordInput } from "../_components/PasswordInput";
 import { Input } from "../_components/Input";
 import Header from "../_components/Header";
@@ -14,7 +14,7 @@ export default function Page() {
       <BackgroundImage src={"/images/welcome-bg-01.webp"} />
 
       {/* Contents */}
-      <ContentLayout>
+      <ContentsLayout showFooter={false}>
         {/* 헤더 */}
         <Header mainText="RagdollPlants" subText="랙돌플랜츠" />
 
@@ -53,7 +53,7 @@ export default function Page() {
             </Link>
           </p>
         </div>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }

@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
-import ContentLayout from '@/app/_components/layout/ContentsLayout';
-import Header from '@/app/_components/layout/Header';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
 import { ScheduleIcon } from '@/app/_components/icons/Icons';
-import ImageUploader from '@/app/_components/common/ImageUploader';
+import { ImageUploader } from '@/app/_components/common/ImageUploader';
 
 // 식물 종류 옵션 배열
 const plantTypeOptions = [
@@ -87,7 +87,7 @@ export default function RegisterPlantPage() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-04.webp" />
-      <ContentLayout>
+      <ContentsLayout>
         <Header
           title="새 식물 등록"
           showBack
@@ -237,7 +237,7 @@ export default function RegisterPlantPage() {
             </button>
           </div>
         </form>
-      </ContentLayout>
+      </ContentsLayout>
     </>
   );
 }
