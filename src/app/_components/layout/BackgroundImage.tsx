@@ -3,25 +3,20 @@ import React from 'react';
 
 type BackgroundImageProps = {
   src: string;
+  className?: string;
 };
 
-export const BackgroundImage = ({ src }: BackgroundImageProps) => {
+export const BackgroundImage = ({ src, className = '' }: BackgroundImageProps) => {
   return (
-    <div>
-      {/* 배경 이미지 */}
-      <div className="fixed inset-0 z-0">
-        <Image
-          alt="background"
-          src={src}
-          fill
-          priority
-          style={{ objectFit: 'cover' }}
-        />
-      </div>
-
-      {/* 어두운 오버레이 */}
-
-      <div className={`absolute inset-0 z-0 bg-black opacity-20`} />
+    <div className={`fixed left-0 top-0 -z-10 h-full w-full overflow-hidden ${className}`}>
+      <Image
+        src={src}
+        alt="배경 이미지"
+        fill
+        className="object-cover object-center"
+        priority
+        sizes="100vw"
+      />
     </div>
   );
 };
