@@ -91,4 +91,7 @@ export const levelExpRequirements = {
 } as const;
 
 // 프로필 이미지
-export const profileImg = '/images/Profile.png'; 
+export const profileImg = '/images/Profile.png';
+
+// 식물 상세 데이터
+export * from './plantDetailData'; 
