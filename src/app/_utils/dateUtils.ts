@@ -81,4 +81,36 @@ export function calculateProgressPercentage(
   const percentage = (remainingDays / totalDays) * 100;
   
   return Math.min(100, Math.max(0, percentage));
+}
+
+/**
+ * 날짜 문자열을 한국어 형식(YYYY년 MM월 DD일)으로 변환합니다.
+ * @param dateString 변환할 날짜 문자열
+ * @returns 한국어 형식으로 포맷된 날짜 문자열
+ */
+export function formatDateKorean(dateString: string): string {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  return new Date(dateString).toLocaleDateString('ko-KR', options);
+}
+
+/**
+ * 마지막 날짜로부터 지정된 주기 이후까지 남은 일수를 계산합니다.
+ * @param lastDate 마지막 날짜
+ * @param cycleDays 주기 일수
+ * @returns 다음 날짜까지 남은 일수
+ */
+export function getDaysRemaining(lastDate: string, cycleDays: number): number {
+  const last = new Date(lastDate);
+  const next = new Date(last);
+  next.setDate(last.getDate() + cycleDays);
+
+  const today = new Date();
+  const diffTime = next.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays;
 } 
