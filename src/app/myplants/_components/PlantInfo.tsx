@@ -1,0 +1,52 @@
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { EditIcon } from '@/app/_components/icons/Icons';
+import { formatDateKorean } from '@/app/_utils/dateUtils';
+
+interface PlantInfoProps {
+  id: number;
+  name: string;
+  imageUrl: string;
+  plantType: string;
+  location: string;
+  acquiredDate: string;
+}
+
+export const PlantInfo: React.FC<PlantInfoProps> = ({
+  id,
+  name,
+  imageUrl,
+  plantType,
+  location,
+  acquiredDate
+}) => {
+  return (
+    <div className="flex flex-col py-4">
+      <div className="relative mx-auto mb-4 aspect-square w-full overflow-hidden rounded-md">
+        <Image
+          src={imageUrl}
+          alt={name}
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      <div className="mx-auto mt-2 mb-2 flex items-center space-x-2">
+        <h1 className="text-center text-2xl font-bold">{name}</h1>
+        <Link
+          href={`/myplants/${id}/edit`}
+          className="text-gray-500">
+          <EditIcon size={18} />
+        </Link>
+      </div>
+
+      <div className="text-center text-sm text-gray-50">
+        <p>
+          {plantType} • {location}
+        </p>
+        <p>입양일: {formatDateKorean(acquiredDate)}</p>
+      </div>
+    </div>
+  );
+}; 
