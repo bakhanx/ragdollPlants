@@ -13,14 +13,14 @@ interface PlantInfoProps {
   acquiredDate: string;
 }
 
-export const PlantInfo: React.FC<PlantInfoProps> = ({
+export const PlantInfo = ({
   id,
   name,
   imageUrl,
   plantType,
   location,
   acquiredDate
-}) => {
+}: PlantInfoProps) => {
   return (
     <div className="flex flex-col py-4">
       <div className="relative mx-auto mb-4 aspect-square w-full overflow-hidden rounded-md">
@@ -32,12 +32,15 @@ export const PlantInfo: React.FC<PlantInfoProps> = ({
         />
       </div>
 
-      <div className="mx-auto mt-2 mb-2 flex items-center space-x-2">
-        <h1 className="text-center text-2xl font-bold">{name}</h1>
+      <div className="relative mx-auto my-2 flex items-center justify-center">
+        <h1 className="text-center text-2xl font-bold text-gray-50">{name}</h1>
         <Link
           href={`/myplants/${id}/edit`}
-          className="text-gray-500">
-          <EditIcon size={18} />
+          className="absolute right-0 translate-x-6 text-gray-500">
+          <EditIcon
+            size={18}
+            className="[&_path]:stroke-gray-50"
+          />
         </Link>
       </div>
 
@@ -49,4 +52,4 @@ export const PlantInfo: React.FC<PlantInfoProps> = ({
       </div>
     </div>
   );
-}; 
+};
