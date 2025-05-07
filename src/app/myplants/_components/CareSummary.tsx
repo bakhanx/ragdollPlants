@@ -2,6 +2,36 @@ import React from 'react';
 import Link from 'next/link';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons/Icons';
 import { formatDateKorean, getDaysRemaining } from '@/app/_utils/dateUtils';
+import { CareCard } from '@/app/care/_components/CareCard';
+
+export interface Plant {
+  id: string;
+  name: string;
+  image: string;
+  isNew?: boolean;
+  description?: string;
+  category?: string;
+  status?: boolean;
+  waterStatus?: boolean;
+  nutrientStatus?: boolean;
+  waterAmount?: number;
+  lastWateredDate?: string;
+  nextWateringDate?: string;
+  waterInterval?: number;
+  lastNutrientDate?: string;
+  nextNutrientDate?: string;
+  nutrientInterval?: number;
+  temperature?: number;
+  humidity?: number;
+  sunlight?: string;
+  // 상세 정보
+  plantType?: string;
+  location?: string;
+  acquiredDate?: string;
+  notes?: string;
+  needsWater?: boolean;
+  needsNutrient?: boolean;
+}
 
 interface CareSummaryProps {
   id: number;
@@ -12,20 +42,30 @@ interface CareSummaryProps {
   notes?: string;
 }
 
-export const CareSummary: React.FC<CareSummaryProps> = ({
+export interface CareProgress {
+  lastDate: string;
+  nextDate: string;
+  interval: number;
+  progressPercentage: number;
+}
+
+export const CareSummary = ({
   id,
   lastWatered,
   wateringCycle,
   lastFertilized,
   fertilizerCycle,
   notes
-}) => {
+}: CareSummaryProps) => {
   const waterDaysRemaining = getDaysRemaining(lastWatered, wateringCycle);
-  const nutrientDaysRemaining = getDaysRemaining(lastFertilized, fertilizerCycle);
+  const nutrientDaysRemaining = getDaysRemaining(
+    lastFertilized,
+    fertilizerCycle
+  );
 
   return (
     <div className="py-4">
-      <h2 className="mb-3 text-lg font-semibold">식물 케어</h2>
+      <h2 className="mb-3 text-lg font-semibold text-gray-50">식물 케어</h2>
 
       <div className="mb-3 flex items-center justify-between rounded-lg bg-blue-50 p-3">
         <div className="flex items-center">
@@ -99,4 +139,16 @@ export const CareSummary: React.FC<CareSummaryProps> = ({
       </div>
     </div>
   );
-}; 
+};
+
+export interface Diary {
+  id: string;
+  date: string;
+  title: string;
+  hasImage?: boolean;
+  excerpt?: string;
+  content?: string;
+  imageUrl?: string;
+  status?: string; // DiaryMoodStatus 등
+  authorName?: string;
+}
