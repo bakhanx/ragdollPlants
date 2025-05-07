@@ -15,11 +15,11 @@ interface DiaryListProps {
   diaries: DiaryEntry[];
 }
 
-export const DiaryList: React.FC<DiaryListProps> = ({ plantId, diaries }) => {
+export const DiaryList = ({ plantId, diaries }: DiaryListProps) => {
   return (
     <div className="py-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">최근 일기</h2>
+        <h2 className="text-lg font-semibold text-gray-50">최근 일기</h2>
         <Link
           href={`/diaries?plantId=${plantId}`}
           className="text-sm text-green-600 hover:text-green-700">
@@ -62,4 +62,4 @@ export const DiaryList: React.FC<DiaryListProps> = ({ plantId, diaries }) => {
       </div>
     </div>
   );
-}; 
+};
