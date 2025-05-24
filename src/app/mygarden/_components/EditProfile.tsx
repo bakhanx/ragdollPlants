@@ -2,11 +2,12 @@
 
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Card from '@/app/_components/common/Card';
+
 import { userProfileData } from '@/app/_temp/userData';
 import Image from 'next/image';
-import Button from '@/app/_components/common/Button';
+
 import { EditIcon } from '@/app/_components/icons';
+import { Button } from '@/app/_components/common/Button';
 
 // PlantTitle에서 가져온 식물 카테고리 목록
 const PlantTitles = [
@@ -129,7 +130,7 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
   };
 
   return (
-    <div className="space-y-5 p-5 rounded-xl border border-green-100 bg-white/50">
+    <div className="space-y-5 rounded-xl border border-green-100 bg-white/50 p-5">
       <h2 className="text-xl font-bold text-gray-800">📝 프로필 수정</h2>
 
       <form
@@ -144,11 +145,10 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
             accept="image/*"
             className="hidden"
           />
-          
-          <div 
-            className="relative my-2 size-24 overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg sm:size-28 group cursor-pointer" 
-            onClick={handleImageSelect}
-          >
+
+          <div
+            className="group relative my-2 size-24 cursor-pointer overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg sm:size-28"
+            onClick={handleImageSelect}>
             {imagePreview && (
               <Image
                 src={imagePreview}
@@ -157,18 +157,20 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
                 style={{ objectFit: 'cover' }}
               />
             )}
-            
+
             {/* 호버 시 보여줄 편집 힌트 */}
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
               <div className="flex flex-col items-center gap-1 text-white">
-                <EditIcon size={24} className="[&_path]:stroke-white" />
+                <EditIcon
+                  size={24}
+                  className="[&_path]:stroke-white"
+                />
                 <span className="text-xs font-medium">이미지 변경</span>
               </div>
             </div>
           </div>
-          
+
           <Button
-            type="button"
             onClick={handleImageSelect}
             className="mt-3 bg-blue-500 hover:bg-blue-600">
             이미지 변경
@@ -187,7 +189,7 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full rounded-md border-2 border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600"
+            className="w-full rounded-md border-2 border-gray-300 p-2 focus:border-green-600 focus:ring-1 focus:ring-green-600 focus:outline-none"
             required
           />
         </div>
@@ -204,7 +206,7 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full rounded-md border-2 border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600"
+            className="w-full rounded-md border-2 border-gray-300 p-2 focus:border-green-600 focus:ring-1 focus:ring-green-600 focus:outline-none"
             required
           />
         </div>
@@ -220,7 +222,7 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
             name="bio"
             value={formData.bio}
             onChange={handleChange}
-            className="min-h-[100px] w-full rounded-md border-2 border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 resize-none"
+            className="min-h-[100px] w-full resize-none rounded-md border-2 border-gray-300 p-2 focus:border-green-600 focus:ring-1 focus:ring-green-600 focus:outline-none"
           />
         </div>
 
@@ -254,13 +256,8 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
         </div>
 
         <div className="flex gap-3 pt-2">
+          <Button className="flex-1">저장하기</Button>
           <Button
-            type="submit"
-            className="flex-1">
-            저장하기
-          </Button>
-          <Button
-            type="button"
             className="flex-1 bg-gray-500 hover:bg-gray-600"
             onClick={onCancel}>
             취소
