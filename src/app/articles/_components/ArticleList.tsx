@@ -5,48 +5,19 @@ import { useTabItems } from '@/app/_hooks/useTabItems';
 import { SearchInput } from '@/app/_components/common/SearchInput';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
-import {
-  inferArticleCategory,
-  ArticleCategory
-} from '@/app/_utils/categoryUtils';
+import { inferArticleCategory } from '@/app/_utils/categoryUtils';
 import { ArticleItem } from './ArticleItem';
 import { UploadButton } from '@/app/_components/common/UploadButton';
 import { useAuth } from '@/app/_hooks/useAuth';
-
-// 탭 타입 정의
-export type ArticleTabType = 'all' | ArticleCategory;
-
-// Article 타입 정의 (articleData.ts와 동일하게 맞춤)
-export type Article = {
-  id: number;
-  title: string;
-  content: string;
-  image: string;
-  date: string;
-  author?: string;
-  tags?: string[];
-  category: ArticleCategory;
-};
-
-export type ArticlePost = {
-  id: number;
-  title: string;
-  content: string;
-  date: string;
-  author?: string;
-  tags?: string[];
-  category?: 'tips' | 'news' | 'guide';
-  imageUrl?: string;
-  image?: string;
-};
+import { ArticleWithNumberId, ArticleTabType } from '@/types/models/article';
 
 export default function ArticleList({
   initialArticles
 }: {
-  initialArticles: Article[];
+  initialArticles: ArticleWithNumberId[];
 }) {
   // 카테고리별로 분류
-  const allItems = useMemo<Record<ArticleTabType, Article[]>>(() => {
+  const allItems = useMemo<Record<ArticleTabType, ArticleWithNumberId[]>>(() => {
     const withCategory = initialArticles.map(article => ({
       ...article,
       category:
@@ -70,12 +41,12 @@ export default function ArticleList({
     handleSearch,
     handleLoadMore,
     filteredItemsCount
-  } = useTabItems<Article, ArticleTabType>({
+  } = useTabItems<ArticleWithNumberId, ArticleTabType>({
     allItems,
     filterFn: (item, query) =>
       item.title.toLowerCase().includes(query.toLowerCase()) ||
       item.content.toLowerCase().includes(query.toLowerCase()) ||
-      (item.author?.toLowerCase().includes(query.toLowerCase()) ?? false),
+      (item.author?.name?.toLowerCase().includes(query.toLowerCase()) ?? false),
     initialTab: 'all'
   });
 

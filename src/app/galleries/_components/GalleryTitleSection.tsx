@@ -1,10 +1,7 @@
 import React from 'react';
 import { UploadButton } from '@/app/_components/common/UploadButton';
-import { MAX_GALLERY_PHOTOS } from '../../_temp/galleryData';
-
-interface GalleryTitleSectionProps {
-  photoCount: number;
-}
+import { MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
+import { GalleryTitleSectionProps } from '@/types/components/galleries';
 
 export const GalleryTitleSection = ({ photoCount }: GalleryTitleSectionProps) => {
   return (

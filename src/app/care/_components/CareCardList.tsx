@@ -3,27 +3,11 @@
 import React, { useState } from 'react';
 import { calculateProgressPercentage } from '@/app/_utils/dateUtils';
 import { CareCard } from './CareCard';
-
-interface Plant {
-  id: string;
-  name: string;
-  image: string;
-  waterStatus?: boolean;
-  nutrientStatus?: boolean;
-  lastWateredDate: string;
-  nextWateringDate: string;
-  waterInterval: number;
-  lastNutrientDate: string;
-  nextNutrientDate: string;
-  nutrientInterval: number;
-}
-
-interface CareCardListProps {
-  plants: Plant[];
-}
+import { CareCardListProps } from '@/types/components/care';
+import { LegacyMyPlantCare } from '@/types/models/care';
 
 export const CareCardList = ({ plants: initialPlants }: CareCardListProps) => {
-  const [plants, setPlants] = useState(initialPlants);
+  const [plants, setPlants] = useState<LegacyMyPlantCare[]>(initialPlants);
   const [waterPendingUpdates, setWaterPendingUpdates] = useState<Set<string>>(
     new Set()
   );

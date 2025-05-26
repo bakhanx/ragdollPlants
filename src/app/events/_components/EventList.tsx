@@ -7,25 +7,10 @@ import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import EventCard from './EventCard';
 import { UploadButton } from '@/app/_components/common/UploadButton';
 import { useAuth } from '@/app/_hooks/useAuth';
+import { EventListProps } from '@/types/components/events';
+import { EventTabType, LegacyBannerItem } from '@/types/models/event';
 
-export type BannerItem = {
-  id: number;
-  title: string;
-  subtitle: string;
-  imageUrl: string;
-  link: string;
-  isEnded?: boolean;
-};
-
-export type EventTabType = 'active' | 'ended';
-
-export default function EventList({
-  initialActiveEvents,
-  initialEndedEvents
-}: {
-  initialActiveEvents: BannerItem[];
-  initialEndedEvents: BannerItem[];
-}) {
+export default function EventList({ initialActiveEvents, initialEndedEvents }: EventListProps) {
   // 탭별 데이터 구성
   const allItems = {
     active: initialActiveEvents,
@@ -41,7 +26,7 @@ export default function EventList({
     handleSearch,
     handleLoadMore,
     filteredItemsCount
-  } = useTabItems<BannerItem, EventTabType>({
+  } = useTabItems<LegacyBannerItem, EventTabType>({
     allItems,
     filterFn: (item, query) =>
       item.title.toLowerCase().includes(query.toLowerCase()) ||

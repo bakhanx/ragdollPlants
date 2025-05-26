@@ -7,20 +7,7 @@ import LevelProgress from './LevelProgress';
 import CareStatusCard from './CareStatusCard';
 import PlantTitle from '../PlantTitle';
 import Link from 'next/link';
-
-type UserProfileProps = {
-  nickname: string;
-  level: number;
-  stats: {
-    galleries: number;
-    visitors: number;
-    plants: number;
-  };
-  levelProgress?: number;
-  todayWaterCount?: number;
-  nutrientCount?: number;
-  interests?: string[];
-};
+import { UserProfileProps } from '@/types/components/mygarden';
 
 export default function UserProfile({
   nickname,

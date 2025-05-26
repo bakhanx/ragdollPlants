@@ -5,25 +5,13 @@ import { SearchInput } from '@/app/_components/common/SearchInput';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { UploadButton } from '@/app/_components/common/UploadButton';
 import DiaryItem from './DiaryItem';
+import { DiaryListProps } from '@/types/components/diaries';
+import { LegacyDiaryPost } from '@/types/models/diary';
 
-export type DiaryPost = {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  imageUrl: string;
-  status: string;
-  authorName?: string;
-};
-
-export default function DiaryList({
-  initialPosts
-}: {
-  initialPosts: DiaryPost[];
-}) {
+export default function DiaryList({ initialPosts }: DiaryListProps) {
   // 검색/더보기 등 상태 관리
   const { visibleItems, hasMore, handleSearch, handleLoadMore } =
-    useFilteredItems<DiaryPost>({
+    useFilteredItems<LegacyDiaryPost>({
       items: initialPosts,
       filterFn: (item, query) =>
         item.title.toLowerCase().includes(query.toLowerCase()) ||

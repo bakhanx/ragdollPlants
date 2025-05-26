@@ -1,13 +1,9 @@
 'use client';
 
 import React from 'react';
-import { ArticleCategory, getCategoryColors, getCategoryLabel } from '@/app/_utils/categoryUtils';
-
-interface CategoryBadgeProps {
-  category: ArticleCategory;
-  className?: string;
-  size?: 'sm' | 'md' | 'lg';
-}
+import { getCategoryColors, getCategoryLabel } from '@/app/_utils/categoryUtils';
+import { ArticleCategory } from '@/types/models/article';
+import { CategoryBadgeProps } from '@/types/components/articles';
 
 /**
  * 기사 카테고리를 표시하는 배지 컴포넌트
@@ -17,8 +13,11 @@ export default function CategoryBadge({
   className = '',
   size = 'md'
 }: CategoryBadgeProps) {
-  const colors = getCategoryColors(category);
-  const label = getCategoryLabel(category);
+  // ArticleCategory 타입으로 변환 (카테고리가 문자열 타입일 수 있으므로)
+  const categoryValue = category as ArticleCategory;
+  
+  const colors = getCategoryColors(categoryValue);
+  const label = getCategoryLabel(categoryValue);
   
   // 사이즈별 스타일 클래스
   const sizeClasses = {

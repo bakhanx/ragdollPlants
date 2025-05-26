@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { GalleryGridProps } from '@/types/components/galleries';
 
 // 갤러리 아이템 타입 정의
 export interface GalleryItem {
@@ -9,10 +10,6 @@ export interface GalleryItem {
   imageUrl: string;
   createdAt: string;
   likes: number;
-}
-
-interface GalleryGridProps {
-  items: GalleryItem[];
 }
 
 export const GalleryGrid = ({ items }: GalleryGridProps) => {

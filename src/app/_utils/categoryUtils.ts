@@ -1,8 +1,7 @@
 /**
  * 기사의 카테고리를 결정하는 유틸리티 함수들
  */
-
-export type ArticleCategory = 'tips' | 'news' | 'guide';
+import { ArticleCategory } from '@/types/models/article';
 
 /**
  * 기사 제목, 내용, 태그를 분석하여 카테고리를 추론합니다

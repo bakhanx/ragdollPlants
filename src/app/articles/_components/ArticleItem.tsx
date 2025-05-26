@@ -2,12 +2,12 @@ import { inferArticleCategory } from '@/app/_utils/categoryUtils';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import CategoryBadge from './CategoryBadge';
-import { ArticlePost } from './ArticleList';
+import { ArticleWithNumberId } from '@/types/models/article';
 import Image from 'next/image';
 /**
  * 개별 기사 아이템 컴포넌트 (최적화를 위해 분리)
  */
-export const ArticleItem = ({ post }: { post: ArticlePost }) => {
+export const ArticleItem = ({ post }: { post: ArticleWithNumberId }) => {
   // post.category가 없으면 카테고리 추론
   const category = useMemo(() => {
     return (
@@ -16,7 +16,7 @@ export const ArticleItem = ({ post }: { post: ArticlePost }) => {
   }, [post.category, post.title, post.content, post.tags]);
 
   // 이미지 소스 설정
-  const imageSource = post.imageUrl || post.image || '';
+  const imageSource = post.image || '';
 
   return (
     <Link
@@ -48,7 +48,7 @@ export const ArticleItem = ({ post }: { post: ArticlePost }) => {
             {post.content}
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <div>{post.author && `by ${post.author}`}</div>
+            <div>{post.author?.name && `by ${post.author.name}`}</div>
             <div>{post.date}</div>
           </div>
         </div>

@@ -1,15 +1,9 @@
 import Link from 'next/link';
 import Pin from './Pin';
 import Image from 'next/image';
-import { DiaryPost } from './DiaryList';
+import { DiaryItemProps } from '@/types/components/diaries';
 
-export default function DiaryItem({
-  post,
-  index
-}: {
-  post: DiaryPost;
-  index: number;
-}) {
+export default function DiaryItem({ post, index }: DiaryItemProps) {
   return (
     <Link
       href={`/diaries/${post.id}`}

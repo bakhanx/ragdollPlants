@@ -1,14 +1,8 @@
 'use client';
 
 import React from 'react';
-
-// 일기 상태 타입 정의
-export type DiaryMoodStatus = 'good' | 'normal' | 'bad';
-
-interface DiaryStatusProps {
-  status: DiaryMoodStatus;
-  className?: string;
-}
+import { DiaryMoodStatus } from '@/types/models/diary';
+import { DiaryStatusProps } from '@/types/components/diaries';
 
 /**
  * 일기 상태(기분) 컴포넌트

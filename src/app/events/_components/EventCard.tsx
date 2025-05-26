@@ -3,11 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BannerItem } from '@/app/_constants/eventData';
-
-interface EventCardProps {
-  event: BannerItem;
-}
+import { EventCardProps } from '@/types/components/events';
 
 export default function EventCard({ event }: EventCardProps) {
   return (
