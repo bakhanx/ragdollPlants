@@ -4,9 +4,10 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import Link from 'next/link';
 import { MyPlantList } from './_components/MyPlantList';
+import { LegacyMyPlant } from '@/types/models/plant';
 
 // 임시 데이터 - 후에 실제 API 연동으로 대체
-const myPlants = [
+const myPlants: LegacyMyPlant[] = [
   {
     id: 1,
     name: '몬스테라',
