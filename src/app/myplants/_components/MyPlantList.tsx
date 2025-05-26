@@ -6,31 +6,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons/Icons';
 import { UploadButton } from '@/app/_components/common/UploadButton';
+import { MyPlantListProps } from '@/types/components/plants';
+import { LegacyMyPlant, MAX_PLANTS } from '@/types/models/plant';
 
-export type MyPlant = {
-  id: number;
-  name: string;
-  imageUrl: string;
-  needsWater: boolean;
-  needsNutrient: boolean;
-  lastWatered: string;
-  plantType: string;
-};
-
-export const MyPlantList = ({
-  initialPlants
-}: {
-  initialPlants: MyPlant[];
-}) => {
-  const { visibleItems, handleSearch } = useFilteredItems<MyPlant>({
+export const MyPlantList = ({ initialPlants }: MyPlantListProps) => {
+  const { visibleItems, handleSearch } = useFilteredItems<LegacyMyPlant>({
     items: initialPlants,
     filterFn: (item, query) =>
       item.name.toLowerCase().includes(query.toLowerCase()) ||
       item.plantType.toLowerCase().includes(query.toLowerCase())
   });
 
-  const maxPlants = 20;
-  const isMax = initialPlants.length >= maxPlants;
+  const isMax = initialPlants.length >= MAX_PLANTS;
 
   return (
     <div className="py-8">
@@ -45,7 +32,7 @@ export const MyPlantList = ({
           link="/myplants/register"
           disabled={isMax}
           count={initialPlants.length}
-          maxCount={maxPlants}
+          maxCount={MAX_PLANTS}
           title="식물 등록"
         />
       </div>
