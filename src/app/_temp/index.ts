@@ -76,19 +76,8 @@ export const notifications: NotificationType[] = [
   }
 ];
 
-// 레벨 경험치 요구사항
-export const levelExpRequirements = {
-  1: 100,
-  2: 300,
-  3: 600,
-  4: 1000,
-  5: 1500,
-  6: 2100,
-  7: 2800,
-  8: 3600,
-  9: 4500,
-  10: 5500
-} as const;
+// 레벨 경험치 요구사항은 타입 모델에서 가져오기
+export { LEVEL_EXP_REQUIREMENTS as levelExpRequirements } from '@/types/models/user';
 
 // 프로필 이미지
 export const profileImg = '/images/Profile.png';
