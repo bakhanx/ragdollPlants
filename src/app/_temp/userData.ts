@@ -1,4 +1,6 @@
-export const userProfileData = [
+import { LegacyUserProfileData } from '@/types/models/user';
+
+export const userProfileData: LegacyUserProfileData[] = [
   {
     id: 'user_1',
     name: 'John Doe',

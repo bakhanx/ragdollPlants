@@ -1,3 +1,5 @@
+import { LegacyMyPlantCare } from '@/types/models/care';
+
 export const plantItems = [
   {
     id: 'plant_1',
@@ -73,7 +75,7 @@ export const plantItems = [
   }
 ];
 
-export const myPlants = [
+export const myPlants: LegacyMyPlantCare[] = [
   {
     id: 'mp_1',
     name: 'Cactus',

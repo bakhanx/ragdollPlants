@@ -1,4 +1,7 @@
-import { GalleryItem } from '../galleries/_components/GalleryGrid';
+import { LegacyGalleryItem, MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
+
+// 갤러리 아이템 타입
+export type GalleryItem = LegacyGalleryItem;
 
 // 임시 갤러리 데이터
 export const galleryItems: GalleryItem[] = [
@@ -32,5 +35,5 @@ export const galleryItems: GalleryItem[] = [
   }
 ];
 
-// 최대 갤러리 사진 개수
-export const MAX_GALLERY_PHOTOS = 10; 
+// 최대 갤러리 사진 개수 내보내기
+export { MAX_GALLERY_PHOTOS }; 

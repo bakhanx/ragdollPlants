@@ -1,14 +1,6 @@
-import { DiaryMoodStatus } from '../diaries/_components/DiaryStatus';
+import { LegacyDiaryPost, DiaryMoodStatus } from '@/types/models/diary';
 
-export type DiaryPost = {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  imageUrl: string;
-  status: DiaryMoodStatus;
-  authorName?: string;
-};
+export type DiaryPost = LegacyDiaryPost;
 
 export const diaryPosts: DiaryPost[] = [
   {

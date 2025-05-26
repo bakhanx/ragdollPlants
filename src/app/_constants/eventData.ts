@@ -1,11 +1,7 @@
-export type BannerItem = {
-  id: number;
-  title: string;
-  subtitle: string;
-  imageUrl: string;
-  link: string;
-  isEnded?: boolean;
-};
+import { LegacyBannerItem, LegacyEventDetail } from '@/types/models/event';
+
+export type BannerItem = LegacyBannerItem;
+export type EventDetail = LegacyEventDetail;
 
 export const bannerItems: BannerItem[] = [
   {
@@ -64,17 +60,6 @@ export const endedEvents: BannerItem[] = [
     isEnded: true
   }
 ];
-
-export type EventDetail = {
-  id: string;
-  title: string;
-  subtitle: string;
-  imageUrl: string;
-  period: string;
-  description: string;
-  content: string;
-  isEnded?: boolean;
-};
 
 export const eventDetails: EventDetail[] = [
   {
