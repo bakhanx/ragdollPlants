@@ -15,7 +15,7 @@ export default function UserProfile({
   stats,
   levelProgress = 0,
   todayWaterCount = 0,
-  nutrientCount = 0,
+  todayNutrientCount = 0,
   interests = []
 }: UserProfileProps) {
   return (
@@ -89,7 +89,7 @@ export default function UserProfile({
           icon={<NutrientIcon />}
           iconColor="[&_path]:stroke-yellow-600"
           title="영양 관리"
-          count={nutrientCount}
+          count={todayNutrientCount}
           href="/care"
           textColor="text-yellow-600"
         />
