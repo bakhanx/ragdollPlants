@@ -13,7 +13,7 @@ export interface UserProfileProps {
   stats: UserStats;
   levelProgress?: number;
   todayWaterCount?: number;
-  nutrientCount?: number;
+  todayNutrientCount?: number;
   interests?: string[];
 }
 
