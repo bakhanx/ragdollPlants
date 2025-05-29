@@ -4,35 +4,44 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import { MenuList } from '../_components/lists/MenuList';
 import UserProfile from './_components/profile/UserProfile';
-import { userProfileData } from '../_temp/userData';
 import Link from 'next/link';
 import { EditIcon } from '../_components/icons';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import { getUserProfileData } from '../actions/userProfile';
 
-export default function Page() {
-  // 0번째 인덱스의 사용자 데이터 사용
-  const user = userProfileData[0];
+export default async function Page() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  const user = await getUserProfileData(session.user.id);
+  if (!user) {
+    redirect('/login');
+  }
 
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
       <ContentsLayout>
         <Header
-          title={`${user.name}님의 정원`}
+          title={`${user.name || '사용자'}님의 정원`}
           showNotification
         />
 
         <div className="relative mb-4">
           <UserProfile
-            nickname={user.name}
+            nickname={user.name || '사용자'}
             level={user.level}
             stats={{
-              galleries: user.posts,
-              visitors: user.followers,
-              plants: user.following
+              galleries: user._count.galleries,
+              visitors: user._count.followersList,
+              plants: user._count.plants
             }}
             levelProgress={user.levelProgress}
-            todayWaterCount={user.plantCare.waterCount}
-            nutrientCount={user.plantCare.nutrientCount}
+            todayWaterCount={user.todayWaterCount}
+            todayNutrientCount={user.todayNutrientCount}
             interests={user.interests}
           />
 
