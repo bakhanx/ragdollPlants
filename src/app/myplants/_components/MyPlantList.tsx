@@ -29,7 +29,7 @@ export const MyPlantList = ({ initialPlants }: MyPlantListProps) => {
           />
         </div>
         <UploadButton
-          link="/myplants/register"
+          link="/myplants/upload"
           disabled={isMax}
           count={initialPlants.length}
           maxCount={MAX_PLANTS}

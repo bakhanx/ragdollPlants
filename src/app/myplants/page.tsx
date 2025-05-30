@@ -70,7 +70,7 @@ export default function MyPlantsPage() {
             <div className="flex h-40 flex-col items-center justify-center rounded-lg bg-gray-50 text-center">
               <p className="mb-2 text-gray-500">등록된 식물이 없습니다.</p>
               <Link
-                href="/myplants/register"
+                href="/myplants/upload"
                 className="rounded-full bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
                 첫 식물 등록하기
               </Link>
