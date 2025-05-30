@@ -13,8 +13,10 @@ interface PlantDetailPageProps {
   };
 }
 
-export default function PlantDetailPage({ params }: PlantDetailPageProps) {
-  const plantId = params.id;
+export default async function PlantDetailPage({
+  params
+}: PlantDetailPageProps) {
+  const { id: plantId } = await params;
 
   // 실제 구현에서는 여기서 plantId를 사용하여 데이터를 가져옴
   // 현재는 임시 데이터 사용
