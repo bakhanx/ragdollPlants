@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import PlantTypeSelector from '@/app/myplants/upload/_components/PlantTypeSelector';
 import DatePickerField from '@/app/myplants/upload/_components/DatePickerField';
+import { uploadPlant } from '../@actions/plantActions';
 
 interface PlantTypeOption {
   value: string;
@@ -92,6 +93,8 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
     try {
       // API 요청 데이터 준비
       const formData = new FormData();
+      
+      // 이미지 처리 로직
       if (imageFile) {
         formData.append('image', imageFile);
       }
@@ -103,20 +106,15 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
       formData.append('acquiredDate', acquiredDate);
       formData.append('notes', notes);
 
-      // API 호출을 시뮬레이션 (실제로는 fetch 등으로 서버에 데이터 전송)
-      console.log('폼 데이터 제출:', {
-        plantName,
-        plantType,
-        location,
-        acquiredDate,
-        notes,
-        imageFile: imageFile
-          ? `${imageFile.name} (${imageFile.size} bytes)`
-          : null
-      });
+      // 서버 액션 호출
+      const result = await uploadPlant(formData);
 
-      // 성공 시 목록 페이지로 이동
-      router.push('/myplants');
+      if (result.success) {
+        // 성공 시 목록 페이지로 이동
+        router.push('/myplants');
+      } else {
+        alert(result.message || '식물 등록에 실패했습니다.');
+      }
     } catch (error) {
       console.error('식물 등록 중 오류 발생:', error);
       alert('식물 등록에 실패했습니다. 다시 시도해주세요.');
