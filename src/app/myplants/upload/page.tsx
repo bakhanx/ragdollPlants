@@ -17,7 +17,7 @@ const plantTypeOptions = [
 export default function RegisterPlantPage() {
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-04.webp" />
+      <BackgroundImage src="/images/welcome-bg-05.webp" />
       <ContentsLayout>
         <Header
           title="새 식물 등록"

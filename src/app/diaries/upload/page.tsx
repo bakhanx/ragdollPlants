@@ -20,7 +20,7 @@ export default function CreateDiaryPage() {
 
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-06.webp" />
+      <BackgroundImage src="/images/welcome-bg-05.webp" />
       <ContentsLayout showFooter={false}>
         <Header
           title="일기 작성"
