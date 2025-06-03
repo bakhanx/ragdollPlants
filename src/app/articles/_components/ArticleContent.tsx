@@ -1,6 +1,6 @@
 import React from 'react';
 import CategoryBadge from './CategoryBadge';
-import { ArticleCategory } from '@/app/_utils/categoryUtils';
+import { ArticleCategory } from '@/types/models/article';
 
 interface ArticleContentProps {
   article: {

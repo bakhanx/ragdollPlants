@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import ShareButton from '../../_components/common/ShareButton';
+import { ShareButton } from '@/app/_components/common/ShareButton';
 
 interface DiaryImageProps {
   imageUrl: string;

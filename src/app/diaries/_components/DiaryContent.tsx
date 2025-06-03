@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import DiaryStatus, { DiaryMoodStatus } from './DiaryStatus';
-
+import DiaryStatus from './DiaryStatus';
+import { DiaryMoodStatus } from '@/types/models/diary';
 export interface DiaryDetailType {
   id: string;
   title: string;
