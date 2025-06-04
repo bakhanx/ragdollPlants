@@ -2,27 +2,41 @@ import React from "react";
 
 type ButtonProps = {
   text: string;
-  type?: "normal" | "primary" | "outlined"; // 추가적인 버튼 타입 지원
-};
+  buttonType?: "normal" | "primary" | "outlined"; // 추가적인 버튼 타입 지원
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>;
 
-export const Button = ({ text, type = "normal" }: ButtonProps) => {
+export const Button = ({ text, buttonType = "normal", disabled = false, className = "", ...props }: ButtonProps) => {
   const baseStyle = "h-12 w-full text-lg rounded-lg transition";
   const primaryStyle = "bg-green-600 text-white hover:bg-green-700 border-none";
   const normalStyle =
     "bg-parent text-white hover:text-green-500 hover:border-green-600 border-white border-2";
+  const disabledStyle = "opacity-50 cursor-not-allowed";
+  
   let buttonStyle = "";
 
-  switch (type) {
+  switch (buttonType) {
     case "normal":
       buttonStyle = normalStyle;
       break;
     case "primary":
       buttonStyle = primaryStyle;
       break;
-
     default:
       buttonStyle = primaryStyle;
   }
 
-  return <button className={`${baseStyle} ${buttonStyle}`}>{text}</button>;
+  // disabled 상태일 때 hover 효과 제거
+  const finalStyle = disabled 
+    ? `${baseStyle} ${buttonStyle} ${disabledStyle}`.replace(/hover:[^ ]*/g, '')
+    : `${baseStyle} ${buttonStyle}`;
+
+  return (
+    <button 
+      className={`${finalStyle} ${className}`}
+      disabled={disabled}
+      {...props}
+    >
+      {text}
+    </button>
+  );
 };
