@@ -45,11 +45,11 @@ button {
   display: none;
 } */
 
-input, textarea {
+/* input, textarea {
   color: #f9fafb;
-}
+} */
 
 input::placeholder,
 textarea::placeholder {
-  color: #d1d5dc
+  color: #b8bfca
 }
