@@ -13,30 +13,31 @@ model User {
   name          String?
   email         String    @unique
   emailVerified DateTime? @map("email_verified")
+  phone         String?   @map("phone")
   image         String?   @map("profile_image")
   coverImage    String?   @map("cover_image")
   bio           String?
-  password      String?   // Credentials 로그인용 (선택적)
-  
-  // 권한 관리
-  role          String    @default("USER") // "USER" | "ADMIN"
-  isActive      Boolean   @default(true) @map("is_active")
-  
-  // 일반 사용자 전용 필드
-  level         Int       @default(1)
-  levelProgress Int       @default(0) @map("level_progress")
+  password      String? // Credentials 로그인용 (선택적)
 
-  waterCount    Int       @default(0) @map("water_count") // 총 물주기 횟수
-  nutrientCount Int       @default(0) @map("nutrient_count") // 총 영양제 횟수
-  interests     String[]  // PlantInterest 배열
-  
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  
+  // 권한 관리
+  role     String  @default("USER") // "USER" | "ADMIN"
+  isActive Boolean @default(true) @map("is_active")
+
+  // 일반 사용자 전용 필드
+  level         Int @default(1)
+  levelProgress Int @default(0) @map("level_progress")
+
+  waterCount    Int      @default(0) @map("water_count") // 총 물주기 횟수
+  nutrientCount Int      @default(0) @map("nutrient_count") // 총 영양제 횟수
+  interests     String[] // PlantInterest 배열
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   // NextAuth 관계
-  accounts      Account[]
-  sessions      Session[]
-  
+  accounts Account[]
+  sessions Session[]
+
   // 앱 관련 관계
   articles      Article[]
   plants        Plant[]
@@ -48,9 +49,9 @@ model User {
   comments      Comment[]
   likes         Like[]
   notifications Notification[]
-  followersList Follow[]      @relation("UserFollows")
-  followingList Follow[]      @relation("UserFollowing")
-  
+  followersList Follow[]       @relation("UserFollows")
+  followingList Follow[]       @relation("UserFollowing")
+
   @@map("users")
 }
 
@@ -98,82 +99,82 @@ model VerificationToken {
 
 // 카테고리 모델 (먼저 정의)
 model Category {
-  id          String    @id @default(uuid())
-  name        String    @unique
+  id          String   @id @default(uuid())
+  name        String   @unique
   description String?
-  color       String?   // 카테고리 색상 코드
-  icon        String?   // 카테고리 아이콘
-  order       Int       @default(0) // 정렬 순서
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  
+  color       String? // 카테고리 색상 코드
+  icon        String? // 카테고리 아이콘
+  order       Int      @default(0) // 정렬 순서
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
   // 관계
-  articles    Article[]
-  
+  articles Article[]
+
   @@map("categories")
 }
 
 // 식물 모델 (통합형)
 model Plant {
-  id                String     @id @default(uuid())
-  name              String
-  image             String
-  category          String     // PlantCategory enum: '실내식물' | '다육식물' | '선인장' | '허브' | '관엽식물' | '기타'
-  description       String?
-  location          String?
-  purchaseDate      DateTime?  @map("purchase_date")
-  
+  id           String    @id @default(uuid())
+  name         String
+  image        String
+  category     String // PlantCategory enum: '실내식물' | '다육식물' | '선인장' | '허브' | '관엽식물' | '기타'
+  description  String?
+  location     String?
+  purchaseDate DateTime? @map("purchase_date")
+
   // 케어 관련 정보
-  wateringInterval  Int        @default(7) @map("watering_interval") // 일 단위
-  nutrientInterval  Int        @default(30) @map("nutrient_interval") // 일 단위
-  lastWateredDate   DateTime?  @map("last_watered_date")
-  nextWateringDate  DateTime?  @map("next_watering_date")
-  lastNutrientDate  DateTime?  @map("last_nutrient_date")
-  nextNutrientDate  DateTime?  @map("next_nutrient_date")
-  
+  wateringInterval Int       @default(7) @map("watering_interval") // 일 단위
+  nutrientInterval Int       @default(30) @map("nutrient_interval") // 일 단위
+  lastWateredDate  DateTime? @map("last_watered_date")
+  nextWateringDate DateTime? @map("next_watering_date")
+  lastNutrientDate DateTime? @map("last_nutrient_date")
+  nextNutrientDate DateTime? @map("next_nutrient_date")
+
   // 환경 정보
-  temperature       Float?
-  humidity          Float?
-  sunlight          String?    // SunlightLevel enum: 'direct' | 'bright' | 'indirect' | 'filtered' | 'low'
-  
+  temperature Float?
+  humidity    Float?
+  sunlight    String? // SunlightLevel enum: 'direct' | 'bright' | 'indirect' | 'filtered' | 'low'
+
   // 상태 정보
-  isActive          Boolean    @default(true) @map("is_active")
-  needsWater        Boolean    @default(false) @map("needs_water")
-  needsNutrient     Boolean    @default(false) @map("needs_nutrient")
-  
+  isActive      Boolean @default(true) @map("is_active")
+  needsWater    Boolean @default(false) @map("needs_water")
+  needsNutrient Boolean @default(false) @map("needs_nutrient")
+
   // 메타 정보
-  tags              String[]
-  createdAt         DateTime   @default(now()) @map("created_at")
-  updatedAt         DateTime   @updatedAt @map("updated_at")
-  
+  tags      String[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   // 관계
-  authorId          String     @map("author_id")
-  author            User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  careRecords       CareRecord[]
-  careReminders     CareReminder[]
-  diaries           Diary[]
-  galleries         Gallery[]
-  
+  authorId      String         @map("author_id")
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  careRecords   CareRecord[]
+  careReminders CareReminder[]
+  diaries       Diary[]
+  galleries     Gallery[]
+
   @@map("plants")
 }
 
 // 케어 기록 모델
 model CareRecord {
-  id            String   @id @default(uuid())
-  type          String   // 'water' | 'nutrient' | 'repot' | 'prune' | 'fertilize'
-  date          DateTime
-  amount        Float?   // 물 양(ml), 영양제 양 등
-  notes         String?
-  isToday       Boolean  @default(false) @map("is_today") // 오늘 기록인지 여부 (당일 케어 횟수 조회용)
-  createdAt     DateTime @default(now()) @map("created_at")
-  
+  id        String   @id @default(uuid())
+  type      String // 'water' | 'nutrient' | 'repot' | 'prune' | 'fertilize'
+  date      DateTime
+  amount    Float? // 물 양(ml), 영양제 양 등
+  notes     String?
+  isToday   Boolean  @default(false) @map("is_today") // 오늘 기록인지 여부 (당일 케어 횟수 조회용)
+  createdAt DateTime @default(now()) @map("created_at")
+
   // 관계
-  plantId       String   @map("plant_id")
-  plant         Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
-  authorId      String   @map("author_id")
-  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+  plantId  String @map("plant_id")
+  plant    Plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
   @@index([authorId, type, isToday]) // 사용자별 당일 케어 기록 조회 성능 최적화
   @@map("care_records")
 }
@@ -181,41 +182,41 @@ model CareRecord {
 // 케어 알림 모델
 model CareReminder {
   id            String    @id @default(uuid())
-  type          String    // 'water' | 'nutrient'
+  type          String // 'water' | 'nutrient'
   scheduledDate DateTime  @map("scheduled_date")
   isCompleted   Boolean   @default(false) @map("is_completed")
   completedDate DateTime? @map("completed_date")
   createdAt     DateTime  @default(now()) @map("created_at")
-  
+
   // 관계
-  plantId       String    @map("plant_id")
-  plant         Plant     @relation(fields: [plantId], references: [id], onDelete: Cascade)
-  authorId      String    @map("author_id")
-  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+  plantId  String @map("plant_id")
+  plant    Plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
   @@map("care_reminders")
 }
 
 // 아티클 모델
 model Article {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
-  content     String    @db.Text
+  content     String   @db.Text
   summary     String?
   image       String?
   tags        String[]
-  isPublished Boolean   @default(true) @map("is_published")
-  viewCount   Int       @default(0) @map("view_count")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  
+  isPublished Boolean  @default(true) @map("is_published")
+  viewCount   Int      @default(0) @map("view_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
   // 관계
-  authorId    String    @map("author_id")
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  categoryId  String    @map("category_id")
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  comments    Comment[]
-  
+  authorId   String    @map("author_id")
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categoryId String    @map("category_id")
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  comments   Comment[]
+
   @@map("articles")
 }
 
@@ -226,17 +227,17 @@ model Diary {
   content   String   @db.Text
   date      DateTime
   image     String?
-  status    String   // DiaryMoodStatus enum: 'good' | 'normal' | 'bad'
+  status    String // DiaryMoodStatus enum: 'good' | 'normal' | 'bad'
   tags      String[]
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
+
   // 관계
-  plantId   String?  @map("plant_id")
-  plant     Plant?   @relation(fields: [plantId], references: [id], onDelete: SetNull)
-  authorId  String   @map("author_id")
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+  plantId  String? @map("plant_id")
+  plant    Plant?  @relation(fields: [plantId], references: [id], onDelete: SetNull)
+  authorId String  @map("author_id")
+  author   User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
   @@map("diaries")
 }
 
@@ -249,39 +250,39 @@ model Gallery {
   tags        String[]
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
-  
+
   // 관계
-  plantId     String?  @map("plant_id")
-  plant       Plant?   @relation(fields: [plantId], references: [id], onDelete: SetNull)
-  authorId    String   @map("author_id")
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+  plantId  String? @map("plant_id")
+  plant    Plant?  @relation(fields: [plantId], references: [id], onDelete: SetNull)
+  authorId String  @map("author_id")
+  author   User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
   @@map("galleries")
 }
 
 // 이벤트 모델
 model Event {
-  id             String    @id @default(uuid())
+  id             String   @id @default(uuid())
   title          String
   subtitle       String
   image          String
   link           String
-  description    String    @db.Text
-  content        String    @db.Text
-  startDate      DateTime  @map("start_date")
-  endDate        DateTime  @map("end_date")
-  isEnded        Boolean   @default(false) @map("is_ended")
-  thumbnailImage String?   @map("thumbnail_image")
+  description    String   @db.Text
+  content        String   @db.Text
+  startDate      DateTime @map("start_date")
+  endDate        DateTime @map("end_date")
+  isEnded        Boolean  @default(false) @map("is_ended")
+  thumbnailImage String?  @map("thumbnail_image")
   tags           String[]
-  viewCount      Int       @default(0) @map("view_count")
-  participants   Int       @default(0)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  
+  viewCount      Int      @default(0) @map("view_count")
+  participants   Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
   // 관계
-  authorId       String    @map("author_id")
-  author         User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
   @@map("events")
 }
 
@@ -291,48 +292,48 @@ model Comment {
   content   String   @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
+
   // 관계
-  articleId String   @map("article_id")
-  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  authorId  String   @map("author_id")
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+  articleId String  @map("article_id")
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  authorId  String  @map("author_id")
+  author    User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
   // 대댓글 지원
-  parentId  String?  @map("parent_id")
-  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   Comment[] @relation("CommentReplies")
-  
+  parentId String?   @map("parent_id")
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
   @@map("comments")
 }
 
 // 좋아요 모델
 model Like {
   id        String   @id @default(uuid())
-  type      String   // 'article' | 'gallery' | 'diary' | 'event'
+  type      String // 'article' | 'gallery' | 'diary' | 'event'
   targetId  String   @map("target_id") // 좋아요 대상의 ID
   createdAt DateTime @default(now()) @map("created_at")
-  
+
   // 관계
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, type, targetId]) // 중복 좋아요 방지
   @@map("likes")
 }
 
 // 팔로우 모델
 model Follow {
-  id          String   @id @default(uuid())
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   // 관계
-  followerId  String   @map("follower_id")
-  follower    User     @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
-  followingId String   @map("following_id")
-  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
-  
+  followerId  String @map("follower_id")
+  follower    User   @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String @map("following_id")
+  following   User   @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
   @@unique([followerId, followingId]) // 중복 팔로우 방지
   @@map("follows")
 }
@@ -340,16 +341,16 @@ model Follow {
 // 알림 모델
 model Notification {
   id        String   @id @default(uuid())
-  type      String   // 'like' | 'comment' | 'follow' | 'care_reminder' | 'system'
+  type      String // 'like' | 'comment' | 'follow' | 'care_reminder' | 'system'
   title     String
   message   String   @db.Text
   isRead    Boolean  @default(false) @map("is_read")
-  data      Json?    // 추가 데이터 (targetId, url 등)
+  data      Json? // 추가 데이터 (targetId, url 등)
   createdAt DateTime @default(now()) @map("created_at")
-  
+
   // 관계
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("notifications")
-} 
+}
