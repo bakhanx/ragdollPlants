@@ -41,6 +41,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   profileImage?: string;
   coverImage?: string;
   bio?: string;
@@ -61,6 +62,7 @@ export interface User {
 export interface UserPreview {
   id: string;
   name: string;
+  phone?: string;
   profileImage?: string;
   level: number;
   interests: PlantInterest[];
@@ -94,6 +96,7 @@ export interface LegacyUserProfileData {
 export interface UserCreateInput {
   name: string;
   email: string;
+  phone?: string;
   profileImage?: string;
   bio?: string;
   interests?: PlantInterest[];
@@ -105,6 +108,7 @@ export interface UserCreateInput {
 export interface UserUpdateInput {
   name?: string;
   email?: string;
+  phone?: string;
   profileImage?: string;
   coverImage?: string;
   bio?: string;
