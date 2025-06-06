@@ -43,6 +43,7 @@ export default async function Page() {
             todayWaterCount={user.todayWaterCount}
             todayNutrientCount={user.todayNutrientCount}
             interests={user.interests}
+            profileImage={session.user.image}
           />
 
           {/* 프로필 편집 버튼 */}
