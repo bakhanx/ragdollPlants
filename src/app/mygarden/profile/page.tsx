@@ -6,18 +6,45 @@ import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import EditProfile from '@/app/mygarden/_components/EditProfile';
 import { useRouter } from 'next/navigation';
-import { userProfileData } from '@/app/_temp/userData';
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
 
 export default function ProfileEditPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-
-  // 현재는 첫번째 유저를 고정적으로 사용 (로그인 기능 구현 시 실제 로그인한 유저 사용)
-  const currentUserId = userProfileData[0].id;
 
   // 취소 시 마이가든 페이지로 이동
   const handleCancel = () => {
     router.push('/mygarden');
   };
+
+  // 로딩 중
+  if (status === 'loading') {
+    return (
+      <>
+        <BackgroundImage src="/images/welcome-bg-06.webp" />
+        <ContentsLayout>
+          <Header
+            title="프로필 수정"
+            showBack
+            onBackClick={handleCancel}
+          />
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+              <p className="text-gray-600">로딩 중...</p>
+            </div>
+          </div>
+        </ContentsLayout>
+      </>
+    );
+  }
+
+  // 인증되지 않음
+  if (!session?.user) {
+    router.push('/login');
+    return null;
+  }
 
   return (
     <>
@@ -25,12 +52,13 @@ export default function ProfileEditPage() {
       <ContentsLayout>
         <Header
           title="프로필 수정"
+          showBack
           onBackClick={handleCancel}
         />
 
         <div className="py-4">
           <EditProfile
-            userId={currentUserId}
+            userId={session.user.id}
             onCancel={handleCancel}
           />
         </div>
