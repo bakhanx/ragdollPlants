@@ -16,8 +16,9 @@ export default function UserProfile({
   levelProgress = 0,
   todayWaterCount = 0,
   todayNutrientCount = 0,
-  interests = []
-}: UserProfileProps) {
+  interests = [],
+  profileImage
+}: UserProfileProps & { profileImage?: string | null }) {
   return (
     <section className="mx-auto w-full max-w-2xl space-y-6 py-4">
       {/* 프로필 카드 */}
@@ -29,7 +30,7 @@ export default function UserProfile({
             href="/mygarden/profile"
             className="hover:opacity-80">
             <ProfileImage
-              src="/images/Profile.png"
+              src={profileImage || "/images/Profile.png"}
               alt={nickname}
               showEditHint={true}
             />
