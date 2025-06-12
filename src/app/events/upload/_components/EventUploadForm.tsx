@@ -52,8 +52,22 @@ export const EventUploadForm = ({
     setIsSubmitting(true);
 
     try {
-      //임시로 메시지 출력
-      // 성공 시 이벤트 목록 페이지로 이동
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('subtitle', subtitle);
+      formData.append('description', description);
+      formData.append('content', content);
+      formData.append('link', '#'); // 임시 링크
+      formData.append('startDate', new Date().toISOString());
+      formData.append('endDate', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()); // 30일 후
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      // 액션 함수 import 및 호출은 추후 추가 예정
+      // const result = await createEvent(formData);
+      
+      // 임시로 메시지 출력
       alert('이벤트가 성공적으로 등록되었습니다.');
       router.push('/events');
     } catch (error) {
