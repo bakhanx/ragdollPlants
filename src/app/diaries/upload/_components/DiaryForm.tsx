@@ -6,6 +6,7 @@ import { useImageUpload } from '@/app/_hooks/useImageUpload';
 import { SelectedPlantInfo } from './SelectedPlantInfo';
 import { DiaryMoodSelector, moodOptions } from './DiaryMoodSelector';
 import { DiaryImageUploadSection } from './DiaryImageUploadSection';
+import { createDiary } from '@/app/actions/diaries';
 
 const MAX_FREE_PHOTO_DIARIES = 3; // 무료 회원이 사진 첨부 가능한 일기 수
 const MAX_PAID_PHOTO_COUNT = 5; // 최대 사진 개수
@@ -73,27 +74,49 @@ export const DiaryForm = ({
   }, [plantId, isPaidUser]);
 
   // 폼 제출 처리
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedPlant) {
-      alert('식물을 선택해주세요.');
+    if (!title.trim()) {
+      alert('제목을 입력해주세요.');
       return;
     }
 
-    // 여기서 API 호출을 통해 데이터를 서버에 저장
-    // 실제 구현에서는 API 호출 코드가 들어갈 자리
-    console.log({
-      plantId: selectedPlant.id,
-      title,
-      content,
-      mood,
-      images: imageFiles.filter(file => file), // null 제거
-      hasImages: imageFiles.filter(file => file).length > 0
-    });
+    if (!content.trim()) {
+      alert('내용을 입력해주세요.');
+      return;
+    }
 
-    // 작성 완료 후 식물 상세 페이지로 이동
-    router.push(`/myplants/${selectedPlant.id}`);
+    try {
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
+      formData.append('status', mood);
+      formData.append('date', new Date().toISOString());
+      
+      // 선택된 식물이 있으면 추가
+      if (selectedPlant) {
+        formData.append('plantId', selectedPlant.id);
+      }
+
+      // 이미지 파일들 추가 (첫 번째 이미지만 사용)
+      const validImages = imageFiles.filter(file => file);
+      if (validImages.length > 0) {
+        formData.append('image', validImages[0]);
+      }
+
+      // 태그 추가 (빈 배열로 초기화)
+      formData.append('tags', JSON.stringify([]));
+
+      // 다이어리 생성 액션 함수 호출
+      await createDiary(formData);
+      
+      // createDiary에서 자동으로 리다이렉트되므로 여기서는 추가 처리 불필요
+    } catch (error) {
+      console.error('다이어리 생성 오류:', error);
+      alert(error instanceof Error ? error.message : '다이어리 저장 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -172,8 +195,8 @@ export const DiaryForm = ({
         <div className="mt-8 flex justify-center">
           <button
             type="submit"
-            className="w-full rounded-md bg-green-600 py-2 text-white hover:bg-green-700"
-            disabled={!selectedPlant}>
+            className="w-full rounded-md bg-green-600 py-2 text-white hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={!title.trim() || !content.trim()}>
             저장하기
           </button>
         </div>
