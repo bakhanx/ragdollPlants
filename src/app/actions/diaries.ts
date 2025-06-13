@@ -1,0 +1,422 @@
+'use server';
+
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
+import { DiaryMoodStatus } from '@/types/models/diary';
+
+// 다이어리 생성 유효성 검사 스키마
+const createDiarySchema = z.object({
+  title: z.string().min(1, '제목은 필수입니다'),
+  content: z.string().min(1, '내용은 필수입니다'),
+  status: z.enum(['good', 'normal', 'bad']),
+  date: z.string().optional(),
+  plantId: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+// 모든 다이어리 조회
+export async function getDiaries() {
+  try {
+    const diaries = await prisma.diary.findMany({
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        image: true,
+        status: true,
+        date: true,
+        plantId: true,
+        tags: true,
+        createdAt: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
+        plant: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return diaries;
+  } catch (error) {
+    console.error('다이어리 목록 조회 오류:', error);
+    throw new Error('다이어리 목록을 불러오는 중 오류가 발생했습니다.');
+  }
+}
+
+// 특정 다이어리 조회
+export async function getDiaryById(id: string) {
+  try {
+    const diary = await prisma.diary.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        }
+      }
+    });
+
+    if (!diary) {
+      throw new Error('다이어리를 찾을 수 없습니다.');
+    }
+
+    return diary;
+  } catch (error) {
+    console.error('다이어리 조회 오류:', error);
+    throw error;
+  }
+}
+
+// 사용자별 다이어리 조회
+export async function getUserDiaries(userId?: string) {
+  try {
+    const session = await auth();
+    const targetUserId = userId || session?.user?.id;
+    
+    if (!targetUserId) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    const diaries = await prisma.diary.findMany({
+      where: {
+        authorId: targetUserId
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        image: true,
+        status: true,
+        date: true,
+        plantId: true,
+        tags: true,
+        createdAt: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
+        plant: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return diaries;
+  } catch (error) {
+    console.error('사용자 다이어리 조회 오류:', error);
+    throw error;
+  }
+}
+
+// 다이어리 생성
+export async function createDiary(formData: FormData) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    // FormData에서 데이터 추출
+    const rawData = {
+      title: formData.get('title') as string,
+      content: formData.get('content') as string,
+      status: formData.get('status') as DiaryMoodStatus,
+      date: formData.get('date') as string,
+      plantId: formData.get('plantId') as string,
+    };
+
+    // 태그 처리
+    const tagsJson = formData.get('tags') as string;
+    let tags: string[] = [];
+    if (tagsJson) {
+      try {
+        tags = JSON.parse(tagsJson);
+      } catch (e) {
+        console.error('태그 파싱 오류:', e);
+      }
+    }
+
+    // 이미지 파일 처리
+    const imageFile = formData.get('image') as File | null;
+    let imageUrl = '';
+    
+    if (imageFile && imageFile.size > 0) {
+      // 실제 구현에서는 파일 스토리지에 업로드
+      // 임시로 base64 인코딩 (실제 운영에서는 Cloudflare Images 등 사용 권장)
+      const bytes = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const base64 = buffer.toString('base64');
+      imageUrl = `data:${imageFile.type};base64,${base64}`;
+    }
+
+    // 입력 검증
+    const validationResult = createDiarySchema.safeParse({
+      ...rawData,
+      tags
+    });
+    
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      throw new Error(errors);
+    }
+
+    const validatedData = validationResult.data;
+
+    // 다이어리 생성
+    const diary = await prisma.diary.create({
+      data: {
+        title: validatedData.title,
+        content: validatedData.content,
+        status: validatedData.status,
+        date: validatedData.date ? new Date(validatedData.date) : new Date(),
+        image: imageUrl || null,
+        plantId: validatedData.plantId || null,
+        tags: validatedData.tags || [],
+        authorId: session.user.id,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        }
+      }
+    });
+
+    console.log('다이어리 생성 완료:', { id: diary.id, title: diary.title });
+
+    // 캐시 재검증
+    revalidatePath('/diaries');
+    
+    // 생성된 다이어리 페이지로 리다이렉트
+    redirect(`/diaries/${diary.id}`);
+  } catch (error) {
+    console.error('다이어리 생성 오류:', error);
+    throw error;
+  }
+}
+
+// 다이어리 수정
+export async function updateDiary(id: string, formData: FormData) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    // 기존 다이어리 확인 및 권한 체크
+    const existingDiary = await prisma.diary.findUnique({
+      where: { id },
+      select: { authorId: true }
+    });
+
+    if (!existingDiary) {
+      throw new Error('다이어리를 찾을 수 없습니다.');
+    }
+
+    if (existingDiary.authorId !== session.user.id) {
+      throw new Error('수정 권한이 없습니다.');
+    }
+
+    // FormData에서 데이터 추출
+    const rawData = {
+      title: formData.get('title') as string,
+      content: formData.get('content') as string,
+      status: formData.get('status') as DiaryMoodStatus,
+      date: formData.get('date') as string,
+      plantId: formData.get('plantId') as string,
+    };
+
+    const tagsJson = formData.get('tags') as string;
+    let tags: string[] = [];
+    if (tagsJson) {
+      try {
+        tags = JSON.parse(tagsJson);
+      } catch (e) {
+        console.error('태그 파싱 오류:', e);
+      }
+    }
+
+    // 이미지 파일 처리
+    const imageFile = formData.get('image') as File | null;
+    let imageUrl: string | undefined = undefined;
+    
+    if (imageFile && imageFile.size > 0) {
+      const bytes = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const base64 = buffer.toString('base64');
+      imageUrl = `data:${imageFile.type};base64,${base64}`;
+    }
+
+    // 입력 검증
+    const validationResult = createDiarySchema.safeParse({
+      ...rawData,
+      tags
+    });
+    
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      throw new Error(errors);
+    }
+
+    const validatedData = validationResult.data;
+
+    // 다이어리 업데이트 데이터 구성
+    const updateData: {
+      title: string;
+      content: string;
+      status: string;
+      date?: Date;
+      plantId: string | null;
+      tags: string[];
+      image?: string;
+    } = {
+      title: validatedData.title,
+      content: validatedData.content,
+      status: validatedData.status,
+      plantId: validatedData.plantId || null,
+      tags: validatedData.tags || [],
+    };
+
+    // 날짜가 있는 경우만 업데이트
+    if (validatedData.date) {
+      updateData.date = new Date(validatedData.date);
+    }
+
+    // 이미지가 있는 경우만 업데이트
+    if (imageUrl) {
+      updateData.image = imageUrl;
+    }
+
+    const updatedDiary = await prisma.diary.update({
+      where: { id },
+      data: updateData
+    });
+
+    console.log('다이어리 수정 완료:', { id: updatedDiary.id, title: updatedDiary.title });
+
+    // 캐시 재검증
+    revalidatePath('/diaries');
+    revalidatePath(`/diaries/${id}`);
+    
+    // 수정된 다이어리 페이지로 리다이렉트
+    redirect(`/diaries/${id}`);
+  } catch (error) {
+    console.error('다이어리 수정 오류:', error);
+    throw error;
+  }
+}
+
+// 다이어리 삭제
+export async function deleteDiary(id: string) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    // 기존 다이어리 확인 및 권한 체크
+    const existingDiary = await prisma.diary.findUnique({
+      where: { id },
+      select: { authorId: true }
+    });
+
+    if (!existingDiary) {
+      throw new Error('다이어리를 찾을 수 없습니다.');
+    }
+
+    if (existingDiary.authorId !== session.user.id) {
+      throw new Error('삭제 권한이 없습니다.');
+    }
+
+    // 다이어리 삭제
+    await prisma.diary.delete({
+      where: { id }
+    });
+
+    console.log('다이어리 삭제 완료:', { id });
+
+    // 캐시 재검증
+    revalidatePath('/diaries');
+    
+    // 다이어리 목록으로 리다이렉트
+    redirect('/diaries');
+  } catch (error) {
+    console.error('다이어리 삭제 오류:', error);
+    throw error;
+  }
+}
+
+// 식물별 다이어리 조회
+export async function getDiariesByPlant(plantId: string) {
+  try {
+    const diaries = await prisma.diary.findMany({
+      where: {
+        plantId: plantId
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        image: true,
+        status: true,
+        date: true,
+        plantId: true,
+        tags: true,
+        createdAt: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
+        plant: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return diaries;
+  } catch (error) {
+    console.error('식물별 다이어리 조회 오류:', error);
+    throw error;
+  }
+} 
