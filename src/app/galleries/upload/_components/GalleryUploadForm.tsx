@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import GalleryUsageInfo from './GalleryUsageInfo';
 import GalleryPreview from './GalleryPreview';
 import GalleryTitleField from './GalleryTitleField';
 import SubmitButton from './GalleryUploadButton';
-
-// 최대 갤러리 사진 개수
-const MAX_GALLERY_PHOTOS = 10;
+import { createGallery, getUserGalleries } from '@/app/actions/galleries';
+import { MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
 
 export default function GalleryUploadForm() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   // 갤러리 사용 현황
   const [galleryUsage, setGalleryUsage] = useState({
@@ -24,21 +24,36 @@ export default function GalleryUploadForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showOverlay, setShowOverlay] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 갤러리 사용 현황 로드 (실제로는 API 호출)
+  // 사용자의 갤러리 사용 현황 로드
   useEffect(() => {
-    // 임시 데이터 - 실제로는 API 호출하여 갤러리 사용 현황 가져오기
-    const mockGalleryUsed = 4; // 예: 이미 4개의 갤러리 사진이 업로드되었다고 가정
+    const loadGalleryUsage = async () => {
+      try {
+        const userGalleries = await getUserGalleries();
+        const used = userGalleries.length;
+        
+        setGalleryUsage({
+          used,
+          remaining: MAX_GALLERY_PHOTOS - used
+        });
+      } catch (error) {
+        console.error('갤러리 사용 현황 로드 실패:', error);
+        // 에러 발생시 기본값 사용
+        setGalleryUsage({
+          used: 0,
+          remaining: MAX_GALLERY_PHOTOS
+        });
+      }
+    };
 
-    setGalleryUsage({
-      used: mockGalleryUsed,
-      remaining: MAX_GALLERY_PHOTOS - mockGalleryUsed
-    });
+    loadGalleryUsage();
   }, []);
 
   // 이미지 변경 핸들러
   const handleImageChange = (file: File | null) => {
     setImageFile(file);
+    setError(null); // 에러 초기화
     
     if (file) {
       // 이미지 미리보기 생성
@@ -53,23 +68,47 @@ export default function GalleryUploadForm() {
   };
 
   // 폼 제출 처리
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!imageFile) {
-      alert('이미지를 업로드해주세요.');
+      setError('이미지를 업로드해주세요.');
       return;
     }
 
-    // 여기서 API 호출을 통해 데이터를 서버에 저장
-    // 실제 구현에서는 API 호출 코드가 들어갈 자리
-    console.log({
-      title,
-      imageFile
-    });
+    if (!title.trim()) {
+      setError('제목을 입력해주세요.');
+      return;
+    }
 
-    // 업로드 완료 후 갤러리 페이지로 이동
-    router.push('/galleries');
+    // 갤러리 개수 제한 확인
+    if (galleryUsage.remaining <= 0) {
+      setError(`갤러리는 최대 ${MAX_GALLERY_PHOTOS}개까지만 등록할 수 있습니다.`);
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append('title', title.trim());
+        formData.append('image', imageFile);
+
+        const result = await createGallery(formData);
+
+        if (result.success) {
+          // 업로드 성공시 갤러리 페이지로 이동
+          router.push('/galleries');
+        }
+      } catch (error) {
+        console.error('갤러리 업로드 실패:', error);
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('갤러리 업로드 중 오류가 발생했습니다.');
+        }
+      }
+    });
   };
 
   return (
@@ -79,6 +118,13 @@ export default function GalleryUploadForm() {
       
       {/* 갤러리 사용 현황 정보 */}
       <GalleryUsageInfo used={galleryUsage.used} max={MAX_GALLERY_PHOTOS} />
+      
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
       
       {/* 갤러리 프리뷰 - 이미지 업로더 및 오버레이 */}
       <GalleryPreview
@@ -94,7 +140,10 @@ export default function GalleryUploadForm() {
       </div>
 
       {/* 등록 버튼 */}
-      <SubmitButton disabled={!imageFile} />
+      <SubmitButton 
+        disabled={!imageFile || !title.trim() || isPending || galleryUsage.remaining <= 0} 
+        isLoading={isPending}
+      />
     </form>
   );
 } 
