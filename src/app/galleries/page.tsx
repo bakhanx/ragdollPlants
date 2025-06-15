@@ -5,11 +5,12 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import { GalleryTitleSection } from './_components/GalleryTitleSection';
 import { GalleryGrid } from './_components/GalleryGrid';
-import { galleryItems } from '../_temp/galleryData';
+import { getGalleries } from '../actions/galleries';
 
-export default function GalleriesPage() {
-  // 등록된 사진 개수
-  const photoCount = galleryItems.length;
+export default async function GalleriesPage() {
+  // 실제 갤러리 데이터 조회
+  const galleries = await getGalleries();
+  const photoCount = galleries.length;
 
   return (
     <>
@@ -29,7 +30,7 @@ export default function GalleriesPage() {
         <GalleryTitleSection photoCount={photoCount} />
 
         {/* 갤러리 그리드 */}
-        <GalleryGrid items={galleryItems} />
+        <GalleryGrid items={galleries} />
       </ContentsLayout>
     </>
   );
