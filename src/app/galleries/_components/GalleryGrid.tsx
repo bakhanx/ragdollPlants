@@ -1,15 +1,28 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GalleryGridProps } from '@/types/components/galleries';
 
-// 갤러리 아이템 타입 정의
+// 갤러리 아이템 타입 정의 - 실제 데이터베이스 구조에 맞춤
 export interface GalleryItem {
-  id: number;
+  id: string;
   title: string;
-  imageUrl: string;
-  createdAt: string;
+  image: string; // imageUrl -> image로 변경
+  createdAt: Date | string;
   likes: number;
+  description?: string | null;
+  author?: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+  plant?: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export interface GalleryGridProps {
+  items: GalleryItem[];
 }
 
 export const GalleryGrid = ({ items }: GalleryGridProps) => {
@@ -19,36 +32,48 @@ export const GalleryGrid = ({ items }: GalleryGridProps) => {
     <div className="mx-auto w-full max-w-md px-4 pb-20">
       {photoCount > 0 ? (
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className={`relative overflow-hidden rounded-lg shadow-lg transition-all duration-500 hover:shadow-xl ${
-                index % 3 === 0 ? 'col-span-2' : ''
-              }`}>
-              <div className="relative aspect-square">
-                <Image
-                  src={item.imageUrl}
-                  alt={item.title}
-                  fill
-                  className="object-cover transition-transform duration-700"
-                />
+          {items.map((item, index) => {
+            // createdAt이 Date 객체인 경우 문자열로 변환
+            const dateString = item.createdAt instanceof Date 
+              ? item.createdAt.toLocaleDateString('ko-KR')
+              : new Date(item.createdAt).toLocaleDateString('ko-KR');
 
-                {/* 오버레이 및 정보 */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 hover:opacity-0">
-                  <div className="absolute bottom-0 w-full p-4 text-white">
-                    <h3 className="mb-1 text-lg font-semibold">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs opacity-80">
-                        {item.createdAt}
-                      </span>
+            return (
+              <div
+                key={item.id}
+                className={`relative overflow-hidden rounded-lg shadow-lg transition-all duration-500 hover:shadow-xl ${
+                  index % 3 === 0 ? 'col-span-2' : ''
+                }`}>
+                <div className="relative aspect-square">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className="object-cover transition-transform duration-700"
+                  />
+
+                  {/* 오버레이 및 정보 */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 hover:opacity-0">
+                    <div className="absolute bottom-0 w-full p-4 text-white">
+                      <h3 className="mb-1 text-lg font-semibold">
+                        {item.title}
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs opacity-80">
+                          {dateString}
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs opacity-80">
+                            ❤️ {item.likes}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="flex h-64 flex-col items-center justify-center rounded-lg bg-black/30 text-center text-white">
