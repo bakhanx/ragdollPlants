@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import PlantTypeSelector from '@/app/myplants/upload/_components/PlantTypeSelector';
 import DatePickerField from '@/app/myplants/upload/_components/DatePickerField';
-import { uploadPlant } from '../@actions/plantActions';
+import { createPlant } from '@/app/actions/plants';
 
 interface PlantTypeOption {
   value: string;
@@ -25,6 +25,8 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
   const [location, setLocation] = useState('');
   const [acquiredDate, setAcquiredDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [wateringInterval, setWateringInterval] = useState('7'); // 기본 7일
+  const [nutrientInterval, setNutrientInterval] = useState('30'); // 기본 30일
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -93,7 +95,7 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
     try {
       // API 요청 데이터 준비
       const formData = new FormData();
-      
+
       // 이미지 처리 로직
       if (imageFile) {
         formData.append('image', imageFile);
@@ -105,9 +107,11 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
       formData.append('location', location);
       formData.append('acquiredDate', acquiredDate);
       formData.append('notes', notes);
+      formData.append('wateringInterval', wateringInterval);
+      formData.append('nutrientInterval', nutrientInterval);
 
       // 서버 액션 호출
-      const result = await uploadPlant(formData);
+      const result = await createPlant(formData);
 
       if (result.success) {
         // 성공 시 목록 페이지로 이동
@@ -177,7 +181,7 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
             onChange={handlePlantNameChange}
             required
             placeholder="예) 몬스테라, 산세베리아"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
           />
           {errors.plantName && (
             <p className="mt-1 text-xs text-red-500">{errors.plantName}</p>
@@ -210,7 +214,7 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
             value={location}
             onChange={e => setLocation(e.target.value)}
             placeholder="예) 거실 창가, 베란다"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
           />
         </div>
 
@@ -230,6 +234,47 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
           )}
         </div>
 
+        {/* 케어 주기 설정 */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label
+              htmlFor="watering-interval"
+              className="mb-1 block text-sm font-medium text-gray-50">
+              물주기 주기 (일)
+            </label>
+            <input
+              id="watering-interval"
+              type="number"
+              min="1"
+              max="365"
+              value={wateringInterval}
+              onChange={e => setWateringInterval(e.target.value)}
+              placeholder="7"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-gray-400">일반적으로 7-14일</p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="nutrient-interval"
+              className="mb-1 block text-sm font-medium text-gray-50">
+              영양제 주기 (일)
+            </label>
+            <input
+              id="nutrient-interval"
+              type="number"
+              min="1"
+              max="365"
+              value={nutrientInterval}
+              onChange={e => setNutrientInterval(e.target.value)}
+              placeholder="30"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-gray-400">일반적으로 30일</p>
+          </div>
+        </div>
+
         <div>
           <label
             htmlFor="notes"
@@ -241,7 +286,7 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
             value={notes}
             onChange={e => setNotes(e.target.value)}
             placeholder="특이사항이나 관리 방법 등을 적어주세요"
-            className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+            className="w-full rounded-md border border-gray-300 p-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
             rows={3}
           />
         </div>
