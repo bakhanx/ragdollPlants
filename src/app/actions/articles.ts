@@ -12,16 +12,14 @@ const createArticleSchema = z.object({
   content: z.string().min(1, '내용은 필수입니다'),
   summary: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  categoryId: z.string().min(1, '카테고리는 필수입니다'),
+  categoryId: z.string().min(1, '카테고리는 필수입니다')
 });
 
-// 모든 아티클 조회
+// 모든 아티클 조회 (최적화된 쿼리 직접 구현)
 export async function getArticles() {
   try {
-    const articles = await prisma.article.findMany({
-      where: {
-        isPublished: true
-      },
+    return await prisma.article.findMany({
+      where: { isPublished: true },
       select: {
         id: true,
         title: true,
@@ -34,7 +32,8 @@ export async function getArticles() {
           select: {
             id: true,
             name: true,
-            image: true
+            image: true,
+            email: true
           }
         },
         category: {
@@ -50,12 +49,8 @@ export async function getArticles() {
           }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: { createdAt: 'desc' }
     });
-
-    return articles;
   } catch (error) {
     console.error('아티클 목록 조회 오류:', error);
     throw new Error('아티클 목록을 불러오는 중 오류가 발생했습니다.');
@@ -89,8 +84,7 @@ export async function getArticleById(id: string) {
           orderBy: {
             createdAt: 'desc'
           }
-        },
-
+        }
       }
     });
 
@@ -119,7 +113,7 @@ export async function getArticleById(id: string) {
 export async function createArticle(formData: FormData) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       throw new Error('로그인이 필요합니다.');
     }
@@ -129,7 +123,7 @@ export async function createArticle(formData: FormData) {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
       summary: formData.get('summary') as string,
-      categoryId: formData.get('categoryId') as string,
+      categoryId: formData.get('categoryId') as string
     };
 
     // 태그 처리
@@ -146,7 +140,7 @@ export async function createArticle(formData: FormData) {
     // 썸네일 이미지 처리
     const thumbnailFile = formData.get('thumbnail') as File | null;
     let thumbnailUrl = '';
-    
+
     if (thumbnailFile && thumbnailFile.size > 0) {
       // 실제 구현에서는 파일 스토리지에 업로드
       // 임시로 base64 인코딩 (실제 운영에서는 Cloudflare Images 등 사용 권장)
@@ -161,9 +155,11 @@ export async function createArticle(formData: FormData) {
       ...rawData,
       tags
     });
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      const errors = validationResult.error.errors
+        .map(err => err.message)
+        .join(', ');
       throw new Error(errors);
     }
 
@@ -179,7 +175,7 @@ export async function createArticle(formData: FormData) {
         tags: validatedData.tags || [],
         authorId: session.user.id,
         categoryId: validatedData.categoryId,
-        isPublished: true,
+        isPublished: true
       },
       include: {
         author: {
@@ -197,7 +193,7 @@ export async function createArticle(formData: FormData) {
 
     // 캐시 재검증
     revalidatePath('/articles');
-    
+
     // 생성된 아티클 페이지로 리다이렉트
     redirect(`/articles/${article.id}`);
   } catch (error) {
@@ -210,7 +206,7 @@ export async function createArticle(formData: FormData) {
 export async function updateArticle(id: string, formData: FormData) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       throw new Error('로그인이 필요합니다.');
     }
@@ -234,7 +230,7 @@ export async function updateArticle(id: string, formData: FormData) {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
       summary: formData.get('summary') as string,
-      categoryId: formData.get('categoryId') as string,
+      categoryId: formData.get('categoryId') as string
     };
 
     const tagsJson = formData.get('tags') as string;
@@ -252,9 +248,11 @@ export async function updateArticle(id: string, formData: FormData) {
       ...rawData,
       tags
     });
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      const errors = validationResult.error.errors
+        .map(err => err.message)
+        .join(', ');
       throw new Error(errors);
     }
 
@@ -268,16 +266,19 @@ export async function updateArticle(id: string, formData: FormData) {
         content: validatedData.content,
         summary: validatedData.summary || undefined,
         tags: validatedData.tags || [],
-        categoryId: validatedData.categoryId,
+        categoryId: validatedData.categoryId
       }
     });
 
-    console.log('아티클 수정 완료:', { id: updatedArticle.id, title: updatedArticle.title });
+    console.log('아티클 수정 완료:', {
+      id: updatedArticle.id,
+      title: updatedArticle.title
+    });
 
     // 캐시 재검증
     revalidatePath('/articles');
     revalidatePath(`/articles/${id}`);
-    
+
     // 수정된 아티클 페이지로 리다이렉트
     redirect(`/articles/${id}`);
   } catch (error) {
@@ -290,7 +291,7 @@ export async function updateArticle(id: string, formData: FormData) {
 export async function deleteArticle(id: string) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       throw new Error('로그인이 필요합니다.');
     }
@@ -318,11 +319,11 @@ export async function deleteArticle(id: string) {
 
     // 캐시 재검증
     revalidatePath('/articles');
-    
+
     // 아티클 목록으로 리다이렉트
     redirect('/articles');
   } catch (error) {
     console.error('아티클 삭제 오류:', error);
     throw error;
   }
-} 
+}
