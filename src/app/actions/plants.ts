@@ -6,9 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { PlantCreateInput, PlantUpdateInput, MAX_PLANTS } from '@/types/models/plant';
-import { getCurrentUser, validatePlantOwnership } from './utils/auth-helpers';
-import { processPlantImage } from './utils/image-upload';
-import { parseStringFromFormData, parseNumberFromFormData, parseDateFromFormData } from './utils/form-helpers';
 
 // 식물 생성 유효성 검사 스키마
 const createPlantSchema = z.object({
@@ -21,19 +18,27 @@ const createPlantSchema = z.object({
   nutrientInterval: z.number().min(1).max(365).optional(),
 });
 
-// 내 식물 목록 조회 (최적화된 쿼리 직접 구현)
+// 내 식물 목록 조회
 export async function getMyPlants() {
   try {
-    const user = await getCurrentUser();
+    const session = await auth();
     
-    return await prisma.plant.findMany({
-      where: { authorId: user.id },
+    if (!session?.user?.id) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    const plants = await prisma.plant.findMany({
+      where: {
+        authorId: session.user.id
+      },
       select: {
         id: true,
         name: true,
         image: true,
         category: true,
+        description: true,
         location: true,
+        purchaseDate: true,
         needsWater: true,
         needsNutrient: true,
         lastWateredDate: true,
@@ -43,27 +48,42 @@ export async function getMyPlants() {
         wateringInterval: true,
         nutrientInterval: true,
         createdAt: true,
-        author: { select: { id: true, name: true, image: true } }
+        updatedAt: true,
+        tags: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
+
+    return plants;
   } catch (error) {
     console.error('내 식물 목록 조회 오류:', error);
     throw new Error('식물 목록을 불러오는 중 오류가 발생했습니다.');
   }
 }
 
-// 특정 식물 상세 조회 - 최적화 적용
+// 특정 식물 상세 조회
 export async function getPlantById(id: string) {
   try {
-    const user = await getCurrentUser();
+    const session = await auth();
     
-    // 권한 확인과 함께 식물 정보 조회
-    const plant = await validatePlantOwnership(id, user.id);
-    
-    // 상세 정보 조회
-    const detailedPlant = await prisma.plant.findUnique({
-      where: { id },
+    if (!session?.user?.id) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    const plant = await prisma.plant.findUnique({
+      where: { 
+        id,
+        authorId: session.user.id // 본인 식물만 조회 가능
+      },
       include: {
         author: {
           select: {
@@ -75,22 +95,30 @@ export async function getPlantById(id: string) {
       }
     });
 
-    return detailedPlant;
+    if (!plant) {
+      throw new Error('식물을 찾을 수 없습니다.');
+    }
+
+    return plant;
   } catch (error) {
     console.error('식물 조회 오류:', error);
     throw error;
   }
 }
 
-// 식물 등록 (업로드) - 최적화 적용
+// 식물 등록 (업로드)
 export async function createPlant(formData: FormData) {
   try {
-    const user = await getCurrentUser();
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      throw new Error('로그인이 필요합니다.');
+    }
 
     // 사용자의 현재 식물 개수 확인
     const currentCount = await prisma.plant.count({
       where: {
-        authorId: user.id
+        authorId: session.user.id
       }
     });
 
@@ -98,24 +126,28 @@ export async function createPlant(formData: FormData) {
       throw new Error(`식물은 최대 ${MAX_PLANTS}개까지만 등록할 수 있습니다.`);
     }
 
-    // 폼 데이터 추출 (최적화된 함수 사용)
-    const plantName = parseStringFromFormData(formData, 'plantName', true, 50);
-    const plantType = parseStringFromFormData(formData, 'plantType', true);
-    const location = parseStringFromFormData(formData, 'location');
-    const notes = parseStringFromFormData(formData, 'notes');
-    const acquiredDate = parseDateFromFormData(formData, 'acquiredDate');
-    const wateringInterval = parseNumberFromFormData(formData, 'wateringInterval', 7, 1, 365);
-    const nutrientInterval = parseNumberFromFormData(formData, 'nutrientInterval', 30, 1, 365);
+    // 폼 데이터 추출 - 직접 처리
+    const plantName = (formData.get('plantName') as string)?.trim() || '';
+    const plantType = (formData.get('plantType') as string)?.trim() || '';
+    const location = (formData.get('location') as string)?.trim() || '';
+    const notes = (formData.get('notes') as string)?.trim() || '';
+    const acquiredDateString = (formData.get('acquiredDate') as string)?.trim() || '';
+    const wateringIntervalString = formData.get('wateringInterval') as string;
+    const nutrientIntervalString = formData.get('nutrientInterval') as string;
 
-    // 유효성 검사
+    // 숫자 변환
+    const wateringInterval = wateringIntervalString ? parseInt(wateringIntervalString) : 7;
+    const nutrientInterval = nutrientIntervalString ? parseInt(nutrientIntervalString) : 30;
+
+    // 유효성 검사 - Zod가 모든 검증 담당
     const validatedData = createPlantSchema.parse({
       name: plantName,
       category: plantType,
-      description: notes,
+      description: notes || undefined,
       location: location || undefined,
-      purchaseDate: acquiredDate || undefined,
-      wateringInterval,
-      nutrientInterval,
+      purchaseDate: acquiredDateString || undefined,
+      wateringInterval: isNaN(wateringInterval) ? 7 : wateringInterval,
+      nutrientInterval: isNaN(nutrientInterval) ? 30 : nutrientInterval,
     });
 
     // 이미지 처리
@@ -151,7 +183,7 @@ export async function createPlant(formData: FormData) {
         nextWateringDate: nextWateringDate,
         lastNutrientDate: now,
         nextNutrientDate: nextNutrientDate,
-        authorId: user.id,
+        authorId: session.user.id,
         tags: []
       },
       include: {
@@ -213,24 +245,28 @@ export async function updatePlant(id: string, formData: FormData) {
       throw new Error('수정할 식물을 찾을 수 없습니다.');
     }
 
-    // 폼 데이터 추출
-    const plantName = formData.get('plantName') as string;
-    const plantType = formData.get('plantType') as string;
-    const location = (formData.get('location') as string) || '';
-    const acquiredDate = (formData.get('acquiredDate') as string) || null;
-    const notes = (formData.get('notes') as string) || '';
-    const wateringInterval = formData.get('wateringInterval') ? parseInt(formData.get('wateringInterval') as string) : existingPlant.wateringInterval;
-    const nutrientInterval = formData.get('nutrientInterval') ? parseInt(formData.get('nutrientInterval') as string) : existingPlant.nutrientInterval;
+    // 폼 데이터 추출 - 직접 처리
+    const plantName = (formData.get('plantName') as string)?.trim() || '';
+    const plantType = (formData.get('plantType') as string)?.trim() || '';
+    const location = (formData.get('location') as string)?.trim() || '';
+    const notes = (formData.get('notes') as string)?.trim() || '';
+    const acquiredDateString = (formData.get('acquiredDate') as string)?.trim() || '';
+    const wateringIntervalString = formData.get('wateringInterval') as string;
+    const nutrientIntervalString = formData.get('nutrientInterval') as string;
 
-    // 유효성 검사
+    // 숫자 변환
+    const wateringInterval = wateringIntervalString ? parseInt(wateringIntervalString) : existingPlant.wateringInterval;
+    const nutrientInterval = nutrientIntervalString ? parseInt(nutrientIntervalString) : existingPlant.nutrientInterval;
+
+    // 유효성 검사 - Zod가 모든 검증 담당
     const validatedData = createPlantSchema.parse({
       name: plantName,
       category: plantType,
-      description: notes,
+      description: notes || undefined,
       location: location || undefined,
-      purchaseDate: acquiredDate || undefined,
-      wateringInterval,
-      nutrientInterval,
+      purchaseDate: acquiredDateString || undefined,
+      wateringInterval: isNaN(wateringInterval) ? existingPlant.wateringInterval : wateringInterval,
+      nutrientInterval: isNaN(nutrientInterval) ? existingPlant.nutrientInterval : nutrientInterval,
     });
 
     // 이미지 처리
