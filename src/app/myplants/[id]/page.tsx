@@ -1,11 +1,13 @@
 import React from 'react';
+import { notFound } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import { PlantInfo } from '@/app/myplants/_components/PlantInfo';
 import { CareSummary } from '@/app/myplants/_components/CareSummary';
 import { DiaryList } from '@/app/myplants/_components/DiaryList';
-import { plantDetails, recentDiaries } from '@/app/_temp/plantDetailData';
+import { getPlantById } from '@/app/actions/plants';
+import { getDiariesByPlant } from '@/app/actions/diaries';
 
 interface PlantDetailPageProps {
   params: {
@@ -18,43 +20,55 @@ export default async function PlantDetailPage({
 }: PlantDetailPageProps) {
   const { id: plantId } = await params;
 
-  // 실제 구현에서는 여기서 plantId를 사용하여 데이터를 가져옴
-  // 현재는 임시 데이터 사용
+  try {
+    // 식물 상세 정보와 관련 일기를 병렬로 가져오기
+    const [plant, diaries] = await Promise.all([
+      getPlantById(plantId),
+      getDiariesByPlant(plantId)
+    ]);
 
-  return (
-    <>
-      <BackgroundImage src="/images/welcome-bg-05.webp" />
-      <ContentsLayout>
-        <Header
-          title={plantDetails.name}
-          showBack
-        />
+    if (!plant) {
+      notFound();
+    }
 
-        <div className="w-full divide-y divide-gray-100">
-          <PlantInfo
-            id={plantDetails.id}
-            name={plantDetails.name}
-            imageUrl={plantDetails.imageUrl}
-            plantType={plantDetails.plantType}
-            location={plantDetails.location}
-            acquiredDate={plantDetails.acquiredDate}
+    return (
+      <>
+        <BackgroundImage src="/images/welcome-bg-05.webp" />
+        <ContentsLayout>
+          <Header
+            title={plant.name}
+            showBack
           />
 
-          <CareSummary
-            id={plantDetails.id}
-            lastWatered={plantDetails.lastWatered}
-            wateringCycle={plantDetails.wateringCycle}
-            lastFertilized={plantDetails.lastFertilized}
-            fertilizerCycle={plantDetails.fertilizerCycle}
-            notes={plantDetails.notes}
-          />
+          <div className="w-full divide-y divide-gray-100">
+            <PlantInfo
+              id={plant.id}
+              name={plant.name}
+              imageUrl={plant.image || '/images/plant-default.png'}
+              plantType={plant.category}
+              location={plant.location || ''}
+              acquiredDate={plant.purchaseDate?.toISOString().split('T')[0] || ''}
+            />
 
-          <DiaryList
-            plantId={plantId}
-            diaries={recentDiaries}
-          />
-        </div>
-      </ContentsLayout>
-    </>
-  );
+            <CareSummary
+              id={plant.id}
+              lastWateredDate={plant.lastWateredDate}
+              wateringInterval={plant.wateringInterval || 7}
+              lastNutrientDate={plant.lastNutrientDate}
+              nutrientInterval={plant.nutrientInterval || 30}
+              description={plant.description}
+            />
+
+            <DiaryList
+              plantId={plantId}
+              diaries={diaries}
+            />
+          </div>
+        </ContentsLayout>
+      </>
+    );
+  } catch (error) {
+    console.error('식물 정보 로딩 오류:', error);
+    notFound();
+  }
 }
