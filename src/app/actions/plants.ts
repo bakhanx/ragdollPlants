@@ -1,35 +1,34 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { PlantCreateInput, PlantUpdateInput, MAX_PLANTS } from '@/types/models/plant';
+import { MAX_PLANTS } from '@/types/models/plant';
+import { getCurrentUser, validatePlantOwnership } from './utils/auth-helpers';
+import { uploadImageToCloudflare, deleteImageFromCloudflare } from '@/lib/cloudflare-images';
 
 // 식물 생성 유효성 검사 스키마
 const createPlantSchema = z.object({
-  name: z.string().min(1, '식물 이름은 필수입니다').max(50, '식물 이름은 50자 이하여야 합니다'),
+  name: z
+    .string()
+    .min(1, '식물 이름은 필수입니다')
+    .max(50, '식물 이름은 50자 이하여야 합니다'),
   category: z.string().min(1, '식물 종류를 선택해주세요'),
   description: z.string().optional(),
   location: z.string().optional(),
   purchaseDate: z.string().optional(),
   wateringInterval: z.number().min(1).max(365).optional(),
-  nutrientInterval: z.number().min(1).max(365).optional(),
+  nutrientInterval: z.number().min(1).max(365).optional()
 });
 
 // 내 식물 목록 조회
 export async function getMyPlants() {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     const plants = await prisma.plant.findMany({
       where: {
-        authorId: session.user.id
+        authorId: user.id
       },
       select: {
         id: true,
@@ -73,16 +72,12 @@ export async function getMyPlants() {
 // 특정 식물 상세 조회
 export async function getPlantById(id: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     const plant = await prisma.plant.findUnique({
-      where: { 
+      where: {
         id,
-        authorId: session.user.id // 본인 식물만 조회 가능
+        authorId: user.id // 본인 식물만 조회 가능
       },
       include: {
         author: {
@@ -109,16 +104,12 @@ export async function getPlantById(id: string) {
 // 식물 등록 (업로드)
 export async function createPlant(formData: FormData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 사용자의 현재 식물 개수 확인
     const currentCount = await prisma.plant.count({
       where: {
-        authorId: session.user.id
+        authorId: user.id
       }
     });
 
@@ -131,13 +122,18 @@ export async function createPlant(formData: FormData) {
     const plantType = (formData.get('plantType') as string)?.trim() || '';
     const location = (formData.get('location') as string)?.trim() || '';
     const notes = (formData.get('notes') as string)?.trim() || '';
-    const acquiredDateString = (formData.get('acquiredDate') as string)?.trim() || '';
+    const acquiredDateString =
+      (formData.get('acquiredDate') as string)?.trim() || '';
     const wateringIntervalString = formData.get('wateringInterval') as string;
     const nutrientIntervalString = formData.get('nutrientInterval') as string;
 
     // 숫자 변환
-    const wateringInterval = wateringIntervalString ? parseInt(wateringIntervalString) : 7;
-    const nutrientInterval = nutrientIntervalString ? parseInt(nutrientIntervalString) : 30;
+    const wateringInterval = wateringIntervalString
+      ? parseInt(wateringIntervalString)
+      : 7;
+    const nutrientInterval = nutrientIntervalString
+      ? parseInt(nutrientIntervalString)
+      : 30;
 
     // 유효성 검사 - Zod가 모든 검증 담당
     const validatedData = createPlantSchema.parse({
@@ -147,25 +143,28 @@ export async function createPlant(formData: FormData) {
       location: location || undefined,
       purchaseDate: acquiredDateString || undefined,
       wateringInterval: isNaN(wateringInterval) ? 7 : wateringInterval,
-      nutrientInterval: isNaN(nutrientInterval) ? 30 : nutrientInterval,
+      nutrientInterval: isNaN(nutrientInterval) ? 30 : nutrientInterval
     });
 
     // 이미지 처리
     let imageUrl = '/images/plant-default.png';
     const image = formData.get('image') as File | null;
-    
+
     if (image && image.size > 0) {
-      // TODO: Cloudflare Images 또는 다른 이미지 서비스에 업로드
-      // imageUrl = await uploadImageToCloudflare(image);
-      
-      // 임시로 기본 이미지 사용 (실제 구현 필요)
-      imageUrl = '/images/plant-default.png';
+      // Cloudflare Images에 업로드
+      imageUrl = await uploadImageToCloudflare(image);
     }
 
     // 데이터베이스에 식물 정보 저장
     const now = new Date();
-    const nextWateringDate = new Date(now.getTime() + (validatedData.wateringInterval || 7) * 24 * 60 * 60 * 1000);
-    const nextNutrientDate = new Date(now.getTime() + (validatedData.nutrientInterval || 30) * 24 * 60 * 60 * 1000);
+    const nextWateringDate = new Date(
+      now.getTime() +
+        (validatedData.wateringInterval || 7) * 24 * 60 * 60 * 1000
+    );
+    const nextNutrientDate = new Date(
+      now.getTime() +
+        (validatedData.nutrientInterval || 30) * 24 * 60 * 60 * 1000
+    );
 
     const plant = await prisma.plant.create({
       data: {
@@ -174,7 +173,9 @@ export async function createPlant(formData: FormData) {
         category: validatedData.category,
         description: validatedData.description,
         location: validatedData.location,
-        purchaseDate: validatedData.purchaseDate ? new Date(validatedData.purchaseDate) : null,
+        purchaseDate: validatedData.purchaseDate
+          ? new Date(validatedData.purchaseDate)
+          : null,
         wateringInterval: validatedData.wateringInterval,
         nutrientInterval: validatedData.nutrientInterval,
         needsWater: false,
@@ -183,7 +184,7 @@ export async function createPlant(formData: FormData) {
         nextWateringDate: nextWateringDate,
         lastNutrientDate: now,
         nextNutrientDate: nextNutrientDate,
-        authorId: session.user.id,
+        authorId: user.id,
         tags: []
       },
       include: {
@@ -206,10 +207,9 @@ export async function createPlant(formData: FormData) {
       message: '식물이 성공적으로 등록되었습니다.',
       plant
     };
-
   } catch (error) {
     console.error('식물 등록 오류:', error);
-    
+
     if (error instanceof z.ZodError) {
       return {
         success: false,
@@ -219,7 +219,8 @@ export async function createPlant(formData: FormData) {
 
     return {
       success: false,
-      message: error instanceof Error ? error.message : '식물 등록에 실패했습니다.'
+      message:
+        error instanceof Error ? error.message : '식물 등록에 실패했습니다.'
     };
   }
 }
@@ -227,36 +228,28 @@ export async function createPlant(formData: FormData) {
 // 식물 정보 수정
 export async function updatePlant(id: string, formData: FormData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 기존 식물 확인
-    const existingPlant = await prisma.plant.findUnique({
-      where: { 
-        id,
-        authorId: session.user.id
-      }
-    });
-
-    if (!existingPlant) {
-      throw new Error('수정할 식물을 찾을 수 없습니다.');
-    }
+    const existingPlant = await validatePlantOwnership(id, user.id);
 
     // 폼 데이터 추출 - 직접 처리
     const plantName = (formData.get('plantName') as string)?.trim() || '';
     const plantType = (formData.get('plantType') as string)?.trim() || '';
     const location = (formData.get('location') as string)?.trim() || '';
     const notes = (formData.get('notes') as string)?.trim() || '';
-    const acquiredDateString = (formData.get('acquiredDate') as string)?.trim() || '';
+    const acquiredDateString =
+      (formData.get('acquiredDate') as string)?.trim() || '';
     const wateringIntervalString = formData.get('wateringInterval') as string;
     const nutrientIntervalString = formData.get('nutrientInterval') as string;
 
     // 숫자 변환
-    const wateringInterval = wateringIntervalString ? parseInt(wateringIntervalString) : existingPlant.wateringInterval;
-    const nutrientInterval = nutrientIntervalString ? parseInt(nutrientIntervalString) : existingPlant.nutrientInterval;
+    const wateringInterval = wateringIntervalString
+      ? parseInt(wateringIntervalString)
+      : existingPlant.wateringInterval;
+    const nutrientInterval = nutrientIntervalString
+      ? parseInt(nutrientIntervalString)
+      : existingPlant.nutrientInterval;
 
     // 유효성 검사 - Zod가 모든 검증 담당
     const validatedData = createPlantSchema.parse({
@@ -265,17 +258,26 @@ export async function updatePlant(id: string, formData: FormData) {
       description: notes || undefined,
       location: location || undefined,
       purchaseDate: acquiredDateString || undefined,
-      wateringInterval: isNaN(wateringInterval) ? existingPlant.wateringInterval : wateringInterval,
-      nutrientInterval: isNaN(nutrientInterval) ? existingPlant.nutrientInterval : nutrientInterval,
+      wateringInterval: isNaN(wateringInterval)
+        ? existingPlant.wateringInterval
+        : wateringInterval,
+      nutrientInterval: isNaN(nutrientInterval)
+        ? existingPlant.nutrientInterval
+        : nutrientInterval
     });
 
     // 이미지 처리
-    const imageUrl = existingPlant.image; // TODO: 이미지 업로드 기능 구현 후 let으로 변경
+    let imageUrl = existingPlant.image;
     const image = formData.get('image') as File | null;
-    
+
     if (image && image.size > 0) {
-      // TODO: 새 이미지 업로드 및 기존 이미지 삭제
-      // imageUrl = await uploadImageToCloudflare(image);
+      // 새 이미지 업로드
+      imageUrl = await uploadImageToCloudflare(image);
+      
+      // 기존 이미지 삭제 (기본 이미지가 아닌 경우)
+      if (existingPlant.image && !existingPlant.image.includes('/images/plant-default.png')) {
+        await deleteImageFromCloudflare(existingPlant.image);
+      }
     }
 
     // 데이터베이스 업데이트
@@ -287,7 +289,9 @@ export async function updatePlant(id: string, formData: FormData) {
         category: validatedData.category,
         description: validatedData.description,
         location: validatedData.location,
-        purchaseDate: validatedData.purchaseDate ? new Date(validatedData.purchaseDate) : null,
+        purchaseDate: validatedData.purchaseDate
+          ? new Date(validatedData.purchaseDate)
+          : null,
         wateringInterval: validatedData.wateringInterval,
         nutrientInterval: validatedData.nutrientInterval,
         updatedAt: new Date()
@@ -312,10 +316,9 @@ export async function updatePlant(id: string, formData: FormData) {
       message: '식물 정보가 성공적으로 수정되었습니다.',
       plant: updatedPlant
     };
-
   } catch (error) {
     console.error('식물 수정 오류:', error);
-    
+
     if (error instanceof z.ZodError) {
       return {
         success: false,
@@ -325,7 +328,8 @@ export async function updatePlant(id: string, formData: FormData) {
 
     return {
       success: false,
-      message: error instanceof Error ? error.message : '식물 수정에 실패했습니다.'
+      message:
+        error instanceof Error ? error.message : '식물 수정에 실패했습니다.'
     };
   }
 }
@@ -333,23 +337,10 @@ export async function updatePlant(id: string, formData: FormData) {
 // 식물 삭제
 export async function deletePlant(id: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 기존 식물 확인
-    const existingPlant = await prisma.plant.findUnique({
-      where: { 
-        id,
-        authorId: session.user.id
-      }
-    });
-
-    if (!existingPlant) {
-      throw new Error('삭제할 식물을 찾을 수 없습니다.');
-    }
+    const existingPlant = await validatePlantOwnership(id, user.id);
 
     // 관련 데이터 삭제 (케어 기록, 다이어리 등)
     await prisma.$transaction([
@@ -375,8 +366,10 @@ export async function deletePlant(id: string) {
       })
     ]);
 
-    // TODO: 이미지 파일도 삭제 (Cloudflare Images에서)
-    // await deleteImageFromCloudflare(existingPlant.image);
+    // 이미지 파일도 삭제 (Cloudflare Images에서)
+    if (existingPlant.image && !existingPlant.image.includes('/images/plant-default.png')) {
+      await deleteImageFromCloudflare(existingPlant.image);
+    }
 
     // 캐시 재검증
     revalidatePath('/myplants');
@@ -385,12 +378,12 @@ export async function deletePlant(id: string) {
       success: true,
       message: '식물이 성공적으로 삭제되었습니다.'
     };
-
   } catch (error) {
     console.error('식물 삭제 오류:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : '식물 삭제에 실패했습니다.'
+      message:
+        error instanceof Error ? error.message : '식물 삭제에 실패했습니다.'
     };
   }
 }
@@ -398,26 +391,15 @@ export async function deletePlant(id: string) {
 // 물주기 기록
 export async function updateWatering(id: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
-    const plant = await prisma.plant.findUnique({
-      where: { 
-        id,
-        authorId: session.user.id
-      }
-    });
-
-    if (!plant) {
-      throw new Error('식물을 찾을 수 없습니다.');
-    }
+    const plant = await validatePlantOwnership(id, user.id);
 
     // 물주기 기록 업데이트
     const now = new Date();
-    const nextWateringDate = new Date(now.getTime() + (plant.wateringInterval || 7) * 24 * 60 * 60 * 1000);
+    const nextWateringDate = new Date(
+      now.getTime() + (plant.wateringInterval || 7) * 24 * 60 * 60 * 1000
+    );
 
     const updatedPlant = await prisma.plant.update({
       where: { id },
@@ -435,7 +417,7 @@ export async function updateWatering(id: string) {
         type: 'water',
         date: now,
         plantId: id,
-        authorId: session.user.id,
+        authorId: user.id,
         notes: '물주기 완료',
         isToday: true
       }
@@ -450,12 +432,12 @@ export async function updateWatering(id: string) {
       message: '물주기가 기록되었습니다.',
       plant: updatedPlant
     };
-
   } catch (error) {
     console.error('물주기 기록 오류:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : '물주기 기록에 실패했습니다.'
+      message:
+        error instanceof Error ? error.message : '물주기 기록에 실패했습니다.'
     };
   }
 }
@@ -463,26 +445,15 @@ export async function updateWatering(id: string) {
 // 영양제 기록
 export async function updateNutrient(id: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
-    const plant = await prisma.plant.findUnique({
-      where: { 
-        id,
-        authorId: session.user.id
-      }
-    });
-
-    if (!plant) {
-      throw new Error('식물을 찾을 수 없습니다.');
-    }
+    const plant = await validatePlantOwnership(id, user.id);
 
     // 영양제 기록 업데이트
     const now = new Date();
-    const nextNutrientDate = new Date(now.getTime() + (plant.nutrientInterval || 30) * 24 * 60 * 60 * 1000);
+    const nextNutrientDate = new Date(
+      now.getTime() + (plant.nutrientInterval || 30) * 24 * 60 * 60 * 1000
+    );
 
     const updatedPlant = await prisma.plant.update({
       where: { id },
@@ -500,7 +471,7 @@ export async function updateNutrient(id: string) {
         type: 'nutrient',
         date: now,
         plantId: id,
-        authorId: session.user.id,
+        authorId: user.id,
         notes: '영양제 공급 완료',
         isToday: true
       }
@@ -515,27 +486,14 @@ export async function updateNutrient(id: string) {
       message: '영양제 공급이 기록되었습니다.',
       plant: updatedPlant
     };
-
   } catch (error) {
     console.error('영양제 기록 오류:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : '영양제 기록에 실패했습니다.'
+      message:
+        error instanceof Error ? error.message : '영양제 기록에 실패했습니다.'
     };
   }
 }
 
-// TODO: 이미지 업로드 함수 (실제 구현 필요)
-async function uploadImageToCloudflare(file: File): Promise<string> {
-  // Cloudflare Images API를 사용한 업로드 로직
-  // 실제 구현 시 환경변수에서 API 키와 계정 정보를 가져와야 함
-  
-  // 임시 반환값
-  return '/images/plant-default.png';
-}
 
-// TODO: 이미지 삭제 함수 (실제 구현 필요)
-async function deleteImageFromCloudflare(imageUrl: string): Promise<void> {
-  // Cloudflare Images에서 이미지 삭제 로직
-  // 실제 구현 필요
-} 
