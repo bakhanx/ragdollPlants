@@ -20,9 +20,12 @@ export const signUpSchema = z.object({
   
   phone: z
     .string()
-    .regex(/^010-\d{4}-\d{4}$/, "올바른 연락처 형식을 입력해주세요 (010-0000-0000)")
     .optional()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .refine(
+      (val) => !val || val === "" || /^010-\d{4}-\d{4}$/.test(val),
+      "올바른 연락처 형식을 입력해주세요 (010-0000-0000)"
+    ),
   
   password: z
     .string()
