@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getCurrentUser } from './utils/auth-helpers';
 
 // 사용자 프로필 조회
 export async function getUserProfileData(userId: string) {
@@ -66,11 +67,7 @@ export async function getUserProfileData(userId: string) {
 // 프로필 업데이트 Server Action
 export async function updateUserProfile(formData: FormData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('인증이 필요합니다');
-    }
+    const user = await getCurrentUser();
 
     // FormData에서 데이터 추출
     const name = formData.get('name') as string;
@@ -90,19 +87,19 @@ export async function updateUserProfile(formData: FormData) {
 
     // 프로필 업데이트
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         name: name.trim(),
         bio: bio?.trim() || null,
         interests: parsedInterests,
-        image: image || null,
-      },
+        image: image || null
+      }
     });
 
     // 캐시 재검증
     revalidatePath('/mygarden');
     revalidatePath('/mygarden/profile');
-    
+
     // 성공 시 마이가든으로 리다이렉트
     redirect('/mygarden');
   } catch (error) {
