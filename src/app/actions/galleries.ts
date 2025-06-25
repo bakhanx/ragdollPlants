@@ -7,14 +7,18 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { GalleryCreateInput, MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
 import { getCurrentUser, validateGalleryOwnership } from './utils/auth-helpers';
+import { uploadImageToCloudflare, deleteImageFromCloudflare } from '@/lib/cloudflare-images';
 
 // 갤러리 생성 유효성 검사 스키마
 const createGallerySchema = z.object({
-  title: z.string().min(1, '제목은 필수입니다').max(100, '제목은 100자 이하여야 합니다'),
+  title: z
+    .string()
+    .min(1, '제목은 필수입니다')
+    .max(100, '제목은 100자 이하여야 합니다'),
   description: z.string().optional(),
   plantId: z.string().optional(),
   plantName: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional()
 });
 
 // 모든 갤러리 조회 (N+1 쿼리 최적화 직접 구현)
@@ -31,7 +35,7 @@ export async function getGalleries() {
         plantId: true,
         tags: true,
         author: { select: { id: true, name: true, image: true } },
-        plant: { select: { id: true, name: true } },
+        plant: { select: { id: true, name: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -103,7 +107,7 @@ export async function getUserGalleries(userId?: string) {
   try {
     const session = await auth();
     const targetUserId = userId || session?.user?.id;
-    
+
     if (!targetUserId) {
       throw new Error('로그인이 필요합니다.');
     }
@@ -120,7 +124,7 @@ export async function getUserGalleries(userId?: string) {
         plantId: true,
         tags: true,
         author: { select: { id: true, name: true, image: true } },
-        plant: { select: { id: true, name: true } },
+        plant: { select: { id: true, name: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -167,7 +171,9 @@ export async function createGallery(formData: FormData) {
     });
 
     if (currentCount >= MAX_GALLERY_PHOTOS) {
-      throw new Error(`갤러리는 최대 ${MAX_GALLERY_PHOTOS}개까지만 등록할 수 있습니다.`);
+      throw new Error(
+        `갤러리는 최대 ${MAX_GALLERY_PHOTOS}개까지만 등록할 수 있습니다.`
+      );
     }
 
     // FormData에서 데이터 추출 - 직접 처리
@@ -183,7 +189,9 @@ export async function createGallery(formData: FormData) {
       try {
         const parsedTags = JSON.parse(tagsJson);
         if (Array.isArray(parsedTags)) {
-          tags = parsedTags.filter(tag => tag && typeof tag === 'string' && tag.trim()).slice(0, 20);
+          tags = parsedTags
+            .filter(tag => tag && typeof tag === 'string' && tag.trim())
+            .slice(0, 20);
         }
       } catch (e) {
         console.error('태그 파싱 오류:', e);
@@ -197,19 +205,16 @@ export async function createGallery(formData: FormData) {
       description: description || undefined,
       plantId: plantId || undefined,
       plantName: plantName || undefined,
-      tags: tags.length > 0 ? tags : undefined,
+      tags: tags.length > 0 ? tags : undefined
     });
 
-    // 이미지 처리 - 직접 처리
+    // 이미지 처리 - Cloudflare Images 업로드
     let imageUrl = '';
     const imageFile = formData.get('image') as File | null;
-    
+
     if (imageFile && imageFile.size > 0) {
-      // TODO: 실제 이미지 업로드 서비스 구현 필요
-      // 임시로 기본 처리
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const base64 = buffer.toString('base64');
-      imageUrl = `data:${imageFile.type};base64,${base64}`;
+      // Cloudflare Images에 업로드
+      imageUrl = await uploadImageToCloudflare(imageFile, '/images/plant-default.png');
     }
 
     // 갤러리 생성
@@ -220,7 +225,7 @@ export async function createGallery(formData: FormData) {
         image: imageUrl,
         plantId: validatedData.plantId || null,
         tags: validatedData.tags || [],
-        authorId: user.id,
+        authorId: user.id
       },
       include: {
         author: {
@@ -241,18 +246,18 @@ export async function createGallery(formData: FormData) {
 
     // 갤러리 페이지 재검증
     revalidatePath('/galleries');
-    
+
     return {
       success: true,
       gallery
     };
   } catch (error) {
     console.error('갤러리 생성 오류:', error);
-    
+
     if (error instanceof Error) {
       throw error;
     }
-    
+
     throw new Error('갤러리 업로드 중 오류가 발생했습니다.');
   }
 }
@@ -270,18 +275,16 @@ export async function updateGallery(id: string, formData: FormData) {
     const description = (formData.get('description') as string)?.trim() || '';
     const plantId = (formData.get('plantId') as string)?.trim() || '';
     const plantName = (formData.get('plantName') as string)?.trim() || '';
-    const tags = (formData.get('tags') as string)?.split(',').map(tag => tag.trim()) || [];
+    const tags =
+      (formData.get('tags') as string)?.split(',').map(tag => tag.trim()) || [];
 
-    // 이미지 처리 - 직접 처리
+    // 이미지 처리 - Cloudflare Images 업로드
     let imageUrl = '';
     const imageFile = formData.get('image') as File | null;
-    
+
     if (imageFile && imageFile.size > 0) {
-      // TODO: 실제 이미지 업로드 서비스 구현 필요
-      // 임시로 기본 처리
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const base64 = buffer.toString('base64');
-      imageUrl = `data:${imageFile.type};base64,${base64}`;
+      // Cloudflare Images에 업로드
+      imageUrl = await uploadImageToCloudflare(imageFile, '/images/plant-default.png');
     }
 
     // 입력 검증
@@ -290,11 +293,13 @@ export async function updateGallery(id: string, formData: FormData) {
       description: description || undefined,
       plantId: plantId || undefined,
       plantName: plantName || undefined,
-      tags: tags.length > 0 ? tags : undefined,
+      tags: tags.length > 0 ? tags : undefined
     });
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      const errors = validationResult.error.errors
+        .map(err => err.message)
+        .join(', ');
       throw new Error(errors);
     }
 
@@ -313,7 +318,7 @@ export async function updateGallery(id: string, formData: FormData) {
       description: validatedData.description || null,
       plantId: validatedData.plantId || null,
       plantName: validatedData.plantName || null,
-      tags: validatedData.tags || [],
+      tags: validatedData.tags || []
     };
 
     if (imageUrl) {
@@ -343,18 +348,18 @@ export async function updateGallery(id: string, formData: FormData) {
     // 갤러리 페이지 재검증
     revalidatePath('/galleries');
     revalidatePath(`/galleries/${id}`);
-    
+
     return {
       success: true,
       gallery
     };
   } catch (error) {
     console.error('갤러리 수정 오류:', error);
-    
+
     if (error instanceof Error) {
       throw error;
     }
-    
+
     throw new Error('갤러리 수정 중 오류가 발생했습니다.');
   }
 }
@@ -380,20 +385,25 @@ export async function deleteGallery(id: string) {
       where: { id }
     });
 
+    // 이미지 파일도 삭제 (Cloudflare Images에서)
+    if (existingGallery.image && !existingGallery.image.includes('/images/plant-default.png')) {
+      await deleteImageFromCloudflare(existingGallery.image);
+    }
+
     // 갤러리 페이지 재검증
     revalidatePath('/galleries');
-    
+
     return {
       success: true,
       message: `"${existingGallery.title}" 갤러리가 삭제되었습니다.`
     };
   } catch (error) {
     console.error('갤러리 삭제 오류:', error);
-    
+
     if (error instanceof Error) {
       throw error;
     }
-    
+
     throw new Error('갤러리 삭제 중 오류가 발생했습니다.');
   }
 }
@@ -453,7 +463,7 @@ export async function toggleGalleryLike(id: string) {
     // 갤러리 페이지 재검증
     revalidatePath('/galleries');
     revalidatePath(`/galleries/${id}`);
-    
+
     return {
       success: true,
       likes: newLikesCount,
@@ -461,11 +471,11 @@ export async function toggleGalleryLike(id: string) {
     };
   } catch (error) {
     console.error('갤러리 좋아요 토글 오류:', error);
-    
+
     if (error instanceof Error) {
       throw error;
     }
-    
+
     throw new Error('좋아요 처리 중 오류가 발생했습니다.');
   }
-} 
+}
