@@ -4,53 +4,21 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import Link from 'next/link';
 import { MyPlantList } from './_components/MyPlantList';
-import { LegacyMyPlant } from '@/types/models/plant';
+import { getMyPlants } from '../actions/plants';
 
-// 임시 데이터 - 후에 실제 API 연동으로 대체
-const myPlants: LegacyMyPlant[] = [
-  {
-    id: 1,
-    name: '몬스테라',
-    imageUrl: '/images/welcome-bg-01.webp',
-    needsWater: true,
-    needsNutrient: false,
-    lastWatered: '2023-04-10',
-    plantType: '실내식물'
-  },
-  {
-    id: 2,
-    name: '산세베리아',
-    imageUrl: '/images/welcome-bg-02.webp',
-    needsWater: false,
-    needsNutrient: true,
-    lastWatered: '2023-04-15',
-    plantType: '다육식물'
-  },
-  {
-    id: 3,
-    name: '피쉬본 선인장',
-    imageUrl: '/images/welcome-bg-03.webp',
-    needsWater: false,
-    needsNutrient: false,
-    lastWatered: '2023-04-18',
-    plantType: '선인장'
-  },
-  {
-    id: 4,
-    name: '관음죽',
-    imageUrl: '/images/welcome-bg-04.webp',
-    needsWater: true,
-    needsNutrient: true,
-    lastWatered: '2023-04-12',
-    plantType: '실내식물'
+export default async function MyPlantsPage() {
+  // 실제 데이터베이스에서 식물 데이터 가져오기 (전처리 없음)
+  let myPlants: Awaited<ReturnType<typeof getMyPlants>> = [];
+  let hasError = false;
+
+  try {
+    // 전처리 과정 제거 - DB 데이터 직접 사용
+    myPlants = await getMyPlants();
+  } catch (error) {
+    console.error('식물 데이터 로딩 오류:', error);
+    hasError = true;
+    myPlants = [];
   }
-  // 추가 식물 데이터는 필요에 따라 확장
-];
-
-export default function MyPlantsPage() {
-  // 등록된 식물 개수
-  const plantCount = myPlants.length;
-  // 등록 가능한 최대 식물 개수
 
   return (
     <>
@@ -62,20 +30,20 @@ export default function MyPlantsPage() {
         />
 
         <div className="w-full py-4">
-          {/* 식물 목록 */}
-          <MyPlantList initialPlants={myPlants} />
-
-          {/* 식물이 없을 경우 메시지 */}
-          {plantCount === 0 && (
-            <div className="flex h-40 flex-col items-center justify-center rounded-lg bg-gray-50 text-center">
-              <p className="mb-2 text-gray-500">등록된 식물이 없습니다.</p>
-              <Link
-                href="/myplants/upload"
-                className="rounded-full bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
-                첫 식물 등록하기
-              </Link>
+          {/* 에러 발생 시 메시지 표시 */}
+          {hasError && (
+            <div className="mb-4 rounded-lg bg-red-50 p-4 text-center">
+              <p className="text-red-600">
+                식물 데이터를 불러오는 중 오류가 발생했습니다.
+              </p>
+              <p className="text-sm text-red-500">
+                페이지를 새로고침해 주세요.
+              </p>
             </div>
           )}
+
+          {/* 식물 목록 - 전처리 없이 직접 전달 */}
+          <MyPlantList initialPlants={myPlants} />
         </div>
       </ContentsLayout>
     </>
