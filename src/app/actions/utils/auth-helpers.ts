@@ -5,31 +5,21 @@ import { prisma } from '@/lib/prisma';
 
 /**
  * 현재 로그인한 사용자 정보 조회
+ * 모든 액션 함수에서 사용할 공통 함수
  */
 export async function getCurrentUser() {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     throw new Error('로그인이 필요합니다.');
   }
-  
-  return session.user;
-}
 
-/**
- * 관리자 권한 확인
- */
-export async function requireAdmin(userId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true }
-  });
-
-  if (user?.role !== 'ADMIN') {
-    throw new Error('관리자만 접근할 수 있습니다.');
-  }
-
-  return true;
+  return {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    image: session.user.image
+  };
 }
 
 /**
@@ -50,7 +40,10 @@ export async function validatePlantOwnership(plantId: string, userId: string) {
 /**
  * 아티클 소유권 확인
  */
-export async function validateArticleOwnership(articleId: string, userId: string) {
+export async function validateArticleOwnership(
+  articleId: string,
+  userId: string
+) {
   const article = await prisma.article.findFirst({
     where: { id: articleId, authorId: userId }
   });
@@ -80,7 +73,10 @@ export async function validateDiaryOwnership(diaryId: string, userId: string) {
 /**
  * 갤러리 소유권 확인
  */
-export async function validateGalleryOwnership(galleryId: string, userId: string) {
+export async function validateGalleryOwnership(
+  galleryId: string,
+  userId: string
+) {
   const gallery = await prisma.gallery.findFirst({
     where: { id: galleryId, authorId: userId }
   });
@@ -105,4 +101,20 @@ export async function validateEventOwnership(eventId: string, userId: string) {
   }
 
   return event;
-} 
+}
+
+/**
+ * 관리자 권한 확인
+ */
+export async function requireAdminPermission(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true }
+  });
+
+  if (user?.role !== 'ADMIN') {
+    throw new Error('관리자만 접근할 수 있습니다.');
+  }
+
+  return true;
+}
