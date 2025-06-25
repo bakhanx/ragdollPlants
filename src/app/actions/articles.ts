@@ -5,6 +5,7 @@ import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { getCurrentUser, validateArticleOwnership } from './utils/auth-helpers';
 
 // 아티클 생성 유효성 검사 스키마
 const createArticleSchema = z.object({
@@ -112,11 +113,7 @@ export async function getArticleById(id: string) {
 // 아티클 생성
 export async function createArticle(formData: FormData) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // FormData에서 데이터 추출
     const rawData = {
@@ -173,7 +170,7 @@ export async function createArticle(formData: FormData) {
         summary: validatedData.summary || null,
         image: thumbnailUrl || null,
         tags: validatedData.tags || [],
-        authorId: session.user.id,
+        authorId: user.id,
         categoryId: validatedData.categoryId,
         isPublished: true
       },
@@ -205,25 +202,10 @@ export async function createArticle(formData: FormData) {
 // 아티클 수정
 export async function updateArticle(id: string, formData: FormData) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 기존 아티클 확인 및 권한 체크
-    const existingArticle = await prisma.article.findUnique({
-      where: { id },
-      select: { authorId: true }
-    });
-
-    if (!existingArticle) {
-      throw new Error('아티클을 찾을 수 없습니다.');
-    }
-
-    if (existingArticle.authorId !== session.user.id) {
-      throw new Error('수정 권한이 없습니다.');
-    }
+    const existingArticle = await validateArticleOwnership(id, user.id);
 
     // FormData에서 데이터 추출 (createArticle과 동일한 로직)
     const rawData = {
@@ -290,25 +272,10 @@ export async function updateArticle(id: string, formData: FormData) {
 // 아티클 삭제
 export async function deleteArticle(id: string) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 기존 아티클 확인 및 권한 체크
-    const existingArticle = await prisma.article.findUnique({
-      where: { id },
-      select: { authorId: true }
-    });
-
-    if (!existingArticle) {
-      throw new Error('아티클을 찾을 수 없습니다.');
-    }
-
-    if (existingArticle.authorId !== session.user.id) {
-      throw new Error('삭제 권한이 없습니다.');
-    }
+    const existingArticle = await validateArticleOwnership(id, user.id);
 
     // 아티클 삭제
     await prisma.article.delete({

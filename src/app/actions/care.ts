@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-
+import { getCurrentUser } from './utils/auth-helpers';
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
 
@@ -14,7 +14,7 @@ export async function getUserPlantsForCare(userId?: string) {
   try {
     const session = await auth();
     const targetUserId = userId || session?.user?.id;
-    
+
     if (!targetUserId) {
       throw new Error('인증이 필요합니다');
     }
@@ -23,7 +23,7 @@ export async function getUserPlantsForCare(userId?: string) {
     const plants = await prisma.plant.findMany({
       where: {
         authorId: targetUserId,
-        isActive: true,
+        isActive: true
       },
       select: {
         id: true,
@@ -42,11 +42,11 @@ export async function getUserPlantsForCare(userId?: string) {
         temperature: true,
         humidity: true,
         sunlight: true,
-        createdAt: true,
+        createdAt: true
       },
       orderBy: {
-        nextWateringDate: 'asc',
-      },
+        nextWateringDate: 'asc'
+      }
     });
 
     // 데이터 변환 (기존 myPlants 구조와 호환)
@@ -60,14 +60,17 @@ export async function getUserPlantsForCare(userId?: string) {
       nutrientStatus: plant.needsNutrient,
       waterAmount: 150, // 기본값, 추후 실제 데이터로 대체
       lastWateredDate: plant.lastWateredDate?.toISOString().split('T')[0] || '',
-      nextWateringDate: plant.nextWateringDate?.toISOString().split('T')[0] || '',
+      nextWateringDate:
+        plant.nextWateringDate?.toISOString().split('T')[0] || '',
       waterInterval: plant.wateringInterval,
-      lastNutrientDate: plant.lastNutrientDate?.toISOString().split('T')[0] || '',
-      nextNutrientDate: plant.nextNutrientDate?.toISOString().split('T')[0] || '',
+      lastNutrientDate:
+        plant.lastNutrientDate?.toISOString().split('T')[0] || '',
+      nextNutrientDate:
+        plant.nextNutrientDate?.toISOString().split('T')[0] || '',
       nutrientInterval: plant.nutrientInterval,
       temperature: plant.temperature || 22,
       humidity: plant.humidity || 50,
-      sunlight: plant.sunlight || 'bright',
+      sunlight: plant.sunlight || 'bright'
     }));
 
     return transformedPlants;
@@ -80,12 +83,13 @@ export async function getUserPlantsForCare(userId?: string) {
 /**
  * 케어 기록 추가 (물주기, 영양제 등) - 간단 버전
  */
-export async function addCareRecord(plantId: string, type: CareType, amount?: number, notes?: string) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error('인증이 필요합니다');
-  }
+export async function addCareRecord(
+  plantId: string,
+  type: CareType,
+  amount?: number,
+  notes?: string
+) {
+  const user = await getCurrentUser();
 
   // 간단한 입력 검증
   if (!plantId || !type) {
@@ -94,7 +98,7 @@ export async function addCareRecord(plantId: string, type: CareType, amount?: nu
 
   // 식물 정보 조회 (소유권 자동 확인)
   const plant = await prisma.plant.findFirst({
-    where: { id: plantId, authorId: session.user.id },
+    where: { id: plantId, authorId: user.id }
   });
 
   if (!plant) {
@@ -109,8 +113,8 @@ export async function addCareRecord(plantId: string, type: CareType, amount?: nu
       notes,
       date: new Date(),
       plantId,
-      authorId: session.user.id,
-    },
+      authorId: user.id
+    }
   });
 
   // 식물 상태 업데이트
@@ -126,37 +130,45 @@ export async function addCareRecord(plantId: string, type: CareType, amount?: nu
 
   if (type === 'water') {
     updateData.lastWateredDate = currentDate;
-    updateData.nextWateringDate = new Date(currentDate.getTime() + plant.wateringInterval * 24 * 60 * 60 * 1000);
+    updateData.nextWateringDate = new Date(
+      currentDate.getTime() + plant.wateringInterval * 24 * 60 * 60 * 1000
+    );
     updateData.needsWater = false;
   } else if (type === 'nutrient') {
     updateData.lastNutrientDate = currentDate;
-    updateData.nextNutrientDate = new Date(currentDate.getTime() + plant.nutrientInterval * 24 * 60 * 60 * 1000);
+    updateData.nextNutrientDate = new Date(
+      currentDate.getTime() + plant.nutrientInterval * 24 * 60 * 60 * 1000
+    );
     updateData.needsNutrient = false;
   }
 
   await prisma.plant.update({
     where: { id: plantId },
-    data: updateData,
+    data: updateData
   });
 
   // 캐시 재검증
   revalidatePath('/care');
-  
+
   return { success: true };
 }
 
 /**
  * 식물 케어 일정 업데이트 - 간단 버전
  */
-export async function updateCareSchedule(plantId: string, waterInterval?: number, nutrientInterval?: number) {
+export async function updateCareSchedule(
+  plantId: string,
+  waterInterval?: number,
+  nutrientInterval?: number
+) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     throw new Error('인증이 필요합니다');
   }
 
   const plant = await prisma.plant.findFirst({
-    where: { id: plantId, authorId: session.user.id },
+    where: { id: plantId, authorId: session.user.id }
   });
 
   if (!plant) {
@@ -173,20 +185,25 @@ export async function updateCareSchedule(plantId: string, waterInterval?: number
   if (waterInterval && waterInterval > 0) {
     updateData.wateringInterval = waterInterval;
     if (plant.lastWateredDate) {
-      updateData.nextWateringDate = new Date(plant.lastWateredDate.getTime() + waterInterval * 24 * 60 * 60 * 1000);
+      updateData.nextWateringDate = new Date(
+        plant.lastWateredDate.getTime() + waterInterval * 24 * 60 * 60 * 1000
+      );
     }
   }
 
   if (nutrientInterval && nutrientInterval > 0) {
     updateData.nutrientInterval = nutrientInterval;
     if (plant.lastNutrientDate) {
-      updateData.nextNutrientDate = new Date(plant.lastNutrientDate.getTime() + nutrientInterval * 24 * 60 * 60 * 1000);
+      updateData.nextNutrientDate = new Date(
+        plant.lastNutrientDate.getTime() +
+          nutrientInterval * 24 * 60 * 60 * 1000
+      );
     }
   }
 
   await prisma.plant.update({
     where: { id: plantId },
-    data: updateData,
+    data: updateData
   });
 
   revalidatePath('/care');
@@ -198,7 +215,7 @@ export async function updateCareSchedule(plantId: string, waterInterval?: number
  */
 export async function getCareHistory(plantId: string, limit: number = 10) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     throw new Error('인증이 필요합니다');
   }
@@ -206,10 +223,10 @@ export async function getCareHistory(plantId: string, limit: number = 10) {
   return await prisma.careRecord.findMany({
     where: {
       plantId,
-      authorId: session.user.id,
+      authorId: session.user.id
     },
     orderBy: { date: 'desc' },
-    take: limit,
+    take: limit
   });
 }
 
@@ -218,7 +235,7 @@ export async function getCareHistory(plantId: string, limit: number = 10) {
  */
 export async function getTodayCareNeeds() {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     throw new Error('인증이 필요합니다');
   }
@@ -232,8 +249,8 @@ export async function getTodayCareNeeds() {
       isActive: true,
       OR: [
         { nextWateringDate: { lte: today } },
-        { nextNutrientDate: { lte: today } },
-      ],
+        { nextNutrientDate: { lte: today } }
+      ]
     },
     select: {
       id: true,
@@ -242,30 +259,33 @@ export async function getTodayCareNeeds() {
       nextWateringDate: true,
       nextNutrientDate: true,
       needsWater: true,
-      needsNutrient: true,
+      needsNutrient: true
     },
-    orderBy: { nextWateringDate: 'asc' },
+    orderBy: { nextWateringDate: 'asc' }
   });
 }
 
 /**
  * 식물의 케어 상태 토글 - 간단 버전
  */
-export async function toggleCareStatus(plantId: string, careType: 'water' | 'nutrient', status: boolean) {
+export async function toggleCareStatus(
+  plantId: string,
+  careType: 'water' | 'nutrient',
+  status: boolean
+) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     throw new Error('인증이 필요합니다');
   }
 
   await prisma.plant.update({
-    where: { 
-      id: plantId, 
+    where: {
+      id: plantId,
       authorId: session.user.id // 소유권 확인을 update에서 처리
     },
-    data: careType === 'water' 
-      ? { needsWater: status }
-      : { needsNutrient: status }
+    data:
+      careType === 'water' ? { needsWater: status } : { needsNutrient: status }
   });
 
   revalidatePath('/care');
@@ -300,4 +320,4 @@ function calculateOverdueDays(nextCareDate: Date): number {
   const diffTime = today.getTime() - nextCareDate.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return Math.max(0, diffDays);
-} 
+}

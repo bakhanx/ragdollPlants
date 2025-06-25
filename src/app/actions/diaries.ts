@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { DiaryMoodStatus } from '@/types/models/diary';
+import { getCurrentUser, validateDiaryOwnership } from './utils/auth-helpers';
 
 // 다이어리 생성 유효성 검사 스키마
 const createDiarySchema = z.object({
@@ -14,7 +15,7 @@ const createDiarySchema = z.object({
   status: z.enum(['good', 'normal', 'bad']),
   date: z.string().optional(),
   plantId: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional()
 });
 
 // 모든 다이어리 조회
@@ -89,7 +90,7 @@ export async function getUserDiaries(userId?: string) {
   try {
     const session = await auth();
     const targetUserId = userId || session?.user?.id;
-    
+
     if (!targetUserId) {
       throw new Error('로그인이 필요합니다.');
     }
@@ -137,11 +138,7 @@ export async function getUserDiaries(userId?: string) {
 // 다이어리 생성
 export async function createDiary(formData: FormData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // FormData에서 데이터 추출
     const rawData = {
@@ -149,7 +146,7 @@ export async function createDiary(formData: FormData) {
       content: formData.get('content') as string,
       status: formData.get('status') as DiaryMoodStatus,
       date: formData.get('date') as string,
-      plantId: formData.get('plantId') as string,
+      plantId: formData.get('plantId') as string
     };
 
     // 태그 처리
@@ -166,7 +163,7 @@ export async function createDiary(formData: FormData) {
     // 이미지 파일 처리
     const imageFile = formData.get('image') as File | null;
     let imageUrl = '';
-    
+
     if (imageFile && imageFile.size > 0) {
       // 실제 구현에서는 파일 스토리지에 업로드
       // 임시로 base64 인코딩 (실제 운영에서는 Cloudflare Images 등 사용 권장)
@@ -181,9 +178,11 @@ export async function createDiary(formData: FormData) {
       ...rawData,
       tags
     });
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      const errors = validationResult.error.errors
+        .map(err => err.message)
+        .join(', ');
       throw new Error(errors);
     }
 
@@ -199,7 +198,7 @@ export async function createDiary(formData: FormData) {
         image: imageUrl || null,
         plantId: validatedData.plantId || null,
         tags: validatedData.tags || [],
-        authorId: session.user.id,
+        authorId: user.id
       },
       include: {
         author: {
@@ -216,7 +215,7 @@ export async function createDiary(formData: FormData) {
 
     // 캐시 재검증
     revalidatePath('/diaries');
-    
+
     // 생성된 다이어리 페이지로 리다이렉트
     redirect(`/diaries/${diary.id}`);
   } catch (error) {
@@ -228,25 +227,10 @@ export async function createDiary(formData: FormData) {
 // 다이어리 수정
 export async function updateDiary(id: string, formData: FormData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 기존 다이어리 확인 및 권한 체크
-    const existingDiary = await prisma.diary.findUnique({
-      where: { id },
-      select: { authorId: true }
-    });
-
-    if (!existingDiary) {
-      throw new Error('다이어리를 찾을 수 없습니다.');
-    }
-
-    if (existingDiary.authorId !== session.user.id) {
-      throw new Error('수정 권한이 없습니다.');
-    }
+    const existingDiary = await validateDiaryOwnership(id, user.id);
 
     // FormData에서 데이터 추출
     const rawData = {
@@ -254,7 +238,7 @@ export async function updateDiary(id: string, formData: FormData) {
       content: formData.get('content') as string,
       status: formData.get('status') as DiaryMoodStatus,
       date: formData.get('date') as string,
-      plantId: formData.get('plantId') as string,
+      plantId: formData.get('plantId') as string
     };
 
     const tagsJson = formData.get('tags') as string;
@@ -270,7 +254,7 @@ export async function updateDiary(id: string, formData: FormData) {
     // 이미지 파일 처리
     const imageFile = formData.get('image') as File | null;
     let imageUrl: string | undefined = undefined;
-    
+
     if (imageFile && imageFile.size > 0) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -283,9 +267,11 @@ export async function updateDiary(id: string, formData: FormData) {
       ...rawData,
       tags
     });
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      const errors = validationResult.error.errors
+        .map(err => err.message)
+        .join(', ');
       throw new Error(errors);
     }
 
@@ -305,7 +291,7 @@ export async function updateDiary(id: string, formData: FormData) {
       content: validatedData.content,
       status: validatedData.status,
       plantId: validatedData.plantId || null,
-      tags: validatedData.tags || [],
+      tags: validatedData.tags || []
     };
 
     // 날짜가 있는 경우만 업데이트
@@ -323,12 +309,15 @@ export async function updateDiary(id: string, formData: FormData) {
       data: updateData
     });
 
-    console.log('다이어리 수정 완료:', { id: updatedDiary.id, title: updatedDiary.title });
+    console.log('다이어리 수정 완료:', {
+      id: updatedDiary.id,
+      title: updatedDiary.title
+    });
 
     // 캐시 재검증
     revalidatePath('/diaries');
     revalidatePath(`/diaries/${id}`);
-    
+
     // 수정된 다이어리 페이지로 리다이렉트
     redirect(`/diaries/${id}`);
   } catch (error) {
@@ -340,25 +329,10 @@ export async function updateDiary(id: string, formData: FormData) {
 // 다이어리 삭제
 export async function deleteDiary(id: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 기존 다이어리 확인 및 권한 체크
-    const existingDiary = await prisma.diary.findUnique({
-      where: { id },
-      select: { authorId: true }
-    });
-
-    if (!existingDiary) {
-      throw new Error('다이어리를 찾을 수 없습니다.');
-    }
-
-    if (existingDiary.authorId !== session.user.id) {
-      throw new Error('삭제 권한이 없습니다.');
-    }
+    const existingDiary = await validateDiaryOwnership(id, user.id);
 
     // 다이어리 삭제
     await prisma.diary.delete({
@@ -369,7 +343,7 @@ export async function deleteDiary(id: string) {
 
     // 캐시 재검증
     revalidatePath('/diaries');
-    
+
     // 다이어리 목록으로 리다이렉트
     redirect('/diaries');
   } catch (error) {
@@ -419,4 +393,4 @@ export async function getDiariesByPlant(plantId: string) {
     console.error('식물별 다이어리 조회 오류:', error);
     throw error;
   }
-} 
+}

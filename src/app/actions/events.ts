@@ -5,6 +5,11 @@ import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import {
+  getCurrentUser,
+  validateEventOwnership,
+  requireAdminPermission
+} from './utils/auth-helpers';
 
 // 이벤트 생성 유효성 검사 스키마
 const createEventSchema = z.object({
@@ -15,7 +20,7 @@ const createEventSchema = z.object({
   image: z.string().min(1, '이미지는 필수입니다'),
   link: z.string().url('유효한 링크를 입력해주세요'),
   startDate: z.string().datetime('유효한 시작 날짜를 입력해주세요'),
-  endDate: z.string().datetime('유효한 종료 날짜를 입력해주세요'),
+  endDate: z.string().datetime('유효한 종료 날짜를 입력해주세요')
 });
 
 // 모든 이벤트 조회
@@ -135,21 +140,10 @@ export async function getEventById(id: string) {
 // 이벤트 생성
 export async function createEvent(formData: FormData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 관리자 권한 확인
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    });
-
-    if (user?.role !== 'ADMIN') {
-      throw new Error('관리자만 이벤트를 등록할 수 있습니다.');
-    }
+    await requireAdminPermission(user.id);
 
     // FormData에서 데이터 추출
     const rawData = {
@@ -159,13 +153,13 @@ export async function createEvent(formData: FormData) {
       content: formData.get('content') as string,
       link: formData.get('link') as string,
       startDate: formData.get('startDate') as string,
-      endDate: formData.get('endDate') as string,
+      endDate: formData.get('endDate') as string
     };
 
     // 이미지 파일 처리
     const imageFile = formData.get('image') as File | null;
     let imageUrl = '';
-    
+
     if (imageFile && imageFile.size > 0) {
       // 실제 구현에서는 파일 스토리지에 업로드
       // 임시로 base64 인코딩 (실제 운영에서는 Cloudflare Images 등 사용 권장)
@@ -180,9 +174,11 @@ export async function createEvent(formData: FormData) {
       ...rawData,
       image: imageUrl
     });
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      const errors = validationResult.error.errors
+        .map(err => err.message)
+        .join(', ');
       throw new Error(errors);
     }
 
@@ -199,8 +195,8 @@ export async function createEvent(formData: FormData) {
         link: validatedData.link,
         startDate: new Date(validatedData.startDate),
         endDate: new Date(validatedData.endDate),
-        authorId: session.user.id,
-        isEnded: false,
+        authorId: user.id,
+        isEnded: false
       },
       include: {
         author: {
@@ -217,7 +213,7 @@ export async function createEvent(formData: FormData) {
 
     // 캐시 재검증
     revalidatePath('/events');
-    
+
     return { success: true, event };
   } catch (error) {
     console.error('이벤트 생성 오류:', error);
@@ -228,30 +224,13 @@ export async function createEvent(formData: FormData) {
 // 이벤트 수정
 export async function updateEvent(id: string, formData: FormData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 관리자 권한 확인
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    });
+    await requireAdminPermission(user.id);
 
-    if (user?.role !== 'ADMIN') {
-      throw new Error('관리자만 이벤트를 수정할 수 있습니다.');
-    }
-
-    // 기존 이벤트 확인
-    const existingEvent = await prisma.event.findUnique({
-      where: { id }
-    });
-
-    if (!existingEvent) {
-      throw new Error('이벤트를 찾을 수 없습니다.');
-    }
+    // 기존 이벤트 확인 및 권한 체크
+    const existingEvent = await validateEventOwnership(id, user.id);
 
     // FormData에서 데이터 추출
     const rawData = {
@@ -261,13 +240,13 @@ export async function updateEvent(id: string, formData: FormData) {
       content: formData.get('content') as string,
       link: formData.get('link') as string,
       startDate: formData.get('startDate') as string,
-      endDate: formData.get('endDate') as string,
+      endDate: formData.get('endDate') as string
     };
 
     // 이미지 파일 처리
     const imageFile = formData.get('image') as File | null;
     let imageUrl = existingEvent.image; // 기존 이미지 유지
-    
+
     if (imageFile && imageFile.size > 0) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -280,9 +259,11 @@ export async function updateEvent(id: string, formData: FormData) {
       ...rawData,
       image: imageUrl
     });
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => err.message).join(', ');
+      const errors = validationResult.error.errors
+        .map(err => err.message)
+        .join(', ');
       throw new Error(errors);
     }
 
@@ -300,7 +281,7 @@ export async function updateEvent(id: string, formData: FormData) {
         link: validatedData.link,
         startDate: new Date(validatedData.startDate),
         endDate: new Date(validatedData.endDate),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       },
       include: {
         author: {
@@ -313,12 +294,15 @@ export async function updateEvent(id: string, formData: FormData) {
       }
     });
 
-    console.log('이벤트 수정 완료:', { id: updatedEvent.id, title: updatedEvent.title });
+    console.log('이벤트 수정 완료:', {
+      id: updatedEvent.id,
+      title: updatedEvent.title
+    });
 
     // 캐시 재검증
     revalidatePath('/events');
     revalidatePath(`/events/${id}`);
-    
+
     return { success: true, event: updatedEvent };
   } catch (error) {
     console.error('이벤트 수정 오류:', error);
@@ -329,30 +313,13 @@ export async function updateEvent(id: string, formData: FormData) {
 // 이벤트 삭제
 export async function deleteEvent(id: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 관리자 권한 확인
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    });
+    await requireAdminPermission(user.id);
 
-    if (user?.role !== 'ADMIN') {
-      throw new Error('관리자만 이벤트를 삭제할 수 있습니다.');
-    }
-
-    // 이벤트 존재 확인
-    const existingEvent = await prisma.event.findUnique({
-      where: { id }
-    });
-
-    if (!existingEvent) {
-      throw new Error('이벤트를 찾을 수 없습니다.');
-    }
+    // 기존 이벤트 확인 및 권한 체크
+    const existingEvent = await validateEventOwnership(id, user.id);
 
     // 이벤트 완전 삭제
     await prisma.event.delete({
@@ -363,7 +330,7 @@ export async function deleteEvent(id: string) {
 
     // 캐시 재검증
     revalidatePath('/events');
-    
+
     return { success: true };
   } catch (error) {
     console.error('이벤트 삭제 오류:', error);
@@ -374,54 +341,36 @@ export async function deleteEvent(id: string) {
 // 이벤트 종료 상태 토글
 export async function toggleEventEndStatus(id: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await getCurrentUser();
 
     // 관리자 권한 확인
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    });
+    await requireAdminPermission(user.id);
 
-    if (user?.role !== 'ADMIN') {
-      throw new Error('관리자만 이벤트 상태를 변경할 수 있습니다.');
-    }
-
-    // 현재 이벤트 상태 조회
-    const existingEvent = await prisma.event.findUnique({
-      where: { id },
-      select: { isEnded: true, title: true }
-    });
-
-    if (!existingEvent) {
-      throw new Error('이벤트를 찾을 수 없습니다.');
-    }
+    // 기존 이벤트 확인 및 권한 체크
+    const existingEvent = await validateEventOwnership(id, user.id);
 
     // 상태 토글
     const updatedEvent = await prisma.event.update({
       where: { id },
       data: {
         isEnded: !existingEvent.isEnded,
-        updatedAt: new Date(),
+        updatedAt: new Date()
       }
     });
 
-    console.log('이벤트 상태 변경 완료:', { 
-      id, 
-      title: existingEvent.title, 
-      newStatus: updatedEvent.isEnded ? '종료' : '진행중' 
+    console.log('이벤트 상태 변경 완료:', {
+      id,
+      title: existingEvent.title,
+      newStatus: updatedEvent.isEnded ? '종료' : '진행중'
     });
 
     // 캐시 재검증
     revalidatePath('/events');
     revalidatePath(`/events/${id}`);
-    
+
     return { success: true, isEnded: updatedEvent.isEnded };
   } catch (error) {
     console.error('이벤트 상태 변경 오류:', error);
     throw error;
   }
-} 
+}
