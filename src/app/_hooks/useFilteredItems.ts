@@ -14,6 +14,7 @@ export interface UseFilteredItemsResult<T> {
   filteredItems: T[];
   visibleItems: T[];
   hasMore: boolean;
+  searchQuery: string;
   handleSearch: (query: string) => void;
   handleLoadMore: () => void;
   resetVisibleCount: () => void;
@@ -72,6 +73,7 @@ export function useFilteredItems<T>({
     filteredItems,
     visibleItems,
     hasMore,
+    searchQuery,
     handleSearch,
     handleLoadMore,
     resetVisibleCount
