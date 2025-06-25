@@ -3,9 +3,9 @@ import React from "react";
 type ButtonProps = {
   text: string;
   buttonType?: "normal" | "primary" | "outlined"; // 추가적인 버튼 타입 지원
-} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-export const Button = ({ text, buttonType = "normal", disabled = false, className = "", ...props }: ButtonProps) => {
+export const Button = ({ text, buttonType = "normal", disabled = false, className = "", type = "button", ...props }: ButtonProps) => {
   const baseStyle = "h-12 w-full text-lg rounded-lg transition";
   const primaryStyle = "bg-green-600 text-white hover:bg-green-700 border-none";
   const normalStyle =
@@ -34,6 +34,7 @@ export const Button = ({ text, buttonType = "normal", disabled = false, classNam
     <button 
       className={`${finalStyle} ${className}`}
       disabled={disabled}
+      type={type}
       {...props}
     >
       {text}
