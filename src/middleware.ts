@@ -10,9 +10,26 @@ const ADMIN_PATHS = [
   '/admin/reports',
 ]
 
+// 로그인이 필요한 사용자 경로 정의
+const PROTECTED_PATHS = [
+  '/myplants',
+  '/mygarden', 
+  '/diaries/upload',
+  '/galleries/upload',
+  '/articles/upload',
+  '/events/upload'
+]
+
 export default async function middleware(request: NextRequest) {
   const session = await auth()
   const { pathname } = request.nextUrl
+  
+  // 로그인이 필요한 페이지 체크
+  if (PROTECTED_PATHS.some(path => pathname.startsWith(path))) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
   
   // 관리자 전용 페이지 체크
   if (ADMIN_PATHS.some(path => pathname.startsWith(path))) {
@@ -35,6 +52,12 @@ export const config = {
   matcher: [
     // 관리자 페이지
     '/admin/:path*',
-    // 필요시 다른 보호된 경로 추가
+    // 로그인이 필요한 사용자 페이지
+    '/myplants/:path*',
+    '/mygarden/:path*',
+    '/diaries/upload/:path*',
+    '/galleries/upload/:path*', 
+    '/articles/upload/:path*',
+    '/events/upload/:path*',
   ],
 } 
