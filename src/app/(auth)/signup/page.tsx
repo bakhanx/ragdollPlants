@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { ContentsLayout } from '../../_components/layout/ContentsLayout';
 import BackgroundImage from '../../_components/layout/BackgroundImage';
