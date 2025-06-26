@@ -12,7 +12,6 @@ interface SearchInputProps {
 export const SearchInput = ({
   onSearch,
   placeholder = '검색하기',
-  className = '',
   defaultValue = '',
   debounceTime = 300
 }: SearchInputProps) => {
@@ -38,7 +37,7 @@ export const SearchInput = ({
   }, [searchQuery, debouncedSearch]);
 
   return (
-    <div className={`relative flex items-center ${className}`}>
+    <div className="relative flex items-center text-gray-50">
       <input
         type="text"
         value={searchQuery}
@@ -61,4 +60,4 @@ export const SearchInput = ({
       )}
     </div>
   );
-}
+};
