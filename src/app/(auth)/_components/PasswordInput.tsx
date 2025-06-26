@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
 import { PasswordStrengthMeter } from './PasswordStrengthMeter';
 
 type PasswordInputProps = {
@@ -17,8 +17,9 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
       error,
       name,
       showStrengthMeter = false,
-      className = '',
+
       onChange,
+      value,
       ...props
     },
     ref
@@ -26,15 +27,22 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     const [showPassword, setShowPassword] = useState(false);
     const [passwordValue, setPasswordValue] = useState('');
 
+    //내부 state 동기화
+    useEffect(() => {
+      if (value !== undefined) {
+        setPasswordValue(value as string);
+      }
+    }, [value]);
+
     const togglePasswordVisibility = () => {
       setShowPassword(!showPassword);
     };
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setPasswordValue(value);
+      const newValue = e.target.value;
+      setPasswordValue(newValue);
 
-      // 부모 컴포넌트의 onChange 호출
+      // 부모 컴포넌트의 onChange 호출 (react-hook-form register)
       if (onChange) {
         onChange(e);
       }
@@ -50,9 +58,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               error
                 ? 'border-red-500 focus:ring-red-500'
                 : 'border-gray-300 focus:ring-green-600'
-            } ${className}`}
+            }`}
             placeholder={placeholder}
             type={showPassword ? 'text' : 'password'}
+            value={value !== undefined ? value : passwordValue}
             onChange={handlePasswordChange}
             {...props}
           />
@@ -65,11 +74,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         </div>
 
         {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-        
+
         {/* 비밀번호 강도 게이지 */}
         {showStrengthMeter && (
           <PasswordStrengthMeter
-            password={passwordValue}
+            password={value !== undefined ? (value as string) : passwordValue}
             showSuggestions={true}
           />
         )}
