@@ -5,7 +5,7 @@ import { EditIcon } from '@/app/_components/icons/Icons';
 import { formatDateKorean } from '@/app/_utils/dateUtils';
 
 interface PlantInfoProps {
-  id: number;
+  id: string;
   name: string;
   imageUrl: string;
   plantType: string;
