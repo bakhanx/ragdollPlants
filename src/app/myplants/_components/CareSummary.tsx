@@ -34,12 +34,12 @@ export interface Plant {
 }
 
 interface CareSummaryProps {
-  id: number;
-  lastWatered: string;
-  wateringCycle: number;
-  lastFertilized: string;
-  fertilizerCycle: number;
-  notes?: string;
+  id: string;
+  lastWateredDate: Date | null;
+  wateringInterval: number;
+  lastNutrientDate: Date | null;
+  nutrientInterval: number;
+  description: string | null;
 }
 
 export interface CareProgress {
@@ -51,17 +51,17 @@ export interface CareProgress {
 
 export const CareSummary = ({
   id,
-  lastWatered,
-  wateringCycle,
-  lastFertilized,
-  fertilizerCycle,
-  notes
+  lastWateredDate,
+  wateringInterval,
+  lastNutrientDate,
+  nutrientInterval,
+  description
 }: CareSummaryProps) => {
-  const waterDaysRemaining = getDaysRemaining(lastWatered, wateringCycle);
-  const nutrientDaysRemaining = getDaysRemaining(
-    lastFertilized,
-    fertilizerCycle
-  );
+  const lastWatered = lastWateredDate?.toISOString().split('T')[0] || '';
+  const lastFertilized = lastNutrientDate?.toISOString().split('T')[0] || '';
+  
+  const waterDaysRemaining = getDaysRemaining(lastWatered, wateringInterval);
+  const nutrientDaysRemaining = getDaysRemaining(lastFertilized, nutrientInterval);
 
   return (
     <div className="py-4">
@@ -78,7 +78,7 @@ export const CareSummary = ({
           <div>
             <h3 className="font-medium">물주기</h3>
             <p className="text-sm text-gray-600">
-              마지막: {formatDateKorean(lastWatered)}
+              마지막: {lastWatered ? formatDateKorean(lastWatered) : '기록 없음'}
             </p>
           </div>
         </div>
@@ -106,7 +106,7 @@ export const CareSummary = ({
           <div>
             <h3 className="font-medium">영양제</h3>
             <p className="text-sm text-gray-600">
-              마지막: {formatDateKorean(lastFertilized)}
+              마지막: {lastFertilized ? formatDateKorean(lastFertilized) : '기록 없음'}
             </p>
           </div>
         </div>
@@ -123,10 +123,10 @@ export const CareSummary = ({
         </div>
       </div>
 
-      {notes && (
+      {description && (
         <div className="rounded-lg bg-gray-50 p-3">
           <h3 className="mb-1 font-medium">메모</h3>
-          <p className="text-sm text-gray-600">{notes}</p>
+          <p className="text-sm text-gray-600">{description}</p>
         </div>
       )}
 
