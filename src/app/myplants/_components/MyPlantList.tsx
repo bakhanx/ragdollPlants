@@ -6,18 +6,40 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons/Icons';
 import { UploadButton } from '@/app/_components/common/UploadButton';
-import { MyPlantListProps } from '@/types/components/plants';
-import { LegacyMyPlant, MAX_PLANTS } from '@/types/models/plant';
+import { MAX_PLANTS } from '@/types/models/plant';
+
+// 실제 DB 스키마 타입 정의
+interface MyPlantFromDB {
+  id: string;
+  name: string;
+  image: string;
+  category: string;
+  needsWater: boolean;
+  needsNutrient: boolean;
+  lastWateredDate: Date | null;
+  author: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+}
+
+interface MyPlantListProps {
+  initialPlants: MyPlantFromDB[];
+}
 
 export const MyPlantList = ({ initialPlants }: MyPlantListProps) => {
-  const { visibleItems, handleSearch } = useFilteredItems<LegacyMyPlant>({
-    items: initialPlants,
-    filterFn: (item, query) =>
-      item.name.toLowerCase().includes(query.toLowerCase()) ||
-      item.plantType.toLowerCase().includes(query.toLowerCase())
-  });
+  const { visibleItems, searchQuery, handleSearch } =
+    useFilteredItems<MyPlantFromDB>({
+      items: initialPlants,
+      filterFn: (item, query) =>
+        item.name.toLowerCase().includes(query.toLowerCase()) ||
+        item.category.toLowerCase().includes(query.toLowerCase()) // plantType → category
+    });
 
   const isMax = initialPlants.length >= MAX_PLANTS;
+  const hasPlants = initialPlants.length > 0;
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <div className="py-8">
@@ -45,7 +67,7 @@ export const MyPlantList = ({ initialPlants }: MyPlantListProps) => {
               className="relative flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-lg">
               <div className="relative aspect-square w-full overflow-hidden">
                 <Image
-                  src={plant.imageUrl}
+                  src={plant.image} // imageUrl → image로 변경
                   alt={plant.name}
                   fill
                   className="object-cover brightness-80 filter transition-all duration-200 hover:brightness-100"
@@ -72,14 +94,32 @@ export const MyPlantList = ({ initialPlants }: MyPlantListProps) => {
               </div>
               <div className="p-2">
                 <h3 className="font-medium text-gray-900">{plant.name}</h3>
-                <p className="text-xs text-gray-500">{plant.plantType}</p>
+                <p className="text-xs text-gray-500">{plant.category}</p>{' '}
               </div>
             </Link>
           ))}
         </div>
       ) : (
         <div className="flex h-40 flex-col items-center justify-center rounded-lg border border-gray-50 text-center">
-          <p className="mb-2 text-gray-200">검색 결과가 없습니다.</p>
+          {!hasPlants ? (
+            <>
+              <p className="mb-2 text-gray-200">등록된 식물이 없습니다.</p>
+              <Link
+                href="/myplants/upload"
+                className="rounded-full bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
+                첫 식물 등록하기
+              </Link>
+            </>
+          ) : isSearching ? (
+            <>
+              <p className="mb-2 text-gray-200">검색 결과가 없습니다.</p>
+              <p className="text-xs text-gray-400">
+                다른 검색어를 입력해보세요.
+              </p>
+            </>
+          ) : (
+            <p className="mb-2 text-gray-200">표시할 식물이 없습니다.</p>
+          )}
         </div>
       )}
     </div>
