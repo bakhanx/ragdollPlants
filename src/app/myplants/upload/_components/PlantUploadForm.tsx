@@ -1,114 +1,92 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import PlantTypeSelector from '@/app/myplants/upload/_components/PlantTypeSelector';
 import DatePickerField from '@/app/myplants/upload/_components/DatePickerField';
 import { createPlant } from '@/app/actions/plants';
+import { plantUploadSchema, type PlantUploadFormData } from '@/lib/validations/plant';
+import { 
+  PLANT_TYPE_OPTIONS,
+  DEFAULT_WATERING_INTERVAL,
+  DEFAULT_NUTRIENT_INTERVAL
+} from '@/app/_constants/plantData';
 
-interface PlantTypeOption {
-  value: string;
-  label: string;
-}
-
-interface PlantUploadFormProps {
-  plantTypeOptions: PlantTypeOption[];
-}
-
-export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
+export const PlantUploadForm = () => {
   const router = useRouter();
-
-  // 폼 상태 관리 - useState 사용
-  const [plantName, setPlantName] = useState('');
-  const [plantType, setPlantType] = useState(plantTypeOptions[0].value);
-  const [location, setLocation] = useState('');
-  const [acquiredDate, setAcquiredDate] = useState('');
-  const [notes, setNotes] = useState('');
-  const [wateringInterval, setWateringInterval] = useState('7'); // 기본 7일
-  const [nutrientInterval, setNutrientInterval] = useState('30'); // 기본 30일
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // 이미지 상태 관리
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // 오늘 날짜 계산
   const today = new Date().toISOString().split('T')[0];
 
+  // React Hook Form 설정
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors }
+  } = useForm<PlantUploadFormData>({
+    resolver: zodResolver(plantUploadSchema),
+    defaultValues: {
+      plantName: '',
+      plantType: PLANT_TYPE_OPTIONS[0].value,
+      location: '',
+      acquiredDate: '',
+      notes: '',
+      wateringInterval: DEFAULT_WATERING_INTERVAL,
+      nutrientInterval: DEFAULT_NUTRIENT_INTERVAL
+    }
+  });
+
+  // 현재 선택된 값들 추적
+  const plantType = watch('plantType');
+
   // 이미지 변경 핸들러
   const handleImageChange = (file: File | null) => {
+    // 이전 미리보기 URL 정리
     if (imagePreview) {
-      URL.revokeObjectURL(imagePreview); // 메모리 누수 방지
+      URL.revokeObjectURL(imagePreview);
     }
 
-    setImageFile(file);
-
     if (file) {
+      // 폼에 파일 설정
+      setValue('image', file);
+      
+      // 미리보기 생성
       const preview = URL.createObjectURL(file);
       setImagePreview(preview);
     } else {
+      setValue('image', undefined);
       setImagePreview(null);
     }
   };
 
-  // 클린업 함수
-  useEffect(() => {
-    return () => {
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview); // 컴포넌트 언마운트 시 URL 객체 해제
-      }
-    };
-  }, [imagePreview]);
-
-  // 폼 유효성 검사
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!plantName.trim()) {
-      newErrors.plantName = '식물 이름을 입력해주세요';
-    }
-
-    if (!plantType) {
-      newErrors.plantType = '식물 종류를 선택해주세요';
-    }
-
-    if (!acquiredDate) {
-      newErrors.acquiredDate = '입양일을 선택해주세요';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // 폼 제출 처리 함수
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+  // 폼 제출 핸들러
+  const onSubmit = async (data: PlantUploadFormData) => {
     setIsSubmitting(true);
 
     try {
-      // API 요청 데이터 준비
+      // FormData 생성
       const formData = new FormData();
 
-      // 이미지 처리 로직
-      if (imageFile) {
-        formData.append('image', imageFile);
+      // 이미지 처리 - Cloudflare Images용
+      if (data.image) {
+        formData.append('image', data.image);
       }
 
-      // 폼 데이터 추가
-      formData.append('plantName', plantName);
-      formData.append('plantType', plantType);
-      formData.append('location', location);
-      formData.append('acquiredDate', acquiredDate);
-      formData.append('notes', notes);
-      formData.append('wateringInterval', wateringInterval);
-      formData.append('nutrientInterval', nutrientInterval);
+      // 다른 폼 데이터 추가
+      formData.append('plantName', data.plantName);
+      formData.append('plantType', data.plantType);
+      formData.append('location', data.location || '');
+      formData.append('acquiredDate', data.acquiredDate);
+      formData.append('notes', data.notes || '');
+      formData.append('wateringInterval', data.wateringInterval.toString());
+      formData.append('nutrientInterval', data.nutrientInterval.toString());
 
       // 서버 액션 호출
       const result = await createPlant(formData);
@@ -127,34 +105,8 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
     }
   };
 
-  // 식물 이름 입력 핸들러
-  const handlePlantNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPlantName(e.target.value);
-    if (errors.plantName && e.target.value.trim()) {
-      setErrors(prev => ({ ...prev, plantName: '' }));
-    }
-  };
-
-  // 식물 종류 선택 핸들러
-  const handlePlantTypeChange = (value: string) => {
-    setPlantType(value);
-    if (errors.plantType) {
-      setErrors(prev => ({ ...prev, plantType: '' }));
-    }
-  };
-
-  // 입양일 선택 핸들러
-  const handleAcquiredDateChange = (value: string) => {
-    setAcquiredDate(value);
-    if (errors.acquiredDate) {
-      setErrors(prev => ({ ...prev, acquiredDate: '' }));
-    }
-  };
-
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mt-4 w-full">
+    <form onSubmit={handleSubmit(onSubmit)} className="mt-4 w-full">
       {/* 이미지 업로드 섹션 */}
       <div className="mb-6">
         <ImageUploader
@@ -164,6 +116,9 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
           label="식물 사진"
           required={false}
         />
+        {errors.image && (
+          <p className="mt-1 text-xs text-red-500">{errors.image.message as string}</p>
+        )}
       </div>
 
       {/* 기본 정보 폼 */}
@@ -177,14 +132,12 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
           <input
             id="plant-name"
             type="text"
-            value={plantName}
-            onChange={handlePlantNameChange}
-            required
+            {...register('plantName')}
             placeholder="예) 몬스테라, 산세베리아"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
           />
           {errors.plantName && (
-            <p className="mt-1 text-xs text-red-500">{errors.plantName}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.plantName.message}</p>
           )}
         </div>
 
@@ -193,12 +146,12 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
             식물 종류 <span className="text-red-500">*</span>
           </label>
           <PlantTypeSelector
-            options={plantTypeOptions}
+            options={PLANT_TYPE_OPTIONS}
             value={plantType}
-            onChange={handlePlantTypeChange}
+            onChange={(value) => setValue('plantType', value)}
           />
           {errors.plantType && (
-            <p className="mt-1 text-xs text-red-500">{errors.plantType}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.plantType.message}</p>
           )}
         </div>
 
@@ -211,11 +164,13 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
           <input
             id="location"
             type="text"
-            value={location}
-            onChange={e => setLocation(e.target.value)}
+            {...register('location')}
             placeholder="예) 거실 창가, 베란다"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
           />
+          {errors.location && (
+            <p className="mt-1 text-xs text-red-500">{errors.location.message}</p>
+          )}
         </div>
 
         <div>
@@ -225,12 +180,12 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
             입양일 <span className="text-red-500">*</span>
           </label>
           <DatePickerField
-            value={acquiredDate}
-            onChange={handleAcquiredDateChange}
+            value={watch('acquiredDate')}
+            onChange={(value) => setValue('acquiredDate', value)}
             max={today}
           />
           {errors.acquiredDate && (
-            <p className="mt-1 text-xs text-red-500">{errors.acquiredDate}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.acquiredDate.message}</p>
           )}
         </div>
 
@@ -247,12 +202,14 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
               type="number"
               min="1"
               max="365"
-              value={wateringInterval}
-              onChange={e => setWateringInterval(e.target.value)}
+              {...register('wateringInterval', { valueAsNumber: true })}
               placeholder="7"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
             />
             <p className="mt-1 text-xs text-gray-400">일반적으로 7-14일</p>
+            {errors.wateringInterval && (
+              <p className="mt-1 text-xs text-red-500">{errors.wateringInterval.message}</p>
+            )}
           </div>
 
           <div>
@@ -266,12 +223,14 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
               type="number"
               min="1"
               max="365"
-              value={nutrientInterval}
-              onChange={e => setNutrientInterval(e.target.value)}
+              {...register('nutrientInterval', { valueAsNumber: true })}
               placeholder="30"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
             />
             <p className="mt-1 text-xs text-gray-400">일반적으로 30일</p>
+            {errors.nutrientInterval && (
+              <p className="mt-1 text-xs text-red-500">{errors.nutrientInterval.message}</p>
+            )}
           </div>
         </div>
 
@@ -283,12 +242,14 @@ export const PlantUploadForm = ({ plantTypeOptions }: PlantUploadFormProps) => {
           </label>
           <textarea
             id="notes"
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
+            {...register('notes')}
             placeholder="특이사항이나 관리 방법 등을 적어주세요"
             className="w-full rounded-md border border-gray-300 p-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
             rows={3}
           />
+          {errors.notes && (
+            <p className="mt-1 text-xs text-red-500">{errors.notes.message}</p>
+          )}
         </div>
       </div>
 
