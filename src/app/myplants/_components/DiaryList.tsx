@@ -3,15 +3,28 @@ import Link from 'next/link';
 import { formatDateKorean } from '@/app/_utils/dateUtils';
 
 interface DiaryEntry {
-  id: number;
-  date: string;
+  id: string;
   title: string;
-  hasImage: boolean;
-  excerpt: string;
+  content: string;
+  image: string | null;
+  status: string;
+  date: Date;
+  plantId: string | null;
+  tags: string[];
+  createdAt: Date;
+  author: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+  plant: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface DiaryListProps {
-  plantId: string | number;
+  plantId: string;
   diaries: DiaryEntry[];
 }
 
@@ -37,14 +50,16 @@ export const DiaryList = ({ plantId, diaries }: DiaryListProps) => {
               <div className="flex items-center justify-between">
                 <h3 className="font-medium">{diary.title}</h3>
                 <span className="text-xs text-gray-500">
-                  {formatDateKorean(diary.date)}
+                  {formatDateKorean(diary.date.toISOString().split('T')[0])}
                 </span>
               </div>
               <p className="mt-1 line-clamp-2 text-sm text-gray-600">
-                {diary.excerpt}
+                {diary.content.length > 100
+                  ? diary.content.substring(0, 100) + '...'
+                  : diary.content}
               </p>
             </div>
-            {diary.hasImage && (
+            {diary.image && (
               <div className="ml-3 flex h-12 w-12 items-center justify-center rounded bg-gray-100 text-xs text-gray-500">
                 사진
               </div>
@@ -53,9 +68,15 @@ export const DiaryList = ({ plantId, diaries }: DiaryListProps) => {
         ))}
       </div>
 
+      {diaries.length === 0 && (
+        <div className="py-8 text-center text-gray-500">
+          <p>아직 작성된 일기가 없습니다.</p>
+        </div>
+      )}
+
       <div className="mt-4 text-center">
         <Link
-          href={`/diaries/create?plantId=${plantId}`}
+          href={`/diaries/upload?plantId=${plantId}`}
           className="inline-block rounded-md bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
           일기 작성하기
         </Link>
