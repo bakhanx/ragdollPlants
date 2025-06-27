@@ -3,16 +3,20 @@ import { notFound } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
-import { PlantInfo } from '@/app/myplants/_components/PlantInfo';
-import { CareSummary } from '@/app/myplants/_components/CareSummary';
-import { DiaryList } from '@/app/myplants/_components/DiaryList';
+
 import { getPlantById } from '@/app/actions/plants';
 import { getDiariesByPlant } from '@/app/actions/diaries';
+import {
+  PlantInfo,
+  DiaryList,
+  PlantDescription,
+  PlantCareSection
+} from '../_components';
 
 interface PlantDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function PlantDetailPage({
@@ -47,17 +51,14 @@ export default async function PlantDetailPage({
               imageUrl={plant.image || '/images/plant-default.png'}
               plantType={plant.category}
               location={plant.location || ''}
-              acquiredDate={plant.purchaseDate?.toISOString().split('T')[0] || ''}
+              acquiredDate={
+                plant.purchaseDate?.toISOString().split('T')[0] || ''
+              }
             />
 
-            <CareSummary
-              id={plant.id}
-              lastWateredDate={plant.lastWateredDate}
-              wateringInterval={plant.wateringInterval || 7}
-              lastNutrientDate={plant.lastNutrientDate}
-              nutrientInterval={plant.nutrientInterval || 30}
-              description={plant.description}
-            />
+            <PlantCareSection plant={plant} />
+
+            <PlantDescription description={plant.description || undefined} />
 
             <DiaryList
               plantId={plantId}
