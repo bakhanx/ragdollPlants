@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useImageUpload } from '@/app/_hooks/useImageUpload';
 import { SelectedPlantInfo } from './SelectedPlantInfo';
+import { PlantSelector } from './PlantSelector';
 import { DiaryMoodSelector, moodOptions } from './DiaryMoodSelector';
 import { DiaryImageUploadSection } from './DiaryImageUploadSection';
 import { createDiary } from '@/app/actions/diaries';
+import { getMyPlants } from '@/app/actions/plants';
 
 const MAX_FREE_PHOTO_DIARIES = 3; // 무료 회원이 사진 첨부 가능한 일기 수
 const MAX_PAID_PHOTO_COUNT = 5; // 최대 사진 개수
@@ -22,18 +24,21 @@ export const DiaryForm = ({
 }: DiaryFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plantId = searchParams.get('plantId');
+  const plantIdFromParams = searchParams.get('plantId');
 
-  // 선택된 식물 정보 (실제로는 API로 가져올 정보)
-  const [selectedPlant, setSelectedPlant] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+  // 내 식물 목록 상태
+  const [myPlants, setMyPlants] = useState<{ id: string; name: string }[]>([]);
+  const [plantsLoading, setPlantsLoading] = useState(false);
+
+  // 선택된 식물 ID 상태
+  const [selectedPlantId, setSelectedPlantId] = useState<string | null>(
+    plantIdFromParams
+  );
 
   // 폼 상태 관리
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [mood, setMood] = useState(moodOptions[0].value);
+  const [mood, setMood] = useState('good');
 
   // 이미지 업로드 훅 사용
   const { imageFiles, imagePreviews, handleMultiImageChange } = useImageUpload({
@@ -43,9 +48,9 @@ export const DiaryForm = ({
 
   // 사용자 제한 관련 상태
   const [photoLimit, setPhotoLimit] = useState({
-    used: 0, // 현재까지 사용한 사진 첨부 일기 수
-    remaining: MAX_FREE_PHOTO_DIARIES, // 남은 사진 첨부 가능 일기 수
-    canAddPhotos: true // 사진 첨부 가능 여부
+    used: 0,
+    remaining: MAX_FREE_PHOTO_DIARIES,
+    canAddPhotos: true
   });
 
   // 업로드할 이미지 수 제한 (구독 여부에 따라)
@@ -53,25 +58,35 @@ export const DiaryForm = ({
     ? MAX_PAID_PHOTO_COUNT
     : MAX_FREE_PHOTO_DIARIES;
 
-  // 선택된 식물 정보 로드 (실제로는 API 호출)
+  // 내 식물 목록 로드 및 초기화
   useEffect(() => {
-    if (plantId) {
-      // 임시 데이터 - 실제로는 API 호출하여 식물 정보 가져오기
-      setSelectedPlant({
-        id: plantId,
-        name: '몬스테라'
-      });
-    }
+    const loadMyPlants = async () => {
+      setPlantsLoading(true);
+      try {
+        const plants = await getMyPlants();
+        const simplifiedPlants = plants.map(plant => ({
+          id: plant.id,
+          name: plant.name
+        }));
+        setMyPlants(simplifiedPlants);
+      } catch (error) {
+        console.error('식물 목록 로딩 오류:', error);
+        alert('식물 목록을 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setPlantsLoading(false);
+      }
+    };
 
-    // 임시 데이터 - 실제로는 API 호출하여 사용자의 사진 첨부 일기 사용 현황 가져오기
-    const mockUserPhotoUsage = 1; // 이미 1개의 사진 첨부 일기를 작성했다고 가정
+    loadMyPlants();
+
+    const mockUserPhotoUsage = 1; // default
 
     setPhotoLimit({
       used: mockUserPhotoUsage,
       remaining: MAX_FREE_PHOTO_DIARIES - mockUserPhotoUsage,
       canAddPhotos: mockUserPhotoUsage < MAX_FREE_PHOTO_DIARIES || isPaidUser
     });
-  }, [plantId, isPaidUser]);
+  }, [isPaidUser]);
 
   // 폼 제출 처리
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,10 +109,10 @@ export const DiaryForm = ({
       formData.append('content', content);
       formData.append('status', mood);
       formData.append('date', new Date().toISOString());
-      
+
       // 선택된 식물이 있으면 추가
-      if (selectedPlant) {
-        formData.append('plantId', selectedPlant.id);
+      if (selectedPlantId) {
+        formData.append('plantId', selectedPlantId);
       }
 
       // 이미지 파일들 추가 (첫 번째 이미지만 사용)
@@ -111,11 +126,18 @@ export const DiaryForm = ({
 
       // 다이어리 생성 액션 함수 호출
       await createDiary(formData);
-      
-      // createDiary에서 자동으로 리다이렉트되므로 여기서는 추가 처리 불필요
     } catch (error) {
+      // Next.js redirect 에러 무시
+      if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+        return;
+      }
+
       console.error('다이어리 생성 오류:', error);
-      alert(error instanceof Error ? error.message : '다이어리 저장 중 오류가 발생했습니다.');
+      alert(
+        error instanceof Error
+          ? error.message
+          : '다이어리 저장 중 오류가 발생했습니다.'
+      );
     }
   };
 
@@ -136,8 +158,23 @@ export const DiaryForm = ({
       <form
         onSubmit={handleSubmit}
         className="mt-2 w-full">
-        {/* 선택된 식물 정보 */}
-        <SelectedPlantInfo selectedPlant={selectedPlant} />
+        {/* 식물 선택 */}
+        {plantIdFromParams ? (
+          // 식물 디테일 페이지에서 리다이렉트
+          <SelectedPlantInfo
+            selectedPlant={
+              myPlants.find(plant => plant.id === selectedPlantId) || null
+            }
+          />
+        ) : (
+          // 일반 일기 작성 - 식물 선택 드롭다운 표시
+          <PlantSelector
+            plants={myPlants}
+            selectedPlantId={selectedPlantId}
+            onPlantSelect={setSelectedPlantId}
+            isLoading={plantsLoading}
+          />
+        )}
 
         {/* 기본 정보 폼 */}
         <div className="space-y-4">
@@ -154,7 +191,7 @@ export const DiaryForm = ({
               onChange={e => setTitle(e.target.value)}
               required
               placeholder="일기 제목을 입력해주세요."
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-50 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
             />
           </div>
 
@@ -171,7 +208,7 @@ export const DiaryForm = ({
               required
               rows={6}
               placeholder="오늘 식물에 대한 생각이나 변화를 기록해보세요."
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-50 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
             />
           </div>
 
@@ -195,7 +232,7 @@ export const DiaryForm = ({
         <div className="mt-8 flex justify-center">
           <button
             type="submit"
-            className="w-full rounded-md bg-green-600 py-2 text-white hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full rounded-md bg-green-600 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             disabled={!title.trim() || !content.trim()}>
             저장하기
           </button>
