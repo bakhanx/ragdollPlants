@@ -6,17 +6,18 @@ import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { UploadButton } from '@/app/_components/common/UploadButton';
 import DiaryItem from './DiaryItem';
 import { DiaryListProps } from '@/types/components/diaries';
-import { LegacyDiaryPost } from '@/types/models/diary';
+import { Diary } from '@/types/models/diary';
 
 export default function DiaryList({ initialPosts }: DiaryListProps) {
   // 검색/더보기 등 상태 관리
   const { visibleItems, hasMore, handleSearch, handleLoadMore } =
-    useFilteredItems<LegacyDiaryPost>({
+    useFilteredItems<Diary>({
       items: initialPosts,
       filterFn: (item, query) =>
         item.title.toLowerCase().includes(query.toLowerCase()) ||
         item.content.toLowerCase().includes(query.toLowerCase()) ||
-        (item.authorName?.toLowerCase().includes(query.toLowerCase()) ?? false)
+        (item.author?.name?.toLowerCase().includes(query.toLowerCase()) ??
+          false)
     });
 
   const maxPlants = 99;
