@@ -2,7 +2,7 @@ import React from 'react';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
-import { PlantUploadForm } from './_components/PlantUploadForm';
+import { PlantForm } from '@/app/myplants/_components';
 
 export default function RegisterPlantPage() {
   return (
@@ -14,7 +14,7 @@ export default function RegisterPlantPage() {
           showBack
         />
 
-        <PlantUploadForm />
+        <PlantForm mode="create" />
       </ContentsLayout>
     </>
   );
