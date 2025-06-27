@@ -2,20 +2,20 @@
  * Diary 관련 컴포넌트 Props 타입 정의
  */
 
-import { DiaryMoodStatus, Diary, DiaryPreview, LegacyDiaryPost } from '../models/diary';
+import { DiaryMoodStatus, Diary } from '../models/diary';
 
 /**
  * 일기 목록 컴포넌트 Props
  */
 export interface DiaryListProps {
-  initialPosts: LegacyDiaryPost[];
+  initialPosts: Diary[];
 }
 
 /**
  * 일기 항목 컴포넌트 Props
  */
 export interface DiaryItemProps {
-  post: LegacyDiaryPost;
+  post: Diary;
   index: number;
 }
 
@@ -41,5 +41,5 @@ export interface DiaryFormProps {
   initialData?: Partial<Diary>;
   onSubmit: (data: Diary) => Promise<void>;
   isLoading?: boolean;
-  plants?: Array<{id: string, name: string}>;
-} 
+  plants?: Array<{ id: string; name: string }>;
+}
