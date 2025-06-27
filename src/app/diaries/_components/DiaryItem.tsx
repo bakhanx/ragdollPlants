@@ -16,7 +16,7 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
         <div className="relative h-32 w-full overflow-hidden">
           <div className="absolute inset-0 bg-amber-50/50"></div>
           <Image
-            src={post.imageUrl}
+            src={post.image || '/images/plant-default.png'}
             alt={post.title}
             fill
             className="rounded-t-lg object-cover"
@@ -25,7 +25,7 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
 
           {/* 날짜 스티커 */}
           <div className="absolute top-3 right-3 rotate-3 rounded-lg border border-amber-200 bg-white/90 px-2 py-1 text-xs font-medium text-amber-700 shadow-sm">
-            {post.date}
+            {new Date(post.date).toLocaleDateString('ko-KR')}
           </div>
         </div>
 
