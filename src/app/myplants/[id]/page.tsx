@@ -9,7 +9,7 @@ import { getDiariesByPlant } from '@/app/actions/diaries';
 import {
   PlantInfo,
   DiaryList,
-  PlantDescription,
+  PlantMemo,
   PlantCareSection
 } from '../_components';
 
@@ -58,7 +58,7 @@ export default async function PlantDetailPage({
 
             <PlantCareSection plant={plant} />
 
-            <PlantDescription description={plant.description || undefined} />
+            <PlantMemo description={plant.description || undefined} />
 
             <DiaryList
               plantId={plantId}
