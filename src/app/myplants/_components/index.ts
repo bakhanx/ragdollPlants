@@ -9,5 +9,5 @@ export * from './lists/DiaryList';
 
 // Details
 export * from './details/PlantInfo';
-export * from './details/PlantMemo';
+export * from './details/PlantDescription';
 export * from './details/PlantCareSection'; 
