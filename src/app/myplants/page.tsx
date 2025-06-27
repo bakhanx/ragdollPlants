@@ -2,17 +2,14 @@ import React from 'react';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
-import Link from 'next/link';
-import { MyPlantList } from './_components/MyPlantList';
 import { getMyPlants } from '../actions/plants';
+import { MyPlantList } from './_components';
 
 export default async function MyPlantsPage() {
-  // 실제 데이터베이스에서 식물 데이터 가져오기 (전처리 없음)
   let myPlants: Awaited<ReturnType<typeof getMyPlants>> = [];
   let hasError = false;
 
   try {
-    // 전처리 과정 제거 - DB 데이터 직접 사용
     myPlants = await getMyPlants();
   } catch (error) {
     console.error('식물 데이터 로딩 오류:', error);
