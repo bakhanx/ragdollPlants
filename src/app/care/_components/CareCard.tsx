@@ -32,6 +32,7 @@ interface CareCardProps {
   onNutrientClick?: (plantId: string, newStatus: boolean) => void;
   isWaterUpdating?: boolean;
   isNutrientUpdating?: boolean;
+  hideImage?: boolean;
 }
 
 export const CareCard = ({
@@ -41,7 +42,8 @@ export const CareCard = ({
   onWaterClick,
   onNutrientClick,
   isWaterUpdating = false,
-  isNutrientUpdating = false
+  isNutrientUpdating = false,
+  hideImage = false
 }: CareCardProps) => {
   // 남은 일수 계산 (정확한 D-day 값)
   const calcRemainingDays = (nextDate: string): number => {
@@ -57,7 +59,7 @@ export const CareCard = ({
   const daysUntilWater = calcRemainingDays(waterProgress.nextDate);
   const daysUntilNutrient = calcRemainingDays(nutrientProgress.nextDate);
 
-  // 물/비료를 줄 수 있는 상태인지 확인 (남은 일수가 주기와 같으면 방금 준 것)
+  // 물/영양제 를 줄 수 있는 상태인지 확인 (남은 일수가 주기와 같으면 방금 준 것)
   const canWater = daysUntilWater !== plant.waterInterval;
   const canNutrient = daysUntilNutrient !== plant.nutrientInterval;
 
@@ -91,11 +93,10 @@ export const CareCard = ({
 
     // 일찍 주는 경우에는 확인 대화상자 표시
     return window.confirm(
-      `${type === 'water' ? '물' : '비료'} 주기까지 ${days}일 남았습니다. 지금 ${type === 'water' ? '물' : '비료'}을 주시겠습니까?`
+      `${type === 'water' ? '물' : '영양제'} 주기까지 ${days}일 남았습니다. 지금 ${type === 'water' ? '물' : '영양제'}을 주시겠습니까?`
     );
   };
-
-  // 진행 상태 문구 (높은 퍼센트 = 더 채워짐 = 더 좋은 상태)
+  // 진행 상태 문구
   const getStatusText = (percentage: number): string => {
     if (percentage >= 80) return '상태 좋음';
     if (percentage >= 50) return '괜찮은 상태';
@@ -107,45 +108,43 @@ export const CareCard = ({
   const handleWaterClick = () => {
     if (isWaterUpdating || !canWater) return;
 
-    // 주기가 아직 오지 않았으면 확인 대화상자 표시
     if (daysUntilWater > 0 && !confirmEarlyCare('water', daysUntilWater)) {
-      return; // 사용자가 취소한 경우 작업 중단
+      return;
     }
 
-    // 물을 주면 상태 비활성화
     setWaterStatus(false);
-    onWaterClick?.(plant.id, true); // API에는 항상 true(물 줬음)로 전달
+    onWaterClick?.(plant.id, true);
   };
 
-  // 비료주기 버튼 클릭 핸들러
+  // 영양제 주기 버튼 클릭 핸들러
   const handleNutrientClick = () => {
     if (isNutrientUpdating || !canNutrient) return;
 
-    // 주기가 아직 오지 않았으면 확인 대화상자 표시
     if (
       daysUntilNutrient > 0 &&
       !confirmEarlyCare('nutrient', daysUntilNutrient)
     ) {
-      return; // 사용자가 취소한 경우 작업 중단
+      return;
     }
 
-    // 비료를 주면 상태 비활성화
     setNutrientStatus(false);
-    onNutrientClick?.(plant.id, true); // API에는 항상 true(비료 줬음)로 전달
+    onNutrientClick?.(plant.id, true);
   };
 
   return (
     <div className="rounded-xl bg-white/90 p-4 shadow-sm backdrop-blur-sm">
-      <h3 className="pb-2 text-sm font-medium">{plant.name}</h3>
+      {!hideImage && <h3 className="pb-2 text-sm font-medium">{plant.name}</h3>}
       <div className="flex items-center gap-4">
-        <div className="relative size-20 shrink-0 self-start">
-          <Image
-            src={plant.image}
-            alt={plant.name}
-            fill
-            className="rounded-lg object-cover"
-          />
-        </div>
+        {!hideImage && (
+          <div className="relative size-20 shrink-0 self-start">
+            <Image
+              src={plant.image}
+              alt={plant.name}
+              fill
+              className="rounded-lg object-cover"
+            />
+          </div>
+        )}
 
         <div className="flex-1 space-y-4">
           {/* 물주기 섹션 */}
@@ -185,7 +184,7 @@ export const CareCard = ({
               </div>
             </div>
             {/* 물주기 버튼 */}
-            <div className='flex items-center'>
+            <div className="flex items-center">
               <button
                 onClick={handleWaterClick}
                 disabled={isWaterUpdating || !canWater}
@@ -207,12 +206,12 @@ export const CareCard = ({
             </div>
           </div>
 
-          {/* 비료주기 섹션 */}
+          {/* 영양제 주기 섹션 */}
           <div className="flex gap-x-2">
             <div className="w-full">
               <div className="mb-1 flex items-center justify-between">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-medium">남은 비료</span>
+                  <span className="text-sm font-medium">남은 영양제</span>
                 </div>
                 {/* 남은 기한 */}
                 <div
@@ -234,7 +233,7 @@ export const CareCard = ({
 
                 <div className="flex items-center justify-between gap-1">
                   <span className="text-xs text-gray-500">
-                    주기: {plant.nutrientInterval}일
+                    주기: {plant.nutrientInterval}회
                   </span>
                   <span className="text-xs text-gray-500">
                     {formatDate(nutrientProgress.nextDate)}
@@ -242,8 +241,8 @@ export const CareCard = ({
                 </div>
               </div>
             </div>
-            {/* 비료주기 버튼 */}
-            <div className='flex items-center'>
+            {/* 영양제 주기 버튼 */}
+            <div className="flex items-center">
               <button
                 onClick={handleNutrientClick}
                 disabled={isNutrientUpdating || !canNutrient}
@@ -252,9 +251,11 @@ export const CareCard = ({
                     ? 'cursor-not-allowed bg-green-100'
                     : 'bg-green-200 hover:bg-green-300 active:scale-95'
                 }`}
-                aria-label="비료주기 완료"
+                aria-label="영양제 주기 완료"
                 title={
-                  !canNutrient ? '아직 비료를 줄 필요가 없습니다' : '비료주기'
+                  !canNutrient
+                    ? '아직 영양제를 줄 필요가 없습니다'
+                    : '영양제 주기'
                 }>
                 <NutrientIcon
                   className={`size-6 transition-all duration-300 ${
@@ -270,4 +271,4 @@ export const CareCard = ({
       </div>
     </div>
   );
-}
+};
