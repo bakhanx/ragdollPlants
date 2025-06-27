@@ -4,10 +4,9 @@ import React from 'react';
 
 // 상태 옵션 데이터
 export const moodOptions = [
-  { value: '좋음', label: '아주 좋아요', icon: '😊' },
-  { value: '보통', label: '보통이에요', icon: '😐' },
-  { value: '나쁨', label: '조금 걱정되요', icon: '😕' },
-  { value: '아픔', label: '상태가 안좋아요', icon: '😢' }
+  { value: 'good', label: '아주 좋아요', icon: '😊' },
+  { value: 'normal', label: '보통이에요', icon: '😐' },
+  { value: 'bad', label: '상태가 안좋아요', icon: '😢' }
 ];
 
 interface DiaryMoodSelectorProps {
@@ -15,13 +14,16 @@ interface DiaryMoodSelectorProps {
   setMood: (mood: string) => void;
 }
 
-export const DiaryMoodSelector = ({ mood, setMood }: DiaryMoodSelectorProps) => {
+export const DiaryMoodSelector = ({
+  mood,
+  setMood
+}: DiaryMoodSelectorProps) => {
   return (
     <div>
       <label className="mb-1 block text-sm font-medium text-gray-50">
         오늘의 상태
       </label>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {moodOptions.map(option => (
           <button
             key={option.value}
@@ -39,4 +41,4 @@ export const DiaryMoodSelector = ({ mood, setMood }: DiaryMoodSelectorProps) => 
       </div>
     </div>
   );
-}; 
+};
