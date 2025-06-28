@@ -4,17 +4,35 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import { getMyPlants } from '../actions/plants';
 import { MyPlantList } from './_components';
+import { PAGINATION } from '@/app/_constants/pagination';
 
-export default async function MyPlantsPage() {
-  let myPlants: Awaited<ReturnType<typeof getMyPlants>> = [];
+interface MyPlantsPageProps {
+  searchParams: Promise<{
+    page?: string;
+    search?: string;
+  }>;
+}
+
+export default async function MyPlantsPage({
+  searchParams
+}: MyPlantsPageProps) {
+  const params = await searchParams;
+  const currentPage = Number(params.page) || 1;
+  const searchQuery = params.search || '';
+
+  let plantsData: Awaited<ReturnType<typeof getMyPlants>> | null = null;
   let hasError = false;
 
   try {
-    myPlants = await getMyPlants();
+    plantsData = await getMyPlants({
+      page: currentPage,
+      limit: PAGINATION.ITEMS_PER_PAGE,
+      search: searchQuery
+    });
   } catch (error) {
     console.error('식물 데이터 로딩 오류:', error);
     hasError = true;
-    myPlants = [];
+    plantsData = null;
   }
 
   return (
@@ -39,8 +57,12 @@ export default async function MyPlantsPage() {
             </div>
           )}
 
-          {/* 식물 목록 - 전처리 없이 직접 전달 */}
-          <MyPlantList initialPlants={myPlants} />
+          {/* 식물 목록 */}
+          <MyPlantList
+            plantsData={plantsData}
+            currentPage={currentPage}
+            searchQuery={searchQuery}
+          />
         </div>
       </ContentsLayout>
     </>
