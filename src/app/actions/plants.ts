@@ -5,7 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { MAX_PLANTS } from '@/types/models/plant';
 import { getCurrentUser, validatePlantOwnership } from './utils/auth-helpers';
-import { uploadImageToCloudflare, deleteImageFromCloudflare } from '@/lib/cloudflare-images';
+import {
+  uploadImageToCloudflare,
+  deleteImageFromCloudflare
+} from '@/lib/cloudflare-images';
 
 // 식물 생성 유효성 검사 스키마
 const createPlantSchema = z.object({
@@ -22,47 +25,89 @@ const createPlantSchema = z.object({
 });
 
 // 내 식물 목록 조회
-export async function getMyPlants() {
+export async function getMyPlants(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}) {
   try {
     const user = await getCurrentUser();
 
-    const plants = await prisma.plant.findMany({
-      where: {
-        authorId: user.id
-      },
-      select: {
-        id: true,
-        name: true,
-        image: true,
-        category: true,
-        description: true,
-        location: true,
-        purchaseDate: true,
-        needsWater: true,
-        needsNutrient: true,
-        lastWateredDate: true,
-        nextWateringDate: true,
-        lastNutrientDate: true,
-        nextNutrientDate: true,
-        wateringInterval: true,
-        nutrientInterval: true,
-        createdAt: true,
-        updatedAt: true,
-        tags: true,
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const page = params?.page || 1;
+    const limit = params?.limit || 4;
+    const search = params?.search?.trim();
+    const skip = (page - 1) * limit;
 
-    return plants;
+    // 검색 조건 설정
+    const searchCondition = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { category: { contains: search, mode: 'insensitive' as const } }
+          ]
+        }
+      : {};
+
+    const whereCondition = {
+      authorId: user.id,
+      ...searchCondition
+    };
+
+    // 식물 목록과 총 개수를 병렬로 조회
+    const [plants, totalCount] = await Promise.all([
+      prisma.plant.findMany({
+        where: whereCondition,
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          category: true,
+          description: true,
+          location: true,
+          purchaseDate: true,
+          needsWater: true,
+          needsNutrient: true,
+          lastWateredDate: true,
+          nextWateringDate: true,
+          lastNutrientDate: true,
+          nextNutrientDate: true,
+          wateringInterval: true,
+          nutrientInterval: true,
+          createdAt: true,
+          updatedAt: true,
+          tags: true,
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip,
+        take: limit
+      }),
+      prisma.plant.count({
+        where: whereCondition
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      plants,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
+      }
+    };
   } catch (error) {
     console.error('내 식물 목록 조회 오류:', error);
     throw new Error('식물 목록을 불러오는 중 오류가 발생했습니다.');
@@ -273,9 +318,12 @@ export async function updatePlant(id: string, formData: FormData) {
     if (image && image.size > 0) {
       // 새 이미지 업로드
       imageUrl = await uploadImageToCloudflare(image);
-      
+
       // 기존 이미지 삭제 (기본 이미지가 아닌 경우)
-      if (existingPlant.image && !existingPlant.image.includes('/images/plant-default.png')) {
+      if (
+        existingPlant.image &&
+        !existingPlant.image.includes('/images/plant-default.png')
+      ) {
         await deleteImageFromCloudflare(existingPlant.image);
       }
     }
@@ -367,7 +415,10 @@ export async function deletePlant(id: string) {
     ]);
 
     // 이미지 파일도 삭제 (Cloudflare Images에서)
-    if (existingPlant.image && !existingPlant.image.includes('/images/plant-default.png')) {
+    if (
+      existingPlant.image &&
+      !existingPlant.image.includes('/images/plant-default.png')
+    ) {
       await deleteImageFromCloudflare(existingPlant.image);
     }
 
@@ -495,5 +546,3 @@ export async function updateNutrient(id: string) {
     };
   }
 }
-
-
