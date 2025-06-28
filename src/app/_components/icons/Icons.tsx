@@ -5,6 +5,7 @@ import Nutrient from '@/../public/svg/vape-kit.svg';
 import Pin from '@/../public/svg/pin.svg';
 import Edit from '@/../public/svg/edit.svg';
 import ChevronLeft from '@/../public/svg/chevron-left.svg';
+import ChevronRight from '@/../public/svg/chevron-right.svg';
 import Cross from '@/../public/svg/cross.svg';
 import MoreVertical from '@/../public/svg/more-vertical.svg';
 import ThreeHline from '@/../public/svg/menu.svg';
@@ -48,6 +49,8 @@ export const EditIcon = createIcon(Edit, 'EditIcon');
 
 // UI 관련 아이콘 추가
 export const BackIcon = createIcon(ChevronLeft, 'BackIcon');
+export const ChevronLeftIcon = createIcon(ChevronLeft, 'ChevronLeftIcon');
+export const ChevronRightIcon = createIcon(ChevronRight, 'ChevronRightIcon');
 export const CloseIcon = createIcon(Cross, 'CloseIcon');
 export const MenuIcon = createIcon(MoreVertical, 'MenuIcon');
 export const HamburgerIcon = createIcon(ThreeHline, 'HamburgerIcon');
