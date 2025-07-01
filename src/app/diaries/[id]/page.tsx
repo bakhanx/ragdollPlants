@@ -7,6 +7,7 @@ import DiaryImage from '@/app/diaries/_components/DiaryImage';
 import DiaryContent from '@/app/diaries/_components/DiaryContent';
 import { getDiaryById } from '@/app/actions/diaries';
 import { DiaryMoodStatus } from '@/types/models/diary';
+import { formatDateTime } from '@/app/_utils/dateUtils';
 
 export default async function DiaryDetail(props: {
   params: Promise<{ id: string }>;
@@ -25,7 +26,7 @@ export default async function DiaryDetail(props: {
       id: diary.id,
       title: diary.title,
       content: diary.content,
-      date: diary.date.toISOString(),
+      date: formatDateTime(diary.date),
       status: diary.status as DiaryMoodStatus,
       authorName: diary.author?.name || '익명'
     };
