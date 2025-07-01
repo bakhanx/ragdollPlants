@@ -1,26 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
-import { formatDateKorean } from '@/app/_utils/dateUtils';
+import { formatDateKorean, formatTimeOnly } from '@/app/_utils/dateUtils';
 
 interface DiaryEntry {
   id: string;
   title: string;
   content: string;
-  image: string | null;
-  status: string;
   date: Date;
-  plantId: string | null;
-  tags: string[];
-  createdAt: Date;
-  author: {
-    id: string;
-    name: string | null;
-    image: string | null;
-  };
-  plant: {
-    id: string;
-    name: string;
-  } | null;
 }
 
 interface DiaryListProps {
@@ -45,25 +31,22 @@ export const DiaryList = ({ plantId, diaries }: DiaryListProps) => {
           <Link
             key={diary.id}
             href={`/diaries/${diary.id}`}
-            className="flex items-start rounded-lg bg-white p-3 shadow-sm hover:bg-gray-50">
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">{diary.title}</h3>
-                <span className="text-xs text-gray-500">
-                  {formatDateKorean(diary.date.toISOString().split('T')[0])}
-                </span>
-              </div>
-              <p className="mt-1 line-clamp-2 text-sm text-gray-600">
-                {diary.content.length > 100
-                  ? diary.content.substring(0, 100) + '...'
-                  : diary.content}
+            className="flex rounded-lg bg-white p-3 shadow-sm hover:bg-gray-50">
+            <div className="flex flex-1 flex-col py-1">
+              <h3 className="mb-1 line-clamp-1 leading-none font-medium">
+                {diary.title}
+              </h3>
+              <p className="line-clamp-2 text-sm text-gray-600">
+                {diary.content}
               </p>
             </div>
-            {diary.image && (
-              <div className="ml-3 flex h-12 w-12 items-center justify-center rounded bg-gray-100 text-xs text-gray-500">
-                사진
+
+            <div className="ml-3 flex flex-col py-1 text-right text-xs text-gray-500">
+              <div className="leading-none">
+                {formatDateKorean(diary.date.toISOString().split('T')[0])}
               </div>
-            )}
+              <div className="mt-1">{formatTimeOnly(diary.date)}</div>
+            </div>
           </Link>
         ))}
       </div>
