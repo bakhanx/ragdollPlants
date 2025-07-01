@@ -546,3 +546,28 @@ export async function updateNutrient(id: string) {
     };
   }
 }
+
+// 다이어리 작성용 간단한 식물 목록 조회 (id, name만 포함)
+export async function getMyPlantsBasicInfo() {
+  try {
+    const user = await getCurrentUser();
+
+    const plants = await prisma.plant.findMany({
+      where: {
+        authorId: user.id
+      },
+      select: {
+        id: true,
+        name: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return plants;
+  } catch (error) {
+    console.error('식물 목록 조회 오류:', error);
+    throw new Error('식물 목록을 불러오는 중 오류가 발생했습니다.');
+  }
+}
