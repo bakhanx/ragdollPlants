@@ -352,7 +352,7 @@ export async function deleteDiary(id: string) {
   }
 }
 
-// 식물별 다이어리 조회
+// 식물별 다이어리 조회 (최근 3개로 제한)
 export async function getDiariesByPlant(plantId: string) {
   try {
     const diaries = await prisma.diary.findMany({
@@ -385,12 +385,39 @@ export async function getDiariesByPlant(plantId: string) {
       },
       orderBy: {
         createdAt: 'desc'
-      }
+      },
+      take: 3 // 최근 3개만 조회
     });
 
     return diaries;
   } catch (error) {
     console.error('식물별 다이어리 조회 오류:', error);
+    throw error;
+  }
+}
+
+// 식물 상세 페이지에서 사용하는 다이어리 조회
+export async function getDiariesByMyPlantDetail(plantId: string) {
+  try {
+    const diaries = await prisma.diary.findMany({
+      where: {
+        plantId: plantId
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        date: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 3 // 최근 3개만 조회
+    });
+
+    return diaries;
+  } catch (error) {
+    console.error('식물별 다이어리 최소 조회 오류:', error);
     throw error;
   }
 }
