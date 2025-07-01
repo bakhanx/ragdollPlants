@@ -5,7 +5,7 @@ import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 
 import { getPlantById } from '@/app/actions/plants';
-import { getDiariesByPlant } from '@/app/actions/diaries';
+import { getDiariesByMyPlantDetail } from '@/app/actions/diaries';
 import {
   PlantInfo,
   DiaryList,
@@ -28,7 +28,7 @@ export default async function PlantDetailPage({
     // 식물 상세 정보와 관련 일기를 병렬로 가져오기
     const [plant, diaries] = await Promise.all([
       getPlantById(plantId),
-      getDiariesByPlant(plantId)
+      getDiariesByMyPlantDetail(plantId)
     ]);
 
     if (!plant) {
