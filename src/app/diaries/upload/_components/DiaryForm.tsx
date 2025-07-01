@@ -8,7 +8,7 @@ import { PlantSelector } from './PlantSelector';
 import { DiaryMoodSelector, moodOptions } from './DiaryMoodSelector';
 import { DiaryImageUploadSection } from './DiaryImageUploadSection';
 import { createDiary } from '@/app/actions/diaries';
-import { getMyPlants } from '@/app/actions/plants';
+import { getMyPlantsBasicInfo } from '@/app/actions/plants';
 
 const MAX_FREE_PHOTO_DIARIES = 3; // 무료 회원이 사진 첨부 가능한 일기 수
 const MAX_PAID_PHOTO_COUNT = 5; // 최대 사진 개수
@@ -63,12 +63,8 @@ export const DiaryForm = ({
     const loadMyPlants = async () => {
       setPlantsLoading(true);
       try {
-        const plants = await getMyPlants();
-        const simplifiedPlants = plants.map(plant => ({
-          id: plant.id,
-          name: plant.name
-        }));
-        setMyPlants(simplifiedPlants);
+        const plants = await getMyPlantsBasicInfo();
+        setMyPlants(plants);
       } catch (error) {
         console.error('식물 목록 로딩 오류:', error);
         alert('식물 목록을 불러오는 중 오류가 발생했습니다.');
