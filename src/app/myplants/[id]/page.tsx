@@ -42,6 +42,10 @@ export default async function PlantDetailPage({
           <Header
             title={plant.name}
             showBack
+            contentType="plant"
+            id={plantId}
+            showContentMenu={true}
+            isOwner={true}
           />
 
           <div className="w-full divide-y divide-gray-100">
