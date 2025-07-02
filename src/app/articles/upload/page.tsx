@@ -21,10 +21,7 @@ export default function UploadArticlePage() {
           showBack={true}
         />
 
-        {/* 클라이언트 컴포넌트들은 _components 폴더로 분리 */}
-        <LoadingState />
-        <AdminAccessCheck />
-        <ArticleUploadForm />
+        <ArticleUploadForm mode="create" />
       </ContentsLayout>
     </>
   );
