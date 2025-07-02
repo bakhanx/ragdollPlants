@@ -18,11 +18,13 @@ interface HeaderProps {
   showBack?: boolean;
   title?: string;
   variant?: HeaderVariant;
-  contentType?: 'article' | 'diary' | 'event';
+  contentType?: 'article' | 'diary' | 'event' | 'plant' | 'gallery';
   showNotification?: boolean;
   onNotificationClick?: () => void;
   showMenuButton?: boolean;
   onBackClick?: () => void;
+  showContentMenu?: boolean;
+  isOwner?: boolean;
 }
 
 // 스타일 변형에 대한 클래스 매핑
@@ -42,7 +44,9 @@ export const Header = ({
   showNotification = false,
   onNotificationClick,
   showMenuButton = false,
-  onBackClick
+  onBackClick,
+  showContentMenu = false,
+  isOwner = false
 }: HeaderProps) => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -86,9 +90,10 @@ export const Header = ({
         <HeaderRight
           showNotification={showNotification}
           onNotificationClick={handleNotificationClick}
-          showMenuButton={showMenuButton}
+          showContentMenu={showContentMenu}
           contentType={contentType}
           id={id}
+          isOwner={isOwner}
         />
       </div>
 

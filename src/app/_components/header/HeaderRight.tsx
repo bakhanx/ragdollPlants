@@ -7,9 +7,10 @@ import { ContentMenu } from '@/app/_components/common/ContentMenu';
 interface HeaderRightProps {
   showNotification: boolean;
   onNotificationClick: () => void;
-  showMenuButton: boolean;
-  contentType: 'article' | 'diary' | 'event';
+  showContentMenu: boolean;
+  contentType: 'article' | 'diary' | 'event' | 'plant' | 'gallery';
   id: string;
+  isOwner?: boolean;
 }
 
 /**
@@ -19,9 +20,10 @@ interface HeaderRightProps {
 export const HeaderRight = ({
   showNotification,
   onNotificationClick,
-  showMenuButton,
+  showContentMenu,
   contentType,
-  id
+  id,
+  isOwner = false
 }: HeaderRightProps) => {
   return (
     <div className="ml-auto flex w-auto items-center justify-end gap-2">
@@ -41,13 +43,14 @@ export const HeaderRight = ({
         </button>
       )}
 
-      {/* 메뉴 버튼 또는 커스텀 메뉴 컴포넌트 */}
-      {showMenuButton && (
+      {/* 콘텐츠 메뉴 버튼 */}
+      {showContentMenu && (
         <ContentMenu
           contentType={contentType}
           id={id}
+          isOwner={isOwner}
         />
       )}
     </div>
   );
-} 
+};
