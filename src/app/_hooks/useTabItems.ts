@@ -31,10 +31,10 @@ export function useTabItems<T, TabType extends string>({
 }: UseTabItemsOptions<T, TabType>): UseTabItemsResult<T, TabType> {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // 현재 탭의 아이템
   const currentItems = allItems[activeTab];
-  
+
   // 현재 활성 탭의 데이터에 대한 필터링 및 페이지네이션
   const {
     filteredItems: currentFilteredItems,
@@ -48,15 +48,15 @@ export function useTabItems<T, TabType extends string>({
     initialItemsCount,
     loadMoreCount
   });
-  
+
   // 각 탭별 필터링된 아이템 개수 계산
   const filteredItemsCount = useMemo(() => {
     const result = {} as Record<TabType, number>;
-    
-    Object.keys(allItems).forEach((tabKey) => {
+
+    Object.keys(allItems).forEach(tabKey => {
       const key = tabKey as TabType;
       const items = allItems[key];
-      
+
       if (!searchQuery) {
         result[key] = items.length;
       } else {
@@ -64,21 +64,24 @@ export function useTabItems<T, TabType extends string>({
         result[key] = filtered.length;
       }
     });
-    
+
     return result;
   }, [allItems, filterFn, searchQuery]);
-  
+
   // 탭 변경 핸들러
   const handleTabChange = useCallback((tab: TabType) => {
     setActiveTab(tab);
   }, []);
-  
+
   // 검색 처리 함수
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    handleTabSearch(query);
-  }, [handleTabSearch]);
-  
+  const handleSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      handleTabSearch(query);
+    },
+    [handleTabSearch]
+  );
+
   return {
     activeTab,
     setActiveTab: handleTabChange,
@@ -88,4 +91,4 @@ export function useTabItems<T, TabType extends string>({
     handleLoadMore,
     filteredItemsCount
   };
-} 
+}
