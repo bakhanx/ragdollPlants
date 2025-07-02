@@ -9,6 +9,7 @@ import { EditIcon } from '../_components/icons';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getUserProfileData } from '../actions/userProfile';
+import LogoutButton from './_components/LogoutButton';
 
 export default async function Page() {
   const session = await auth();
@@ -46,16 +47,20 @@ export default async function Page() {
             profileImage={session.user.image}
           />
 
-          {/* 프로필 편집 버튼 */}
-          <Link
-            href="/mygarden/profile"
-            className="absolute top-7 right-5 rounded-full bg-white/80 p-2 shadow-sm transition-colors hover:bg-white/100"
-            aria-label="프로필 편집">
-            <EditIcon
-              size={20}
-              className="text-gray-600"
-            />
-          </Link>
+          {/* 프로필 편집 버튼과 로그아웃 버튼 */}
+          <div className="absolute top-7 right-5 flex gap-2">
+            <Link
+              href="/mygarden/profile"
+              className="rounded-full bg-white/80 p-2 shadow-sm transition-colors hover:bg-white/100"
+              aria-label="프로필 편집">
+              <EditIcon
+                size={20}
+                className="text-gray-600"
+              />
+            </Link>
+            
+            <LogoutButton />
+          </div>
         </div>
 
         <MenuList />
