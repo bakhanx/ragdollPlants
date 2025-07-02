@@ -3,7 +3,10 @@
 import Image from 'next/image';
 import Water2 from '@/../public/svg/water2.svg';
 import ProgressBar from './ProgressBar';
-import { formatDate, calculateProgressPercentage } from '@/app/_utils/dateUtils';
+import {
+  formatDate,
+  calculateProgressPercentage
+} from '@/app/_utils/dateUtils';
 import { useState, useEffect } from 'react';
 import { NutrientIcon } from '@/app/_components/icons';
 import { addCareRecord } from '@/app/actions/care';
@@ -24,17 +27,16 @@ interface CareCardProps {
   hideImage?: boolean;
 }
 
-export const CareCard = ({
-  plant,
-  hideImage = false
-}: CareCardProps) => {
+export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
   const router = useRouter();
   const [isWaterUpdating, setIsWaterUpdating] = useState(false);
   const [isNutrientUpdating, setIsNutrientUpdating] = useState(false);
 
   // 케어 데이터 계산
-  const lastWateredStr = plant.lastWateredDate?.toISOString().split('T')[0] || '';
-  const lastNutrientStr = plant.lastNutrientDate?.toISOString().split('T')[0] || '';
+  const lastWateredStr =
+    plant.lastWateredDate?.toISOString().split('T')[0] || '';
+  const lastNutrientStr =
+    plant.lastNutrientDate?.toISOString().split('T')[0] || '';
 
   const calculateNextDate = (lastDate: string, interval: number): string => {
     if (!lastDate) return '';
@@ -231,8 +233,8 @@ export const CareCard = ({
                 <Water2
                   className={`size-5 transition-all duration-300 ${
                     waterStatus
-                      ? 'text-blue-600'
-                      : 'scale-110 text-blue-700 drop-shadow-sm'
+                      ? 'text-blue-600 [&>path]:fill-blue-600'
+                      : 'scale-110 text-blue-700 drop-shadow-sm [&>path]:fill-none'
                   }`}
                 />
               </button>
@@ -285,12 +287,14 @@ export const CareCard = ({
                 }`}
                 aria-label="영양제 주기 완료"
                 title={
-                  !canNutrient ? '아직 영양제를 줄 필요가 없습니다' : '영양제 주기'
+                  !canNutrient
+                    ? '아직 영양제를 줄 필요가 없습니다'
+                    : '영양제 주기'
                 }>
                 <NutrientIcon
                   className={`size-5 transition-all duration-300 ${
                     nutrientStatus
-                      ? 'text-green-600'
+                      ? 'text-green-600 [&>path]:fill-green-600'
                       : 'scale-110 text-green-700 drop-shadow-sm'
                   }`}
                 />
