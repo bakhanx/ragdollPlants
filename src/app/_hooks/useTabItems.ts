@@ -26,8 +26,8 @@ export function useTabItems<T, TabType extends string>({
   allItems,
   filterFn,
   initialTab,
-  initialItemsCount = PAGINATION.INITIAL_ITEMS_COUNT,
-  loadMoreCount = PAGINATION.LOAD_MORE_COUNT
+  initialItemsCount = PAGINATION.ITEMS_PER_PAGE,
+  loadMoreCount = PAGINATION.ITEMS_PER_PAGE
 }: UseTabItemsOptions<T, TabType>): UseTabItemsResult<T, TabType> {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
