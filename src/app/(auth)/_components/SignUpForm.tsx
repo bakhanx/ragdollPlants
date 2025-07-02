@@ -9,7 +9,7 @@ import { Button } from './Button';
 import { PasswordInput } from './PasswordInput';
 import { TermsAgreement } from './TermsAgreement';
 import { signUpSchema, type SignUpData } from '@/lib/validations/auth';
-import { signUpAction } from '../signup/actions';
+import { signUpAction } from '@/app/actions/auth';
 
 export const SignUpForm: React.FC = () => {
   const router = useRouter();
