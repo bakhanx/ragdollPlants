@@ -8,7 +8,19 @@ import { DiaryMoodStatus, Diary } from '../models/diary';
  * 일기 목록 컴포넌트 Props
  */
 export interface DiaryListProps {
-  initialPosts: Diary[];
+  diariesData: {
+    diaries: Diary[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalCount: number;
+      limit: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+  } | null;
+  currentPage: number;
+  searchQuery: string;
 }
 
 /**
