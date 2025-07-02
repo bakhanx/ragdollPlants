@@ -19,17 +19,13 @@ export default function ArticleContent({ article }: ArticleContentProps) {
       <div className="absolute top-2 right-4 z-20">
         <CategoryBadge category={article.category} />
       </div>
-      <h1 className="text-2xl font-bold text-gray-800">
-        {article.title}
-      </h1>
+      <h1 className="text-2xl font-bold text-gray-800">{article.title}</h1>
 
       <div className="mb-6 flex items-center justify-between pt-12">
         <span className="text-sm font-medium text-gray-500">
           작성자: {article.author || '익명'}
         </span>
-        <time className="text-end text-sm text-gray-500">
-          {article.date}
-        </time>
+        <time className="text-end text-sm text-gray-500">{article.date}</time>
       </div>
 
       {article.tags && article.tags.length > 0 && (
@@ -44,9 +40,15 @@ export default function ArticleContent({ article }: ArticleContentProps) {
         </div>
       )}
 
-      <p className="text-base leading-relaxed whitespace-pre-line text-gray-600">
-        {article.content}
-      </p>
+      <div
+        className="prose prose-green max-w-none text-base leading-relaxed break-words [&_*]:break-words [&_div]:break-words [&_p]:break-words"
+        style={{
+          overflowWrap: 'anywhere',
+          wordBreak: 'break-word',
+          hyphens: 'auto'
+        }}
+        dangerouslySetInnerHTML={{ __html: article.content }}
+      />
     </div>
   );
-} 
+}
