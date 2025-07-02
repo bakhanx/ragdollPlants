@@ -7,7 +7,7 @@ import { SelectedPlantInfo } from './SelectedPlantInfo';
 import { PlantSelector } from './PlantSelector';
 import { DiaryMoodSelector, moodOptions } from './DiaryMoodSelector';
 import { DiaryImageUploadSection } from './DiaryImageUploadSection';
-import { createDiary } from '@/app/actions/diaries';
+import { createDiary, updateDiary } from '@/app/actions/diaries';
 import { getMyPlantsBasicInfo } from '@/app/actions/plants';
 
 const MAX_FREE_PHOTO_DIARIES = 3; // 무료 회원이 사진 첨부 가능한 일기 수
@@ -16,11 +16,23 @@ const MAX_PAID_PHOTO_COUNT = 5; // 최대 사진 개수
 interface DiaryFormProps {
   isPaidUser: boolean;
   toggleSubscription: () => void;
+  mode?: 'create' | 'edit';
+  initialData?: {
+    id: string;
+    title: string;
+    content: string;
+    status: string;
+    date: Date;
+    plantId: string | null;
+    image: string | null;
+  };
 }
 
 export const DiaryForm = ({
   isPaidUser,
-  toggleSubscription
+  toggleSubscription,
+  mode = 'create',
+  initialData
 }: DiaryFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,15 +42,15 @@ export const DiaryForm = ({
   const [myPlants, setMyPlants] = useState<{ id: string; name: string }[]>([]);
   const [plantsLoading, setPlantsLoading] = useState(false);
 
-  // 선택된 식물 ID 상태
+  // 선택된 식물 ID 상태 - 편집 모드일 때 초기값 설정
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(
-    plantIdFromParams
+    initialData?.plantId || plantIdFromParams
   );
 
-  // 폼 상태 관리
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [mood, setMood] = useState('good');
+  // 폼 상태 관리 - 편집 모드일 때 초기값 설정
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [content, setContent] = useState(initialData?.content || '');
+  const [mood, setMood] = useState(initialData?.status || 'good');
 
   // 이미지 업로드 훅 사용
   const { imageFiles, imagePreviews, handleMultiImageChange } = useImageUpload({
@@ -104,7 +116,12 @@ export const DiaryForm = ({
       formData.append('title', title);
       formData.append('content', content);
       formData.append('status', mood);
+      
+      if (mode === 'edit' && initialData) {
+        formData.append('date', initialData.date.toISOString());
+      } else {
       formData.append('date', new Date().toISOString());
+      }
 
       // 선택된 식물이 있으면 추가
       if (selectedPlantId) {
@@ -120,19 +137,24 @@ export const DiaryForm = ({
       // 태그 추가 (빈 배열로 초기화)
       formData.append('tags', JSON.stringify([]));
 
-      // 다이어리 생성 액션 함수 호출
+      // mode에 따라 다른 액션 함수 호출
+      if (mode === 'edit' && initialData) {
+        await updateDiary(initialData.id, formData);
+      } else {
       await createDiary(formData);
+      }
     } catch (error) {
       // Next.js redirect 에러 무시
       if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
         return;
       }
 
-      console.error('다이어리 생성 오류:', error);
+      const actionText = mode === 'edit' ? '수정' : '생성';
+      console.error(`다이어리 ${actionText} 오류:`, error);
       alert(
         error instanceof Error
           ? error.message
-          : '다이어리 저장 중 오류가 발생했습니다.'
+          : `다이어리 ${actionText} 중 오류가 발생했습니다.`
       );
     }
   };
