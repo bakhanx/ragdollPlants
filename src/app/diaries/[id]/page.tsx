@@ -5,7 +5,7 @@ import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import DiaryImage from '@/app/diaries/_components/DiaryImage';
 import DiaryContent from '@/app/diaries/_components/DiaryContent';
-import { getDiaryById } from '@/app/actions/diaries';
+import { getDiaryWithOwnership } from '@/app/actions/diaries';
 import { DiaryMoodStatus } from '@/types/models/diary';
 import { formatDateTime } from '@/app/_utils/dateUtils';
 
@@ -16,11 +16,7 @@ export default async function DiaryDetail(props: {
   const id = params.id;
 
   try {
-    const diary = await getDiaryById(id);
-
-    if (!diary) {
-      notFound();
-    }
+    const { diary, isOwner } = await getDiaryWithOwnership(id);
 
     const diaryDetail = {
       id: diary.id,
@@ -42,6 +38,8 @@ export default async function DiaryDetail(props: {
             variant="glass"
             contentType="diary"
             id={id}
+            showContentMenu={true}
+            isOwner={isOwner}
           />
 
           <div className="w-full overflow-hidden rounded-2xl">
