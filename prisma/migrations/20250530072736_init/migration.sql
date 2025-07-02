@@ -8,6 +8,7 @@ CREATE TABLE "users" (
     "cover_image" TEXT,
     "bio" TEXT,
     "password" TEXT,
+    "phone" TEXT,
     "role" TEXT NOT NULL DEFAULT 'USER',
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "level" INTEGER NOT NULL DEFAULT 1,
@@ -131,7 +132,7 @@ CREATE TABLE "care_reminders" (
 
 -- CreateTable
 CREATE TABLE "articles" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "summary" TEXT,
@@ -181,7 +182,7 @@ CREATE TABLE "galleries" (
 
 -- CreateTable
 CREATE TABLE "events" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "subtitle" TEXT NOT NULL,
     "image" TEXT NOT NULL,
@@ -208,7 +209,7 @@ CREATE TABLE "comments" (
     "content" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "article_id" TEXT NOT NULL,
+    "article_id" INTEGER NOT NULL,
     "author_id" TEXT NOT NULL,
     "parent_id" TEXT,
 
