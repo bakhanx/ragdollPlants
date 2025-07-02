@@ -12,9 +12,6 @@ export * from './communityData';
 // 다이어리 관련 데이터
 export * from './diaryData';
 
-// 아티클 관련 데이터
-export * from './articleData';
-
 // 알림 유형 정의
 export type NotificationType = {
   id: string;
@@ -83,4 +80,4 @@ export { LEVEL_EXP_REQUIREMENTS as levelExpRequirements } from '@/types/models/u
 export const profileImg = '/images/Profile.png';
 
 // 식물 상세 데이터
-export * from './plantDetailData'; 
+export * from './plantDetailData';
