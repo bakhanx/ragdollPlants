@@ -6,19 +6,12 @@ import Banner from './_components/banner/Banner';
 import { MenuList } from './_components/lists/MenuList';
 import { Header } from './_components/header/Header';
 import { ArticleList } from './_components/lists/ArticleList';
-import { articleItems } from './_temp/articleData';
+import { getLatestArticles } from './actions/articles';
 
-export default function Page() {
-  // 최신 3개의 아티클만 선택
-  const latestArticles = articleItems
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 3)
-    .map(article => ({
-      id: String(article.id), // ArticleList 컴포넌트가 string id를 기대하므로 변환
-      title: article.title,
-      image: article.image,
-      date: article.date
-    }));
+const ARTICLE_COUNT = 3;
+
+export default async function Page() {
+  const latestArticles = await getLatestArticles(ARTICLE_COUNT);
 
   return (
     <>
