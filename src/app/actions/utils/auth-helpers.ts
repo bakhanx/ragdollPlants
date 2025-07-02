@@ -41,11 +41,14 @@ export async function validatePlantOwnership(plantId: string, userId: string) {
  * 아티클 소유권 확인
  */
 export async function validateArticleOwnership(
-  articleId: string,
+  articleId: number | string,
   userId: string
 ) {
+  const id =
+    typeof articleId === 'string' ? parseInt(articleId, 10) : articleId;
+
   const article = await prisma.article.findFirst({
-    where: { id: articleId, authorId: userId }
+    where: { id, authorId: userId }
   });
 
   if (!article) {
@@ -91,9 +94,14 @@ export async function validateGalleryOwnership(
 /**
  * 이벤트 소유권 확인
  */
-export async function validateEventOwnership(eventId: string, userId: string) {
+export async function validateEventOwnership(
+  eventId: number | string,
+  userId: string
+) {
+  const id = typeof eventId === 'string' ? parseInt(eventId, 10) : eventId;
+
   const event = await prisma.event.findFirst({
-    where: { id: eventId, authorId: userId }
+    where: { id, authorId: userId }
   });
 
   if (!event) {
