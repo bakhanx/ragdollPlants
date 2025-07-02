@@ -15,6 +15,7 @@ import ArrowUp from '@/../public/svg/arrow-up.svg';
 import Schedule from '@/../public/svg/schedule.svg';
 import Image from '@/../public/svg/image.svg';
 import Search from '@/../public/svg/search.svg';
+import SignOut from '@/../public/svg/sign-out.svg';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
@@ -60,3 +61,4 @@ export const ArrowUpIcon = createIcon(ArrowUp, 'ArrowUpIcon');
 export const ScheduleIcon = createIcon(Schedule, 'ScheduleIcon');
 export const ImageIcon = createIcon(Image, 'ImageIcon');
 export const SearchIcon = createIcon(Search, 'SearchIcon');
+export const SignOutIcon = createIcon(SignOut, 'SignOutIcon');
