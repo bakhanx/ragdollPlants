@@ -24,6 +24,11 @@ export default async function middleware(request: NextRequest) {
   const session = await auth()
   const { pathname } = request.nextUrl
   
+  // 이미 로그인한 사용자가 /login에 접근하면 메인으로 리다이렉트
+  if (pathname === '/login' && session?.user) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
   // 로그인이 필요한 페이지 체크
   if (PROTECTED_PATHS.some(path => pathname.startsWith(path))) {
     if (!session) {
@@ -50,6 +55,7 @@ export default async function middleware(request: NextRequest) {
 // 미들웨어가 실행될 경로 지정
 export const config = {
   matcher: [
+    '/login', // 로그인 페이지도 미들웨어 적용
     // 관리자 페이지
     '/admin/:path*',
     // 로그인이 필요한 사용자 페이지
