@@ -3,27 +3,31 @@
 import { useMemo } from 'react';
 import { useTabItems } from '@/app/_hooks/useTabItems';
 import { SearchInput } from '@/app/_components/common/SearchInput';
-import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
+import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { inferArticleCategory } from '@/app/_utils/categoryUtils';
 import { ArticleItem } from './ArticleItem';
 import { UploadButton } from '@/app/_components/common/UploadButton';
-import { useAuth } from '@/app/_hooks/useAuth';
 import { ArticleWithNumberId, ArticleTabType } from '@/types/models/article';
 
 export default function ArticleList({
-  initialArticles
+  initialArticles,
+  isAdmin
 }: {
   initialArticles: ArticleWithNumberId[];
+  isAdmin: boolean;
 }) {
   // 카테고리별로 분류
-  const allItems = useMemo<Record<ArticleTabType, ArticleWithNumberId[]>>(() => {
+  const allItems = useMemo<
+    Record<ArticleTabType, ArticleWithNumberId[]>
+  >(() => {
     const withCategory = initialArticles.map(article => ({
       ...article,
       category:
         article.category ||
         inferArticleCategory(article.title, article.content, article.tags)
     }));
+
     return {
       all: withCategory,
       tips: withCategory.filter(a => a.category === 'tips'),
@@ -50,8 +54,6 @@ export default function ArticleList({
     initialTab: 'all'
   });
 
-  const { isAdmin } = useAuth();
-
   // 탭 정보
   const tabs: { id: ArticleTabType; label: string; count: number }[] = [
     { id: 'all', label: '전체', count: filteredItemsCount.all },
@@ -76,15 +78,17 @@ export default function ArticleList({
           />
         )}
       </div>
+
       <TabNavigation
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
+
       <div className="mx-auto w-full">
         {visibleItems.length > 0 ? (
           <>
-            <div className={`space-y-6`}>
+            <div className="space-y-6">
               {visibleItems.map(post => (
                 <ArticleItem
                   key={post.id}
