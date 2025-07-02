@@ -6,6 +6,25 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getCurrentUser, validateArticleOwnership } from './utils/auth-helpers';
+import {
+  uploadImageToCloudflare,
+  deleteImageFromCloudflare
+} from '@/lib/cloudflare-images';
+import { ArticleWithNumberId, ArticleCategory } from '@/types/models/article';
+
+// 카테고리 목록 조회
+export async function getCategories() {
+  try {
+    const categories = await prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { order: 'asc' }
+    });
+    return categories;
+  } catch (error) {
+    console.error('카테고리 조회 실패:', error);
+    return [];
+  }
+}
 
 // 아티클 생성 유효성 검사 스키마
 const createArticleSchema = z.object({
@@ -17,24 +36,15 @@ const createArticleSchema = z.object({
 });
 
 // 모든 아티클 조회 (최적화된 쿼리 직접 구현)
-export async function getArticles() {
+export async function getArticles(): Promise<ArticleWithNumberId[]> {
   try {
-    return await prisma.article.findMany({
+    const articles = await prisma.article.findMany({
       where: { isPublished: true },
-      select: {
-        id: true,
-        title: true,
-        summary: true,
-        image: true,
-        tags: true,
-        viewCount: true,
-        createdAt: true,
+      include: {
         author: {
           select: {
             id: true,
-            name: true,
-            image: true,
-            email: true
+            name: true
           }
         },
         category: {
@@ -43,23 +53,37 @@ export async function getArticles() {
             name: true,
             color: true
           }
-        },
-        _count: {
-          select: {
-            comments: true
-          }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
+
+    // DB 데이터를 ArticleWithNumberId 형태로 변환
+    return articles.map(article => ({
+      id: article.id,
+      title: article.title,
+      content: '', // 목록에서는 content 불필요
+      image: article.image || '/images/plant-default.png',
+      date: article.createdAt.toISOString().split('T')[0].replace(/-/g, '.'),
+      summary: article.summary || undefined,
+      author: {
+        id: article.author.id,
+        name: article.author.name || '익명'
+      },
+      tags: article.tags,
+      category: article.category.name as ArticleCategory,
+      likes: 0 // 임시값 (현재 스키마에 likes 테이블이 없음)
+    }));
   } catch (error) {
-    console.error('아티클 목록 조회 오류:', error);
-    throw new Error('아티클 목록을 불러오는 중 오류가 발생했습니다.');
+    console.error('아티클 조회 실패:', error);
+    return [];
   }
 }
 
 // 특정 아티클 조회
-export async function getArticleById(id: string) {
+export async function getArticleById(id: number) {
   try {
     const article = await prisma.article.findUnique({
       where: { id },
@@ -135,16 +159,11 @@ export async function createArticle(formData: FormData) {
     }
 
     // 썸네일 이미지 처리
+    let thumbnailUrl = '/images/plant-default.png';
     const thumbnailFile = formData.get('thumbnail') as File | null;
-    let thumbnailUrl = '';
 
     if (thumbnailFile && thumbnailFile.size > 0) {
-      // 실제 구현에서는 파일 스토리지에 업로드
-      // 임시로 base64 인코딩 (실제 운영에서는 Cloudflare Images 등 사용 권장)
-      const bytes = await thumbnailFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64 = buffer.toString('base64');
-      thumbnailUrl = `data:${thumbnailFile.type};base64,${base64}`;
+      thumbnailUrl = await uploadImageToCloudflare(thumbnailFile);
     }
 
     // 입력 검증
@@ -168,7 +187,7 @@ export async function createArticle(formData: FormData) {
         title: validatedData.title,
         content: validatedData.content,
         summary: validatedData.summary || null,
-        image: thumbnailUrl || null,
+        image: thumbnailUrl,
         tags: validatedData.tags || [],
         authorId: user.id,
         categoryId: validatedData.categoryId,
@@ -200,7 +219,7 @@ export async function createArticle(formData: FormData) {
 }
 
 // 아티클 수정
-export async function updateArticle(id: string, formData: FormData) {
+export async function updateArticle(id: number, formData: FormData) {
   try {
     const user = await getCurrentUser();
 
@@ -215,6 +234,9 @@ export async function updateArticle(id: string, formData: FormData) {
       categoryId: formData.get('categoryId') as string
     };
 
+    // 디버깅: content가 제대로 전달되는지 확인
+    console.log('updateArticle - 전달받은 content:', rawData.content);
+
     const tagsJson = formData.get('tags') as string;
     let tags: string[] = [];
     if (tagsJson) {
@@ -222,6 +244,23 @@ export async function updateArticle(id: string, formData: FormData) {
         tags = JSON.parse(tagsJson);
       } catch (e) {
         console.error('태그 파싱 오류:', e);
+      }
+    }
+
+    // 썸네일 이미지 처리
+    let thumbnailUrl = existingArticle.image || '/images/plant-default.png';
+    const thumbnailFile = formData.get('thumbnail') as File | null;
+
+    if (thumbnailFile && thumbnailFile.size > 0) {
+      // 새 이미지 업로드
+      thumbnailUrl = await uploadImageToCloudflare(thumbnailFile);
+
+      // 기존 이미지 삭제 (기본 이미지가 아닌 경우)
+      if (
+        existingArticle.image &&
+        !existingArticle.image.includes('/images/plant-default.png')
+      ) {
+        await deleteImageFromCloudflare(existingArticle.image);
       }
     }
 
@@ -246,9 +285,10 @@ export async function updateArticle(id: string, formData: FormData) {
       data: {
         title: validatedData.title,
         content: validatedData.content,
-        summary: validatedData.summary || undefined,
+        summary: validatedData.summary || null,
         tags: validatedData.tags || [],
-        categoryId: validatedData.categoryId
+        categoryId: validatedData.categoryId,
+        image: thumbnailUrl
       }
     });
 
@@ -269,8 +309,58 @@ export async function updateArticle(id: string, formData: FormData) {
   }
 }
 
+// 홈페이지용 최신 아티클 조회 (3개)
+export async function getLatestArticles(
+  limit: number = 3
+): Promise<ArticleWithNumberId[]> {
+  try {
+    const articles = await prisma.article.findMany({
+      where: { isPublished: true },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            color: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit
+    });
+
+    // DB 데이터를 ArticleWithNumberId 형태로 변환
+    return articles.map(article => ({
+      id: article.id,
+      title: article.title,
+      content: '', // 목록에서는 content 불필요
+      image: article.image || '/images/plant-default.png',
+      date: article.createdAt.toISOString().split('T')[0].replace(/-/g, '.'),
+      summary: article.summary || undefined,
+      author: {
+        id: article.author.id,
+        name: article.author.name || '익명'
+      },
+      tags: article.tags,
+      category: article.category.name as ArticleCategory,
+      likes: 0 // 임시값 (현재 스키마에 likes 테이블이 없음)
+    }));
+  } catch (error) {
+    console.error('최신 아티클 조회 실패:', error);
+    return [];
+  }
+}
+
 // 아티클 삭제
-export async function deleteArticle(id: string) {
+export async function deleteArticle(id: number) {
   try {
     const user = await getCurrentUser();
 
