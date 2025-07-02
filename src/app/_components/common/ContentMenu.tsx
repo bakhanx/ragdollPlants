@@ -12,13 +12,20 @@ export type MenuItem = {
 };
 
 type ContentMenuProps = {
-  id: string;              // 콘텐츠 ID
-  contentType: 'diary' | 'event' | 'article'; // 콘텐츠 타입
+  id: string; // 콘텐츠 ID
+  contentType: 'diary' | 'event' | 'article' | 'plant' | 'gallery'; // 콘텐츠 타입
   customItems?: MenuItem[]; // 커스텀 메뉴 항목
-  ariaLabel?: string;      // 접근성 레이블
+  ariaLabel?: string; // 접근성 레이블
+  isOwner?: boolean; // 작성자 여부
 };
 
-export const ContentMenu = ({ id, contentType, customItems, ariaLabel }: ContentMenuProps) => {
+export const ContentMenu = ({
+  id,
+  contentType,
+  customItems,
+  ariaLabel,
+  isOwner = false
+}: ContentMenuProps) => {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
 
@@ -29,37 +36,67 @@ export const ContentMenu = ({ id, contentType, customItems, ariaLabel }: Content
   // 콘텐츠 타입별 기본 메뉴 항목 매핑
   const getEditPath = () => {
     const paths = {
-      diary: `/diary/edit/${id}`,
-      event: `/events/edit/${id}`,
-      article: `/articles/edit/${id}`
+      diary: `/diaries/${id}/edit`,
+      event: `/events/${id}/edit`,
+      article: `/articles/${id}/edit`,
+      plant: `/myplants/${id}/edit`,
+      gallery: `/galleries/${id}/edit`
     };
     return paths[contentType];
   };
 
-  // 기본 메뉴 항목
-  const defaultItems: MenuItem[] = [
+  // 삭제 핸들러
+  const handleDelete = () => {
+    if (confirm('정말 삭제하시겠습니까?')) {
+      // TODO: 실제 삭제 로직 구현
+      console.log(`${contentType} ${id} 삭제`);
+    }
+  };
+
+  // 신고 핸들러
+  const handleReport = () => {
+    if (confirm('이 게시물을 신고하시겠습니까?')) {
+      // TODO: 실제 신고 로직 구현
+      console.log(`${contentType} ${id} 신고`);
+      alert('신고가 접수되었습니다.');
+    }
+  };
+
+  // 작성자/관리자용 메뉴 항목 (수정, 삭제 권한)
+  const ownerItems: MenuItem[] = [
     {
       label: '수정하기',
       onClick: () => router.push(getEditPath())
     },
     {
       label: '삭제하기',
-      onClick: () => confirm('정말 삭제하시겠습니까?') && console.log(`${contentType} ${id} 삭제`),
+      onClick: handleDelete,
       isDanger: true
     }
   ];
 
-  // 커스텀 메뉴 항목이 있으면 사용, 없으면 기본 항목 사용
-  const menuItems = customItems || defaultItems;
+  // 일반 사용자용 메뉴 항목 (신고만 가능)
+  const nonOwnerItems: MenuItem[] = [
+    {
+      label: '신고하기',
+      onClick: handleReport,
+      isDanger: true
+    }
+  ];
+
+  // 커스텀 메뉴 항목이 있으면 사용, 없으면 작성자 여부에 따라 항목 결정
+  const menuItems = customItems || (isOwner ? ownerItems : nonOwnerItems);
 
   // 접근성 레이블 생성
   const getAriaLabel = () => {
     if (ariaLabel) return ariaLabel;
-    
+
     const labels = {
       diary: '다이어리 메뉴 열기',
       event: '이벤트 메뉴 열기',
-      article: '게시물 메뉴 열기'
+      article: '게시물 메뉴 열기',
+      plant: '식물 메뉴 열기',
+      gallery: '갤러리 메뉴 열기'
     };
     return labels[contentType];
   };
@@ -70,7 +107,10 @@ export const ContentMenu = ({ id, contentType, customItems, ariaLabel }: Content
         onClick={handleMenuClick}
         className="group relative flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all hover:bg-white/70 hover:shadow-md"
         aria-label={getAriaLabel()}>
-        <MenuIcon size={18} className="[&_circle]:stroke-gray-700" />
+        <MenuIcon
+          size={18}
+          className="[&_circle]:stroke-gray-700"
+        />
       </button>
 
       {showMenu && (
