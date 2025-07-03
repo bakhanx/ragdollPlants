@@ -101,7 +101,7 @@ export async function getActiveEvents() {
 }
 
 // 특정 이벤트 조회
-export async function getEventById(id: string) {
+export async function getEventById(id: number) {
   try {
     const event = await prisma.event.findUnique({
       where: { id },
@@ -222,7 +222,7 @@ export async function createEvent(formData: FormData) {
 }
 
 // 이벤트 수정
-export async function updateEvent(id: string, formData: FormData) {
+export async function updateEvent(id: number, formData: FormData) {
   try {
     const user = await getCurrentUser();
 
@@ -311,7 +311,7 @@ export async function updateEvent(id: string, formData: FormData) {
 }
 
 // 이벤트 삭제
-export async function deleteEvent(id: string) {
+export async function deleteEvent(id: number) {
   try {
     const user = await getCurrentUser();
 
@@ -339,7 +339,7 @@ export async function deleteEvent(id: string) {
 }
 
 // 이벤트 종료 상태 토글
-export async function toggleEventEndStatus(id: string) {
+export async function toggleEventEndStatus(id: number) {
   try {
     const user = await getCurrentUser();
 
