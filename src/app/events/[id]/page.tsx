@@ -3,37 +3,50 @@ import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import { EventCard } from '@/app/events/[id]/_components/EventCard';
-import { eventDetails } from '@/app/_constants/eventData';
 import { notFound } from 'next/navigation';
+import { auth } from '@/auth';
+import { getEventById } from '@/app/actions/events';
 
 export default async function EventDetailPage(props: {
   params: Promise<{ id: string }>;
 }) {
-  // Next.js 15에서는 params가 Promise이므로 await로 처리해야 함
   const params = await props.params;
-  const eventId = params.id;
+  const { id } = params;
 
-  // URL의 id 파라미터로 해당 이벤트 찾기
-  const eventDetail = eventDetails.find(event => event.id === eventId);
+  const session = await auth();
+  const isAdmin = session?.user?.role === 'ADMIN';
 
-  // 이벤트가 없으면 404 메시지 표시
-  if (!eventDetail) {
+  try {
+    const eventId = parseInt(id, 10);
+    if (isNaN(eventId)) {
+      notFound();
+    }
+
+    const event = await getEventById(eventId);
+
+    return (
+      <>
+        <BackgroundImage src={event.image} />
+        <ContentsLayout noPadding>
+          <Header
+            title={event.title}
+            id={id}
+            showBack
+            showContentMenu={isAdmin}
+            showNotification
+            variant="glass"
+            contentType="event"
+            isOwner={isAdmin}
+          />
+
+          <div className="w-full rounded-2xl">
+            <EventCard eventData={event} />
+          </div>
+        </ContentsLayout>
+      </>
+    );
+  } catch (error) {
+    console.error('이벤트 조회 오류:', error);
     notFound();
   }
-
-  return (
-    <>
-      <BackgroundImage src={eventDetail.imageUrl} />
-      <ContentsLayout>
-        <Header
-          title={eventDetail.title}
-          showNotification
-          showBack
-          showMenuButton
-        />
-        
-        <EventCard eventData={{ ...eventDetail, id: eventId }} />
-      </ContentsLayout>
-    </>
-  );
 }
