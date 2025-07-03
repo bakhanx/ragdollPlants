@@ -1,22 +1,39 @@
-/**
- * Event 관련 컴포넌트 Props 타입 정의
- */
+import { EventDetail, EventPreview } from '../models/event';
 
-import { EventTabType, EventDetail, EventPreview, LegacyBannerItem } from '../models/event';
+export interface EventWithAuthor {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  link: string;
+  startDate: Date;
+  endDate: Date;
+  isEnded: boolean;
+  viewCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  author: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+}
 
 /**
  * 이벤트 목록 컴포넌트 Props
  */
 export interface EventListProps {
-  initialActiveEvents: LegacyBannerItem[];
-  initialEndedEvents: LegacyBannerItem[];
+  initialActiveEvents: EventWithAuthor[];
+  initialEndedEvents: EventWithAuthor[];
+  isAdmin: boolean;
 }
 
 /**
  * 이벤트 카드 컴포넌트 Props
  */
 export interface EventCardProps {
-  event: LegacyBannerItem;
+  event: EventWithAuthor;
 }
 
 /**
@@ -42,4 +59,4 @@ export interface EventFormProps {
   initialData?: Partial<EventDetail>;
   onSubmit: (data: EventDetail) => Promise<void>;
   isLoading?: boolean;
-} 
+}
