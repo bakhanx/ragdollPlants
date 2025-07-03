@@ -32,7 +32,7 @@ const variantClasses: Record<HeaderVariant, string> = {
   default: 'w-full flex items-center gap-3',
   transparent: 'w-full flex items-center gap-3',
   glass:
-    'fixed z-10 flex w-full items-center justify-between rounded-t-2xl bg-black/20 px-4 py-4 shadow-lg backdrop-blur-sm'
+    'fixed z-10 flex w-full items-center justify-between rounded-t-xl bg-black/20 px-4 py-4 shadow-lg backdrop-blur-sm'
 };
 
 export const Header = ({

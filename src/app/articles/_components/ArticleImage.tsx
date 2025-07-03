@@ -9,12 +9,12 @@ interface ArticleImageProps {
 
 export default function ArticleImage({ imageUrl, title, id }: ArticleImageProps) {
   return (
-    <div className="relative h-[calc(50vh-16px)] w-full">
+    <div className="relative h-[calc(50vh-16px)] w-full ">
       <Image
         src={imageUrl}
         alt={title}
         fill
-        className="object-cover"
+        className="object-cover rounded-xl"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         priority
       />
