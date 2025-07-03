@@ -23,8 +23,8 @@ export interface UseFilteredItemsResult<T> {
 export function useFilteredItems<T>({
   items,
   filterFn,
-  initialItemsCount = PAGINATION.INITIAL_ITEMS_COUNT,
-  loadMoreCount = PAGINATION.LOAD_MORE_COUNT
+  initialItemsCount = PAGINATION.ITEMS_PER_PAGE,
+  loadMoreCount = PAGINATION.ITEMS_PER_PAGE
 }: UseFilteredItemsOptions<T>): UseFilteredItemsResult<T> {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredItems, setFilteredItems] = useState<T[]>(items);
