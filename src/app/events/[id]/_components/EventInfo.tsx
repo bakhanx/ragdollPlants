@@ -4,7 +4,8 @@ import Link from 'next/link';
 interface EventInfoProps {
   subtitle: string;
   title: string;
-  period: string;
+  startDate: Date;
+  endDate: Date;
   description: string;
   content: string;
   isEnded: boolean;
@@ -13,11 +14,15 @@ interface EventInfoProps {
 export const EventInfo = ({
   subtitle,
   title,
-  period,
+  startDate,
+  endDate,
   description,
   content,
-  isEnded,
+  isEnded
 }: EventInfoProps) => {
+  
+  const period = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+
   return (
     <div className="rounded-lg bg-white/90 p-4 shadow-lg">
       <div className="mb-4">
@@ -45,4 +50,4 @@ export const EventInfo = ({
       </Link>
     </div>
   );
-}; 
+};
