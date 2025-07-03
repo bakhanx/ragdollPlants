@@ -9,20 +9,33 @@ import { SubmitButton } from './SubmitButton';
 
 export interface EventUploadFormProps {
   isLoading?: boolean;
+  mode?: 'create' | 'edit';
+  initialData?: {
+    id: string;
+    title: string;
+    subtitle: string;
+    description: string;
+    content: string;
+    image: string | null;
+    startDate: Date;
+    endDate: Date;
+  };
 }
 
 // 메인 폼 컴포넌트
 export const EventUploadForm = ({
-  isLoading = false
+  isLoading = false,
+  mode = 'create',
+  initialData
 }: EventUploadFormProps) => {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [subtitle, setSubtitle] = useState('');
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [subtitle, setSubtitle] = useState(initialData?.subtitle || '');
   const [period, setPeriod] = useState('');
-  const [description, setDescription] = useState('');
-  const [content, setContent] = useState('');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [content, setContent] = useState(initialData?.content || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 이미지 변경 핸들러
@@ -44,8 +57,14 @@ export const EventUploadForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !subtitle || !period || !description || !imageFile) {
+    if (!title || !subtitle || !period || !description) {
       alert('모든 필수 항목을 입력해주세요.');
+      return;
+    }
+
+    // 편집 모드에서는 이미지가 필수가 아님
+    if (mode === 'create' && !imageFile) {
+      alert('이미지를 업로드해주세요.');
       return;
     }
 
@@ -60,19 +79,27 @@ export const EventUploadForm = ({
       formData.append('link', '#'); // 임시 링크
       formData.append('startDate', new Date().toISOString());
       formData.append('endDate', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()); // 30일 후
+      
       if (imageFile) {
         formData.append('image', imageFile);
       }
 
-      // 액션 함수 import 및 호출은 추후 추가 예정
-      // const result = await createEvent(formData);
-      
-      // 임시로 메시지 출력
-      alert('이벤트가 성공적으로 등록되었습니다.');
-      router.push('/events');
+      // mode에 따라 다른 액션 함수 호출
+      if (mode === 'edit' && initialData) {
+        const { updateEvent } = await import('@/app/actions/events');
+        await updateEvent(parseInt(initialData.id), formData);
+        alert('이벤트가 성공적으로 수정되었습니다.');
+        router.push(`/events/${initialData.id}`);
+      } else {
+        const { createEvent } = await import('@/app/actions/events');
+        await createEvent(formData);
+        alert('이벤트가 성공적으로 등록되었습니다.');
+        router.push('/events');
+      }
     } catch (error) {
-      console.error('이벤트 등록 실패:', error);
-      alert('이벤트 등록에 실패했습니다. 다시 시도해주세요.');
+      const actionText = mode === 'edit' ? '수정' : '등록';
+      console.error(`이벤트 ${actionText} 실패:`, error);
+      alert(`이벤트 ${actionText}에 실패했습니다. 다시 시도해주세요.`);
     } finally {
       setIsSubmitting(false);
     }
