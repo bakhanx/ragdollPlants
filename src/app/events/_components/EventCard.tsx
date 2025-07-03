@@ -8,12 +8,12 @@ import { EventCardProps } from '@/types/components/events';
 export default function EventCard({ event }: EventCardProps) {
   return (
     <Link
-      href={event.link}
+      href={`/events/${event.id}`}
       className="block">
       <div
         className={`relative h-40 w-full overflow-hidden rounded-lg transition-shadow hover:shadow-lg ${event.isEnded ? 'grayscale' : ''}`}>
         <Image
-          src={event.imageUrl}
+          src={event.image}
           alt={event.title}
           fill
           className="object-cover"
