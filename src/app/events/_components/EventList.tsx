@@ -6,12 +6,14 @@ import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import EventCard from './EventCard';
 import { UploadButton } from '@/app/_components/common/UploadButton';
-import { useAuth } from '@/app/_hooks/useAuth';
-import { EventListProps } from '@/types/components/events';
-import { EventTabType, LegacyBannerItem } from '@/types/models/event';
+import { EventListProps, EventWithAuthor } from '@/types/components/events';
+import { EventTabType } from '@/types/models/event';
 
-export default function EventList({ initialActiveEvents, initialEndedEvents }: EventListProps) {
-  // 탭별 데이터 구성
+export default function EventList({
+  initialActiveEvents,
+  initialEndedEvents,
+  isAdmin
+}: EventListProps) {
   const allItems = {
     active: initialActiveEvents,
     ended: initialEndedEvents
@@ -26,15 +28,13 @@ export default function EventList({ initialActiveEvents, initialEndedEvents }: E
     handleSearch,
     handleLoadMore,
     filteredItemsCount
-  } = useTabItems<LegacyBannerItem, EventTabType>({
+  } = useTabItems<EventWithAuthor, EventTabType>({
     allItems,
     filterFn: (item, query) =>
       item.title.toLowerCase().includes(query.toLowerCase()) ||
       item.subtitle.toLowerCase().includes(query.toLowerCase()),
     initialTab: 'active'
   });
-
-  const { isAdmin } = useAuth();
 
   const tabs: { id: EventTabType; label: string; count: number }[] = [
     {
@@ -56,7 +56,7 @@ export default function EventList({ initialActiveEvents, initialEndedEvents }: E
         </div>
         {isAdmin && (
           <UploadButton
-            link="/events/create"
+            link="/events/upload"
             title="이벤트 등록"
           />
         )}
