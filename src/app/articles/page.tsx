@@ -9,8 +9,12 @@ export default async function ArticlesPage() {
   const session = await auth();
   const isAdmin = session?.user?.role === 'ADMIN';
 
-  // 실제 DB에서 데이터 가져오기 (이제 구조가 일치함)
   const articles = await getArticles();
+
+  const allArticles = articles;
+  const tipsArticles = articles.filter(a => a.category === 'tips');
+  const newsArticles = articles.filter(a => a.category === 'news');
+  const guideArticles = articles.filter(a => a.category === 'guide');
 
   return (
     <>
@@ -21,7 +25,10 @@ export default async function ArticlesPage() {
           showNotification
         />
         <ArticleList
-          initialArticles={articles}
+          allArticles={allArticles}
+          tipsArticles={tipsArticles}
+          newsArticles={newsArticles}
+          guideArticles={guideArticles}
           isAdmin={isAdmin}
         />
       </ContentsLayout>

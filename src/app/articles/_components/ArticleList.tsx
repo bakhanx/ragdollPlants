@@ -1,40 +1,33 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useTabItems } from '@/app/_hooks/useTabItems';
 import { SearchInput } from '@/app/_components/common/SearchInput';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
-import { inferArticleCategory } from '@/app/_utils/categoryUtils';
 import { ArticleItem } from './ArticleItem';
 import { UploadButton } from '@/app/_components/common/UploadButton';
 import { ArticleWithNumberId, ArticleTabType } from '@/types/models/article';
 
 export default function ArticleList({
-  initialArticles,
+  allArticles,
+  tipsArticles,
+  newsArticles,
+  guideArticles,
   isAdmin
 }: {
-  initialArticles: ArticleWithNumberId[];
+  allArticles: ArticleWithNumberId[];
+  tipsArticles: ArticleWithNumberId[];
+  newsArticles: ArticleWithNumberId[];
+  guideArticles: ArticleWithNumberId[];
   isAdmin: boolean;
 }) {
-  // 카테고리별로 분류
-  const allItems = useMemo<
-    Record<ArticleTabType, ArticleWithNumberId[]>
-  >(() => {
-    const withCategory = initialArticles.map(article => ({
-      ...article,
-      category:
-        article.category ||
-        inferArticleCategory(article.title, article.content, article.tags)
-    }));
-
-    return {
-      all: withCategory,
-      tips: withCategory.filter(a => a.category === 'tips'),
-      news: withCategory.filter(a => a.category === 'news'),
-      guide: withCategory.filter(a => a.category === 'guide')
-    };
-  }, [initialArticles]);
+  // 서버에서 미리 처리된 참조값을 그대로 사용
+  const allItems = {
+    all: allArticles,
+    tips: tipsArticles,
+    news: newsArticles,
+    guide: guideArticles
+  };
 
   // 탭/검색/더보기 등 상태 관리
   const {
