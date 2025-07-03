@@ -4,34 +4,44 @@ import { EventInfo } from './EventInfo';
 
 interface EventCardProps {
   eventData: {
-    id: string;
-    imageUrl: string;
+    id: number;
     title: string;
     subtitle: string;
-    period: string;
     description: string;
     content: string;
-    isEnded?: boolean;
+    image: string;
+    link: string;
+    startDate: Date;
+    endDate: Date;
+    isEnded: boolean;
+    viewCount: number;
+    createdAt: Date;
+    updatedAt: Date;
+    author: {
+      id: string;
+      name: string | null;
+      image: string | null;
+    };
   };
 }
 
 export const EventCard = ({ eventData }: EventCardProps) => {
-  // isEnded에 기본값 설정
-  const isEnded = eventData.isEnded ?? false;
+  const isEnded = eventData.isEnded;
 
   return (
-    <div className="mx-auto w-full max-w-md py-4">
+    <div className="mx-auto w-full max-w-md">
       <EventHeaderImage
-        imageUrl={eventData.imageUrl}
+        imageUrl={eventData.image}
         title={eventData.title}
         isEnded={isEnded}
-        eventId={eventData.id}
+        eventId={eventData.id.toString()}
       />
 
       <EventInfo
         subtitle={eventData.subtitle}
         title={eventData.title}
-        period={eventData.period}
+        startDate={eventData.startDate}
+        endDate={eventData.endDate}
         description={eventData.description}
         content={eventData.content}
         isEnded={isEnded}
