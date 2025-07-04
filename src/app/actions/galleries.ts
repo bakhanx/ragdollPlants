@@ -7,7 +7,10 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { GalleryCreateInput, MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
 import { getCurrentUser, validateGalleryOwnership } from './utils/auth-helpers';
-import { uploadImageToCloudflare, deleteImageFromCloudflare } from '@/lib/cloudflare-images';
+import {
+  uploadImageToCloudflare,
+  deleteImageFromCloudflare
+} from '@/lib/cloudflare-images';
 
 // 갤러리 생성 유효성 검사 스키마
 const createGallerySchema = z.object({
@@ -112,7 +115,6 @@ export async function getUserGalleries(userId?: string) {
       throw new Error('로그인이 필요합니다.');
     }
 
-    // 사용자 갤러리 목록 조회
     const galleries = await prisma.gallery.findMany({
       where: { authorId: targetUserId },
       select: {
@@ -123,10 +125,16 @@ export async function getUserGalleries(userId?: string) {
         createdAt: true,
         plantId: true,
         tags: true,
+        displayOrder: true,
+        isFeatured: true,
         author: { select: { id: true, name: true, image: true } },
         plant: { select: { id: true, name: true } }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: [
+        { isFeatured: 'desc' }, // 대표 이미지 우선
+        { displayOrder: 'asc' }, // 그 다음 순서대로
+        { createdAt: 'asc' } // 같은 순서면 오래된 순 (안정적인 순서)
+      ]
     });
 
     // 갤러리 ID 목록 추출
@@ -214,7 +222,10 @@ export async function createGallery(formData: FormData) {
 
     if (imageFile && imageFile.size > 0) {
       // Cloudflare Images에 업로드
-      imageUrl = await uploadImageToCloudflare(imageFile, '/images/plant-default.png');
+      imageUrl = await uploadImageToCloudflare(
+        imageFile,
+        '/images/plant-default.png'
+      );
     }
 
     // 갤러리 생성
@@ -284,7 +295,10 @@ export async function updateGallery(id: string, formData: FormData) {
 
     if (imageFile && imageFile.size > 0) {
       // Cloudflare Images에 업로드
-      imageUrl = await uploadImageToCloudflare(imageFile, '/images/plant-default.png');
+      imageUrl = await uploadImageToCloudflare(
+        imageFile,
+        '/images/plant-default.png'
+      );
     }
 
     // 입력 검증
@@ -309,15 +323,11 @@ export async function updateGallery(id: string, formData: FormData) {
     const updateData: {
       title: string;
       description: string | null;
-      plantId: string | null;
-      plantName: string | null;
       tags: string[];
       image?: string;
     } = {
       title: validatedData.title,
       description: validatedData.description || null,
-      plantId: validatedData.plantId || null,
-      plantName: validatedData.plantName || null,
       tags: validatedData.tags || []
     };
 
@@ -347,7 +357,6 @@ export async function updateGallery(id: string, formData: FormData) {
 
     // 갤러리 페이지 재검증
     revalidatePath('/galleries');
-    revalidatePath(`/galleries/${id}`);
 
     return {
       success: true,
@@ -386,7 +395,10 @@ export async function deleteGallery(id: string) {
     });
 
     // 이미지 파일도 삭제 (Cloudflare Images에서)
-    if (existingGallery.image && !existingGallery.image.includes('/images/plant-default.png')) {
+    if (
+      existingGallery.image &&
+      !existingGallery.image.includes('/images/plant-default.png')
+    ) {
       await deleteImageFromCloudflare(existingGallery.image);
     }
 
@@ -462,7 +474,6 @@ export async function toggleGalleryLike(id: string) {
 
     // 갤러리 페이지 재검증
     revalidatePath('/galleries');
-    revalidatePath(`/galleries/${id}`);
 
     return {
       success: true,
@@ -477,5 +488,111 @@ export async function toggleGalleryLike(id: string) {
     }
 
     throw new Error('좋아요 처리 중 오류가 발생했습니다.');
+  }
+}
+
+// 대표 이미지 설정
+export async function setFeaturedGallery(itemId: string) {
+  try {
+    const user = await getCurrentUser();
+
+    // 갤러리 존재 여부 및 권한 확인
+    await validateGalleryOwnership(itemId, user.id);
+
+    // 트랜잭션으로 대표 이미지 설정
+    await prisma.$transaction(async tx => {
+      // 기존 대표 이미지들 해제 (같은 사용자의 모든 갤러리)
+      await tx.gallery.updateMany({
+        where: {
+          authorId: user.id,
+          isFeatured: true
+        },
+        data: { isFeatured: false }
+      });
+
+      // 선택한 갤러리를 대표 이미지로 설정
+      await tx.gallery.update({
+        where: { id: itemId },
+        data: {
+          isFeatured: true,
+          displayOrder: 0 // 대표 이미지는 항상 맨 앞
+        }
+      });
+
+      // 나머지 갤러리들의 순서 재정렬
+      const otherGalleries = await tx.gallery.findMany({
+        where: {
+          authorId: user.id,
+          id: { not: itemId }
+        },
+        orderBy: { displayOrder: 'asc' }
+      });
+
+      // 나머지 갤러리들의 순서를 1부터 시작하도록 업데이트
+      await Promise.all(
+        otherGalleries.map((gallery, index) =>
+          tx.gallery.update({
+            where: { id: gallery.id },
+            data: { displayOrder: index + 1 }
+          })
+        )
+      );
+    });
+
+    // 갤러리 페이지 재검증
+    revalidatePath('/galleries');
+
+    return {
+      success: true,
+      message: '대표 작품으로 설정되었습니다.'
+    };
+  } catch (error) {
+    console.error('대표 이미지 설정 오류:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('대표 이미지 설정 중 오류가 발생했습니다.');
+  }
+}
+
+// 갤러리 순서 저장
+export async function updateGalleriesOrder(
+  galleryOrder: { id: string; order: number }[]
+) {
+  try {
+    const user = await getCurrentUser();
+
+    // 트랜잭션으로 순서 업데이트
+    await prisma.$transaction(async tx => {
+      await Promise.all(
+        galleryOrder.map(({ id, order }) =>
+          tx.gallery.update({
+            where: {
+              id,
+              authorId: user.id // 보안: 자신의 갤러리만 수정 가능
+            },
+            data: { displayOrder: order }
+          })
+        )
+      );
+    });
+
+    // 갤러리 페이지 재검증
+    revalidatePath('/galleries');
+
+    return {
+      success: true,
+      message: '갤러리 순서가 저장되었습니다.'
+    };
+  } catch (error) {
+    console.error('갤러리 순서 저장 오류:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('갤러리 순서 저장 중 오류가 발생했습니다.');
   }
 }
