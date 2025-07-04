@@ -201,17 +201,19 @@ model Diary {
 }
 
 model Gallery {
-  id          String   @id @default(uuid())
-  title       String
-  image       String
-  description String?
-  tags        String[]
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  plantId     String?  @map("plant_id")
-  authorId    String   @map("author_id")
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  plant       Plant?   @relation(fields: [plantId], references: [id])
+  id           String   @id @default(uuid())
+  title        String
+  image        String
+  description  String?
+  tags         String[]
+  displayOrder Int      @default(0) @map("display_order")
+  isFeatured   Boolean  @default(false) @map("is_featured")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  plantId      String?  @map("plant_id")
+  authorId     String   @map("author_id")
+  author       User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  plant        Plant?   @relation(fields: [plantId], references: [id])
 
   @@map("galleries")
 }
@@ -220,7 +222,6 @@ model Event {
   title          String
   subtitle       String
   image          String
-  link           String
   description    String
   content        String
   startDate      DateTime @map("start_date")
