@@ -10,7 +10,6 @@ interface EventCardProps {
     description: string;
     content: string;
     image: string;
-    link: string;
     startDate: Date;
     endDate: Date;
     isEnded: boolean;
