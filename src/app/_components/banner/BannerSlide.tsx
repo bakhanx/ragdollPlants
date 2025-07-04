@@ -8,8 +8,7 @@ type BannerSlideProps = {
   id: string | number;
   title: string;
   subtitle: string;
-  imageUrl: string;
-  link: string;
+  image: string;
   isActive: boolean;
 };
 
@@ -17,13 +16,12 @@ export const BannerSlide: React.FC<BannerSlideProps> = ({
   id,
   title,
   subtitle,
-  imageUrl,
-  link,
+  image,
   isActive
 }) => {
   return (
     <Link
-      href={link}
+      href={`/events/${id}`}
       className="absolute top-0 left-0 h-full w-full transition-opacity duration-500"
       style={{
         opacity: isActive ? 1 : 0,
@@ -33,7 +31,7 @@ export const BannerSlide: React.FC<BannerSlideProps> = ({
       {/* 배경 이미지 */}
       <div className="relative h-full w-full">
         <Image
-          src={imageUrl}
+          src={image}
           alt={title}
           fill
           style={{ objectFit: 'cover' }}
@@ -47,12 +45,10 @@ export const BannerSlide: React.FC<BannerSlideProps> = ({
       {/* 텍스트 내용 */}
       <div className="absolute bottom-4 left-4 z-20">
         <p className="text-xs sm:text-sm">{subtitle}</p>
-        <h2 className="text-lg leading-snug font-medium sm:text-xl">
-          {title}
-        </h2>
+        <h2 className="text-lg leading-snug font-medium sm:text-xl">{title}</h2>
       </div>
     </Link>
   );
 };
 
-export default BannerSlide; 
+export default BannerSlide;
