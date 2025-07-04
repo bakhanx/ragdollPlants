@@ -7,11 +7,16 @@ import { MenuList } from './_components/lists/MenuList';
 import { Header } from './_components/header/Header';
 import { ArticleList } from './_components/lists/ArticleList';
 import { getLatestArticles } from './actions/articles';
+import { getActiveEventsForBanner } from './actions/events';
 
 const ARTICLE_COUNT = 3;
+const BANNER_EVENT_COUNT = 3;
 
 export default async function Page() {
-  const latestArticles = await getLatestArticles(ARTICLE_COUNT);
+  const [latestArticles, activeEvents] = await Promise.all([
+    getLatestArticles(ARTICLE_COUNT),
+    getActiveEventsForBanner(BANNER_EVENT_COUNT)
+  ]);
 
   return (
     <>
@@ -26,7 +31,7 @@ export default async function Page() {
         <MenuList />
 
         {/* 배너 */}
-        <Banner />
+        <Banner events={activeEvents} />
 
         {/* 기사 리스트 - 최신 3개 표시 */}
         <ArticleList items={latestArticles} />
