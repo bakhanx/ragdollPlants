@@ -1,9 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import {
   getCurrentUser,
@@ -18,7 +16,6 @@ const createEventSchema = z.object({
   description: z.string().min(1, '설명은 필수입니다'),
   content: z.string().min(1, '내용은 필수입니다'),
   image: z.string().min(1, '이미지는 필수입니다'),
-  link: z.string().url('유효한 링크를 입력해주세요'),
   startDate: z.string().datetime('유효한 시작 날짜를 입력해주세요'),
   endDate: z.string().datetime('유효한 종료 날짜를 입력해주세요')
 });
@@ -33,7 +30,6 @@ export async function getEvents() {
         subtitle: true,
         description: true,
         image: true,
-        link: true,
         startDate: true,
         endDate: true,
         isEnded: true,
@@ -73,7 +69,6 @@ export async function getActiveEvents() {
         subtitle: true,
         description: true,
         image: true,
-        link: true,
         startDate: true,
         endDate: true,
         isEnded: true,
@@ -97,6 +92,36 @@ export async function getActiveEvents() {
   } catch (error) {
     console.error('진행중인 이벤트 조회 오류:', error);
     throw new Error('진행중인 이벤트를 불러오는 중 오류가 발생했습니다.');
+  }
+}
+
+// 배너용 진행중인 이벤트 조회 (최신순으로 지정된 개수만)
+export async function getActiveEventsForBanner(limit: number = 3) {
+  try {
+    const events = await prisma.event.findMany({
+      where: {
+        isEnded: false
+      },
+      select: {
+        id: true,
+        title: true,
+        subtitle: true,
+        image: true,
+        isEnded: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit
+    });
+
+    return events;
+  } catch (error) {
+    console.error('배너용 진행중인 이벤트 조회 오류:', error);
+    throw new Error(
+      '배너용 진행중인 이벤트를 불러오는 중 오류가 발생했습니다.'
+    );
   }
 }
 
@@ -151,7 +176,6 @@ export async function createEvent(formData: FormData) {
       subtitle: formData.get('subtitle') as string,
       description: formData.get('description') as string,
       content: formData.get('content') as string,
-      link: formData.get('link') as string,
       startDate: formData.get('startDate') as string,
       endDate: formData.get('endDate') as string
     };
@@ -192,7 +216,6 @@ export async function createEvent(formData: FormData) {
         description: validatedData.description,
         content: validatedData.content,
         image: validatedData.image,
-        link: validatedData.link,
         startDate: new Date(validatedData.startDate),
         endDate: new Date(validatedData.endDate),
         authorId: user.id,
@@ -238,7 +261,6 @@ export async function updateEvent(id: number, formData: FormData) {
       subtitle: formData.get('subtitle') as string,
       description: formData.get('description') as string,
       content: formData.get('content') as string,
-      link: formData.get('link') as string,
       startDate: formData.get('startDate') as string,
       endDate: formData.get('endDate') as string
     };
@@ -278,7 +300,6 @@ export async function updateEvent(id: number, formData: FormData) {
         description: validatedData.description,
         content: validatedData.content,
         image: validatedData.image,
-        link: validatedData.link,
         startDate: new Date(validatedData.startDate),
         endDate: new Date(validatedData.endDate),
         updatedAt: new Date()
