@@ -1,80 +1,74 @@
-import { requireAdmin } from '@/lib/auth-utils';
-import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import DataBackup from './_components/DataBackup';
+import DatabaseReset from './_components/DatabaseReset';
+import DataRestore from './_components/DataRestore';
 
 export default async function AdminPage() {
-  // 관리자만 접근 가능
-  const session = await requireAdmin();
+  const session = await auth();
 
-  // 관리자용 대시보드 데이터
-  const stats = await prisma.$transaction([
-    prisma.user.count({ where: { role: 'USER' } }),
-    prisma.article.count(),
-    prisma.plant.count(),
-    prisma.comment.count()
-  ]);
-
-  const [userCount, articleCount, plantCount, commentCount] = stats;
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    redirect('/');
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-3xl font-bold">관리자 대시보드</h1>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-8 text-3xl font-bold text-gray-900">관리자 페이지</h1>
 
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-lg font-semibold text-gray-600">총 사용자</h3>
-          <p className="text-3xl font-bold text-blue-600">{userCount}</p>
-        </div>
+        <div className="space-y-6">
+          {/* 데이터 백업 섹션 */}
+          <DataBackup />
 
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-lg font-semibold text-gray-600">총 아티클</h3>
-          <p className="text-3xl font-bold text-green-600">{articleCount}</p>
-        </div>
+          {/* 데이터베이스 리셋 섹션 */}
+          <DatabaseReset />
 
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-lg font-semibold text-gray-600">총 식물</h3>
-          <p className="text-3xl font-bold text-emerald-600">{plantCount}</p>
-        </div>
+          {/* 데이터 복원 섹션 */}
+          <DataRestore />
 
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-lg font-semibold text-gray-600">총 댓글</h3>
-          <p className="text-3xl font-bold text-purple-600">{commentCount}</p>
-        </div>
-      </div>
+          {/* 기존 시스템 관리 섹션 */}
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-xl font-semibold">시스템 관리</h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h3 className="font-medium text-blue-900">이벤트 관리</h3>
+                  <p className="text-sm text-blue-700 mt-1">
+                    이벤트 생성, 수정, 삭제
+                  </p>
+                  <Link 
+                    href="/events/upload" 
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block"
+                  >
+                    이벤트 생성 →
+                  </Link>
+                </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-xl font-semibold">빠른 액션</h2>
-          <div className="space-y-3">
-            <a
-              href="/admin/articles"
-              className="block rounded bg-blue-50 p-3 hover:bg-blue-100">
-              📝 아티클 관리
-            </a>
-            <a
-              href="/admin/users"
-              className="block rounded bg-green-50 p-3 hover:bg-green-100">
-              👥 사용자 관리
-            </a>
-            <a
-              href="/admin/reports"
-              className="block rounded bg-red-50 p-3 hover:bg-red-100">
-              🚨 신고 관리
-            </a>
-          </div>
-        </div>
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h3 className="font-medium text-green-900">아티클 관리</h3>
+                  <p className="text-sm text-green-700 mt-1">
+                    아티클 생성, 수정, 삭제
+                  </p>
+                  <Link 
+                    href="/articles/upload" 
+                    className="text-green-600 hover:text-green-800 text-sm font-medium mt-2 inline-block"
+                  >
+                    아티클 생성 →
+                  </Link>
+                </div>
 
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-xl font-semibold">관리자 정보</h2>
-          <div className="space-y-2">
-            <p>
-              <strong>이름:</strong> {session.user.name}
-            </p>
-            <p>
-              <strong>이메일:</strong> {session.user.email}
-            </p>
-            <p>
-              <strong>역할:</strong> {session.user.role}
-            </p>
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h3 className="font-medium text-purple-900">사용자 관리</h3>
+                  <p className="text-sm text-purple-700 mt-1">
+                    사용자 권한 및 계정 관리
+                  </p>
+                  <span className="text-purple-600 text-sm font-medium mt-2 inline-block">
+                    개발 예정
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
