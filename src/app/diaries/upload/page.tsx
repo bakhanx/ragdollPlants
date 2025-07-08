@@ -1,22 +1,21 @@
-'use client';
-
-import React, { useState } from 'react';
+import React from 'react';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
-import { useAuth } from '@/app/_hooks/useAuth';
 import { DiaryForm } from './_components';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 
-export default function CreateDiaryPage() {
-  const { isLoggedIn } = useAuth();
+export default async function CreateDiaryPage() {
+  // 서버에서 세션 확인
+  const session = await auth();
   
-  // 구독 상태 임시 설정 (실제로는 API 호출)
-  const [isPaidUser, setIsPaidUser] = useState(false);
-  
-  // 테스트용 구독 상태 토글
-  const toggleSubscription = () => {
-    setIsPaidUser(!isPaidUser);
-  };
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  // 임시 구독 상태 확인
+  const isPaidUser = false; // 임시값
 
   return (
     <>
@@ -29,7 +28,7 @@ export default function CreateDiaryPage() {
         
         <DiaryForm 
           isPaidUser={isPaidUser}
-          toggleSubscription={toggleSubscription}
+          toggleSubscription={() => {}}
         />
       </ContentsLayout>
     </>
