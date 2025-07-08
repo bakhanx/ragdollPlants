@@ -3,11 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import {
-  getCurrentUser,
-  validateEventOwnership,
-  requireAdminPermission
-} from './utils/auth-helpers';
+import { requireAdmin, validateEventOwnership } from '@/lib/auth-utils';
 
 // 이벤트 생성 유효성 검사 스키마
 const createEventSchema = z.object({
@@ -165,10 +161,8 @@ export async function getEventById(id: number) {
 // 이벤트 생성
 export async function createEvent(formData: FormData) {
   try {
-    const user = await getCurrentUser();
-
-    // 관리자 권한 확인
-    await requireAdminPermission(user.id);
+    // 사용자 정보 가져오기 및 관리자 권한 확인
+    const user = await requireAdmin();
 
     // FormData에서 데이터 추출
     const rawData = {
@@ -247,10 +241,8 @@ export async function createEvent(formData: FormData) {
 // 이벤트 수정
 export async function updateEvent(id: number, formData: FormData) {
   try {
-    const user = await getCurrentUser();
-
-    // 관리자 권한 확인
-    await requireAdminPermission(user.id);
+    // 사용자 정보 가져오기 및 관리자 권한 확인
+    const user = await requireAdmin();
 
     // 기존 이벤트 확인 및 권한 체크
     const existingEvent = await validateEventOwnership(id, user.id);
@@ -334,10 +326,8 @@ export async function updateEvent(id: number, formData: FormData) {
 // 이벤트 삭제
 export async function deleteEvent(id: number) {
   try {
-    const user = await getCurrentUser();
-
-    // 관리자 권한 확인
-    await requireAdminPermission(user.id);
+    // 사용자 정보 가져오기 및 관리자 권한 확인
+    const user = await requireAdmin();
 
     // 기존 이벤트 확인 및 권한 체크
     const existingEvent = await validateEventOwnership(id, user.id);
@@ -362,10 +352,8 @@ export async function deleteEvent(id: number) {
 // 이벤트 종료 상태 토글
 export async function toggleEventEndStatus(id: number) {
   try {
-    const user = await getCurrentUser();
-
-    // 관리자 권한 확인
-    await requireAdminPermission(user.id);
+    // 사용자 정보 가져오기 및 관리자 권한 확인
+    const user = await requireAdmin();
 
     // 기존 이벤트 확인 및 권한 체크
     const existingEvent = await validateEventOwnership(id, user.id);
