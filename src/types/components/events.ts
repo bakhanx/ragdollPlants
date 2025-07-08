@@ -6,7 +6,6 @@ export interface EventWithAuthor {
   subtitle: string;
   description: string;
   image: string;
-  link: string;
   startDate: Date;
   endDate: Date;
   isEnded: boolean;
