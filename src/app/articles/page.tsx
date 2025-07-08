@@ -1,13 +1,12 @@
-import BackgroundImage from '../_components/layout/BackgroundImage';
-import { ContentsLayout } from '../_components/layout/ContentsLayout';
-import { Header } from '../_components/header/Header';
-import { auth } from '@/auth';
-import { getArticles } from '../actions/articles';
+import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
+import { Header } from '@/app/_components/header/Header';
+import BackgroundImage from '@/app/_components/layout/BackgroundImage';
+import { getArticles } from '@/app/actions/articles';
 import ArticleList from './_components/ArticleList';
+import { checkIsAdmin } from '@/lib/auth-utils';
 
 export default async function ArticlesPage() {
-  const session = await auth();
-  const isAdmin = session?.user?.role === 'ADMIN';
+  const isAdmin = await checkIsAdmin();
 
   const articles = await getArticles();
 
@@ -18,10 +17,10 @@ export default async function ArticlesPage() {
 
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-04.webp" />
+      <BackgroundImage src="/images/welcome-bg-07.webp" />
       <ContentsLayout>
         <Header
-          title="식물 관련 기사"
+          title="아티클"
           showNotification
         />
         <ArticleList

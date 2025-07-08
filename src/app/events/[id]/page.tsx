@@ -4,8 +4,8 @@ import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import { EventCard } from '@/app/events/[id]/_components/EventCard';
 import { notFound } from 'next/navigation';
-import { auth } from '@/auth';
 import { getEventById } from '@/app/actions/events';
+import { checkIsAdmin } from '@/lib/auth-utils';
 
 export default async function EventDetailPage(props: {
   params: Promise<{ id: string }>;
@@ -13,8 +13,7 @@ export default async function EventDetailPage(props: {
   const params = await props.params;
   const { id } = params;
 
-  const session = await auth();
-  const isAdmin = session?.user?.role === 'ADMIN';
+  const isAdmin = await checkIsAdmin();
 
   try {
     const eventId = parseInt(id, 10);

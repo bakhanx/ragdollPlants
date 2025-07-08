@@ -1,13 +1,12 @@
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
-import { auth } from '@/auth';
 import { getEvents } from '../actions/events';
 import EventList from './_components/EventList';
+import { checkIsAdmin } from '@/lib/auth-utils';
 
 export default async function EventsPage() {
-  const session = await auth();
-  const isAdmin = session?.user?.role === 'ADMIN';
+  const isAdmin = await checkIsAdmin();
 
   const events = await getEvents();
 

@@ -4,26 +4,31 @@ import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import { auth } from '@/auth';
+import { USER_ROLES } from '@/lib/auth-utils';
+import { checkIsAdmin } from '@/lib/auth-utils';
 
 import { ArticleCategory } from '@/types/models/article';
 import ArticleImage from '../_components/ArticleImage';
 import ArticleContent from '../_components/ArticleContent';
 import { getArticleById } from '@/app/actions/articles';
 
-export default async function ArticleDetail(props: {
-  params: Promise<{ id: string }>;
-}) {
-  const params = await props.params;
-  const { id } = params;
+interface ArticleDetailPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
 
-  const session = await auth();
-  const isAdmin = session?.user?.role === 'ADMIN';
+export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
+  const { id } = await params;
+  const isAdmin = await checkIsAdmin();
+
+  // ID를 숫자로 변환
+  const articleId = parseInt(id, 10);
+  if (isNaN(articleId)) {
+    notFound();
+  }
+
   try {
-    const articleId = parseInt(id, 10);
-    if (isNaN(articleId)) {
-      notFound();
-    }
-
     const article = await getArticleById(articleId);
 
     // ArticleContent에 전달할 형태로 변환
@@ -38,7 +43,7 @@ export default async function ArticleDetail(props: {
 
     return (
       <>
-        <BackgroundImage src="/images/welcome-bg-06.webp" />
+        <BackgroundImage src="/images/welcome-bg-07.webp" />
         <ContentsLayout noPadding>
           {/* 헤더 */}
           <Header
