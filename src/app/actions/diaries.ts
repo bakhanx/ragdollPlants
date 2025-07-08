@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { DiaryMoodStatus } from '@/types/models/diary';
-import { getCurrentUser, validateDiaryOwnership } from './utils/auth-helpers';
+import { getCurrentUser, validateDiaryOwnership } from '@/lib/auth-utils';
 
 // 다이어리 생성 유효성 검사 스키마
 const createDiarySchema = z.object({
