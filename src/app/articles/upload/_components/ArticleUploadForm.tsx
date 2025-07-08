@@ -8,9 +8,9 @@ import SubmitButtons from './SubmitButtons';
 import ArticleEditor from './ArticleEditor';
 import {
   createArticle,
-  getCategories,
   updateArticle
 } from '@/app/actions/articles';
+import { ArticleCategory, ARTICLE_CATEGORIES } from '@/app/_constants/categories';
 
 interface ArticleData {
   id: number;
@@ -35,8 +35,7 @@ export default function ArticleUploadForm({
   initialData
 }: ArticleUploadFormProps) {
   const router = useRouter();
-  const isAdmin = true; // 실제로는 useAuth() 등을 사용하여 권한 체크
-  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 기본값 설정 - mode에 따라 다르게
   const getDefaultValues = () => {
@@ -73,32 +72,19 @@ export default function ArticleUploadForm({
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     defaultValues.thumbnailPreview
   );
-  const [categories, setCategories] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
+  const [categories, setCategories] = useState<ArticleCategory[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     defaultValues.categoryId
   );
 
-  // 관리자 체크 및 카테고리 로드
+  // 초기 카테고리 설정
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const categoriesData = await getCategories();
-        setCategories(categoriesData);
-        // 편집 모드가 아니고 초기 데이터가 없을 때만 첫 번째 카테고리 선택
-        if (mode === 'create' && !initialData && categoriesData.length > 0) {
-          setSelectedCategoryId(categoriesData[0].id);
-        }
-      } catch (error) {
-        console.error('카테고리 로드 실패:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
+    setCategories(ARTICLE_CATEGORIES);
+    // 편집 모드가 아니고 초기 데이터가 없을 때만 첫 번째 카테고리 선택
+    if (mode === 'create' && !initialData && ARTICLE_CATEGORIES.length > 0) {
+      setSelectedCategoryId(ARTICLE_CATEGORIES[0].id);
+    }
+  }, [mode, initialData]);
 
   // 썸네일 이미지 변경 핸들러
   const handleThumbnailChange = (file: File | null) => {
@@ -179,7 +165,7 @@ export default function ArticleUploadForm({
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       // FormData 생성
@@ -224,20 +210,15 @@ export default function ArticleUploadForm({
           ? error.message
           : '기사 등록에 실패했습니다. 다시 시도해주세요.'
       );
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
-
-  // 로딩 중이거나 관리자가 아니면 컴포넌트에서 처리하지 않음
-  if (isLoading || !isAdmin) {
-    return null;
-  }
 
   return (
     <div className="mx-auto w-full max-w-4xl py-4">
       <form
         onSubmit={handleSubmit}
-        className="space-y-6">
+        className="space-y-6 text-gray-50">
         {/* 썸네일 이미지 업로드 */}
         <div className="mb-8">
           <h2 className="mb-4 text-lg font-medium text-gray-50">
@@ -300,13 +281,14 @@ export default function ArticleUploadForm({
             id="category"
             value={selectedCategoryId}
             onChange={e => setSelectedCategoryId(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+            className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none text-gray-50"
             required>
-            <option value="">카테고리를 선택하세요</option>
+            <option value="" className='text-gray-800' >카테고리를 선택하세요</option>
             {categories.map(category => (
               <option
                 key={category.id}
-                value={category.id}>
+                value={category.id}
+                className='text-black'>
                 {category.name}
               </option>
             ))}
@@ -331,7 +313,7 @@ export default function ArticleUploadForm({
         {/* 제출 버튼 */}
         <SubmitButtons
           onCancel={() => router.back()}
-          isLoading={isLoading}
+          isLoading={isSubmitting}
         />
       </form>
     </div>
