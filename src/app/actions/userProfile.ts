@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getCurrentUser } from './utils/auth-helpers';
+import { getCurrentUser } from '@/lib/auth-utils';
 
 // 사용자 프로필 조회
 export async function getUserProfileData(userId: string) {
