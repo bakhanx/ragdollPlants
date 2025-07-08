@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getCurrentUser, validateArticleOwnership } from './utils/auth-helpers';
+import { getCurrentUser, validateArticleOwnership } from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare

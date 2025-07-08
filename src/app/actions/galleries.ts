@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { GalleryCreateInput, MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
-import { getCurrentUser, validateGalleryOwnership } from './utils/auth-helpers';
+import { getCurrentUser, validateGalleryOwnership } from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare

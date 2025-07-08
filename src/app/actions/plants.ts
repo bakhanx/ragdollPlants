@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { MAX_PLANTS } from '@/types/models/plant';
-import { getCurrentUser, validatePlantOwnership } from './utils/auth-helpers';
+import { getCurrentUser, validatePlantOwnership } from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare

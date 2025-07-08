@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-import { getCurrentUser } from './utils/auth-helpers';
+import { getCurrentUser } from '@/lib/auth-utils';
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
 
