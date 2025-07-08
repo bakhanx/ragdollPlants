@@ -5,7 +5,6 @@ import { Header } from '@/app/_components/header/Header';
 import ArticleUploadForm from '@/app/articles/upload/_components/ArticleUploadForm';
 import { notFound } from 'next/navigation';
 import { getArticleById } from '@/app/actions/articles';
-import { auth } from '@/auth';
 
 interface EditArticlePageProps {
   params: Promise<{
@@ -19,20 +18,13 @@ export default async function EditArticlePage({
   try {
     const { id } = await params;
 
-    // 관리자 권한 체크
-    const session = await auth();
-    const isAdmin = session?.user?.role === 'ADMIN';
-
-    if (!isAdmin) {
-      notFound(); // 관리자가 아니면 404
-    }
-
     // ID를 숫자로 변환
     const articleId = parseInt(id, 10);
     if (isNaN(articleId)) {
       notFound();
     }
 
+    // 아티클 데이터 가져오기
     const article = await getArticleById(articleId);
 
     // ArticleUploadForm에 맞는 형태로 데이터 변환
