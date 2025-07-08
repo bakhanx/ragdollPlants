@@ -5,7 +5,6 @@ import { Header } from '@/app/_components/header/Header';
 import { EventUploadForm } from '@/app/events/upload/_components/EventUploadForm';
 import { notFound } from 'next/navigation';
 import { getEventById } from '@/app/actions/events';
-import { auth } from '@/auth';
 
 interface EditEventPageProps {
   params: Promise<{
@@ -18,14 +17,6 @@ export default async function EditEventPage({
 }: EditEventPageProps) {
   try {
     const { id } = await params;
-
-    // 관리자 권한 체크
-    const session = await auth();
-    const isAdmin = session?.user?.role === 'ADMIN';
-
-    if (!isAdmin) {
-      notFound(); // 관리자가 아니면 404
-    }
 
     // ID를 숫자로 변환
     const eventId = parseInt(id, 10);
