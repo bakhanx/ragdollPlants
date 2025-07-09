@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FormField } from './FormField';
 import { ImageUploadSection } from './ImageUploadSection';
 import { EventDetailsSection } from './EventDetailsSection';
 import { SubmitButton } from './SubmitButton';
