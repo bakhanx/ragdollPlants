@@ -14,7 +14,7 @@ export const Card = ({
   isHover = true,
   className = ''
 }: CardProps) => {
-  const baseClasses = `rounded-xl border border-green-100 bg-white/50 transition-colors ${isHover ? 'hover:bg-white/70' : ''}`;
+  const baseClasses = `rounded-xl border border-green-100 bg-white/50 transition-colors ${isHover ? 'hover:bg-white/80' : ''}`;
   const combinedClasses = `${baseClasses} ${className}`;
 
   if (href) {

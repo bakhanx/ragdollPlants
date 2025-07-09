@@ -31,7 +31,7 @@ export const UploadButton = ({
       ) : (
         <Link
           href={link}
-          className="flex aspect-square w-10 items-center justify-center rounded-md border-2 border-gray-300 text-xl text-white hover:bg-green-900"
+          className="flex aspect-square w-10 items-center justify-center rounded-md border-2 border-gray-300 text-xl text-white hover:bg-green-700"
           title={title}>
           <span className="text-2xl">+</span>
         </Link>

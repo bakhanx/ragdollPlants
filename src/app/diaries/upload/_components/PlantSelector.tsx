@@ -37,8 +37,8 @@ export const PlantSelector = ({
           </span>
         </div>
       ) : (
-        <div className="mb-2 rounded-lg bg-gray-50 p-3">
-          <span className="text-sm text-gray-600">
+        <div className="mb-2 rounded-lg bg-black/50 p-3">
+          <span className="text-sm text-gray-50">
             일기와 연결할 식물을 선택해주세요.
           </span>
         </div>
@@ -70,7 +70,7 @@ export const PlantSelector = ({
       )}
 
       {!isLoading && plants.length === 0 && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-300">
           등록된 식물이 없습니다. 먼저 식물을 등록해보세요.
         </p>
       )}

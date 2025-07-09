@@ -53,7 +53,7 @@ export const SearchInput = ({
         value={searchQuery}
         onChange={e => handleInputChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border-2 border-gray-50 p-2 pl-9 text-sm focus:border-green-500 focus:outline-none"
+        className="w-full rounded-md border border-gray-300 bg-black/10 text-white placeholder-gray-300 p-2 pl-9 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
       />
       <div className="absolute top-1/2 left-2 -translate-y-1/2 transform">
         <SearchIcon
