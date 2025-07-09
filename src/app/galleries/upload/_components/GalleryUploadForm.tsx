@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Input, Textarea } from '@/app/_components/common';
 import GalleryUsageInfo from './GalleryUsageInfo';
 import GalleryPreview from './GalleryPreview';
-import GalleryTitleField from './GalleryTitleField';
 import SubmitButton from './GalleryUploadButton';
 import { createGallery, getUserGalleries } from '@/app/actions/galleries';
 import { MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
@@ -157,29 +157,30 @@ export default function GalleryUploadForm() {
 
       {/* 제목 및 설명 폼 */}
       <div className="space-y-4">
-        <GalleryTitleField
-          title={title}
-          setTitle={setTitle}
+        <Input
+          id="title"
+          type="text"
+          label="작품명"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          required
+          placeholder="작품명을 입력해주세요 (최대 30자)"
+          maxLength={30}
         />
 
-        {/* 설명 필드 */}
         <div>
-          <label
-            htmlFor="description"
-            className="mb-2 block text-sm font-medium text-white">
-            설명 (선택사항)
-          </label>
-          <textarea
+          <Textarea
             id="description"
+            label="설명 (선택사항)"
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="갤러리에 대한 간단한 설명을 입력하세요..."
-            className="w-full resize-none rounded-lg border border-white/20 bg-black/20 px-3 py-2 text-white placeholder-white/60 backdrop-blur-sm focus:border-white/40 focus:outline-none"
             rows={3}
             maxLength={200}
+            resize="none"
           />
-          <div className="mt-1 text-right text-xs text-white/60">
-            {description.length}/200
+          <div className="mt-1 text-right text-xs text-gray-200">
+            {description.length} / 200
           </div>
         </div>
       </div>

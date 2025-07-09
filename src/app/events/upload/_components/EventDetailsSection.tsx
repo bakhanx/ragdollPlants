@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormField } from './FormField';
+import { Input, Textarea } from '@/app/_components/common';
 
 export interface EventDetailsSectionProps {
   title: string;
@@ -23,7 +23,7 @@ export const EventDetailsSection = ({
 }: EventDetailsSectionProps) => {
   return (
     <>
-      <FormField
+      <Input
         id="title"
         label="이벤트 제목"
         value={title}
@@ -32,7 +32,7 @@ export const EventDetailsSection = ({
         required
       />
 
-      <FormField
+      <Input
         id="subtitle"
         label="부제목"
         value={subtitle}
@@ -41,7 +41,7 @@ export const EventDetailsSection = ({
         required
       />
 
-      <FormField
+      <Input
         id="period"
         label="이벤트 기간"
         value={period}
@@ -50,22 +50,20 @@ export const EventDetailsSection = ({
         required
       />
 
-      <FormField
+      <Textarea
         id="description"
         label="이벤트 설명"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        type="textarea"
         placeholder="이벤트에 대한 간략한 설명을 입력해주세요."
         required
       />
 
-      <FormField
+      <Textarea
         id="content"
         label="상세 내용"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        type="textarea"
         rows={5}
         placeholder="이벤트 상세 내용을 입력해주세요."
       />

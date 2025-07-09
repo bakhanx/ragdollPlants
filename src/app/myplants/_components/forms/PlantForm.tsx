@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Input, Textarea } from '@/app/_components/common';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import PlantTypeSelector from './PlantTypeSelector';
 import DatePickerField from './DatePickerField';
@@ -197,25 +198,15 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
 
       {/* 기본 정보 폼 */}
       <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="plant-name"
-            className="mb-1 block text-sm font-medium text-gray-50">
-            식물 이름 <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="plant-name"
-            type="text"
-            {...register('plantName')}
-            placeholder="예) 몬스테라, 산세베리아"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-          />
-          {errors.plantName && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.plantName.message}
-            </p>
-          )}
-        </div>
+        <Input
+          id="plant-name"
+          type="text"
+          label="식물 이름"
+          required
+          placeholder="예) 몬스테라, 산세베리아"
+          {...register('plantName')}
+          error={errors.plantName?.message}
+        />
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-50">
@@ -233,25 +224,14 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
           )}
         </div>
 
-        <div>
-          <label
-            htmlFor="location"
-            className="mb-1 block text-sm font-medium text-gray-50">
-            위치
-          </label>
-          <input
-            id="location"
-            type="text"
-            {...register('location')}
-            placeholder="예) 거실 창가, 베란다"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-          />
-          {errors.location && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.location.message}
-            </p>
-          )}
-        </div>
+        <Input
+          id="location"
+          type="text"
+          label="위치"
+          placeholder="예) 거실 창가, 베란다"
+          {...register('location')}
+          error={errors.location?.message}
+        />
 
         <div>
           <label
@@ -273,70 +253,39 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
 
         {/* 케어 주기 설정 */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="watering-interval"
-              className="mb-1 block text-sm font-medium text-gray-50">
-              물주기 주기 (일)
-            </label>
-            <input
-              id="watering-interval"
-              type="number"
-              min="1"
-              max="365"
-              {...register('wateringInterval', { valueAsNumber: true })}
-              placeholder="7"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-            />
-            <p className="mt-1 text-xs text-gray-400">일반적으로 7-14일</p>
-            {errors.wateringInterval && (
-              <p className="mt-1 text-xs text-red-500">
-                {errors.wateringInterval.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="nutrient-interval"
-              className="mb-1 block text-sm font-medium text-gray-50">
-              영양제 주기 (일)
-            </label>
-            <input
-              id="nutrient-interval"
-              type="number"
-              min="1"
-              max="365"
-              {...register('nutrientInterval', { valueAsNumber: true })}
-              placeholder="30"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-            />
-            <p className="mt-1 text-xs text-gray-400">일반적으로 30일</p>
-            {errors.nutrientInterval && (
-              <p className="mt-1 text-xs text-red-500">
-                {errors.nutrientInterval.message}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="notes"
-            className="mb-1 block text-sm font-medium text-gray-50">
-            메모
-          </label>
-          <textarea
-            id="notes"
-            {...register('notes')}
-            placeholder="특이사항이나 관리 방법 등을 적어주세요"
-            className="w-full rounded-md border border-gray-300 p-2 text-sm text-white placeholder:text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-            rows={3}
+          <Input
+            id="watering-interval"
+            type="number"
+            label="물주기 주기 (일)"
+            min="1"
+            max="365"
+            placeholder="7"
+            helpText="일반적으로 7-14일"
+            {...register('wateringInterval', { valueAsNumber: true })}
+            error={errors.wateringInterval?.message}
           />
-          {errors.notes && (
-            <p className="mt-1 text-xs text-red-500">{errors.notes.message}</p>
-          )}
+
+          <Input
+            id="nutrient-interval"
+            type="number"
+            label="영양제 주기 (일)"
+            min="1"
+            max="365"
+            placeholder="30"
+            helpText="일반적으로 30일"
+            {...register('nutrientInterval', { valueAsNumber: true })}
+            error={errors.nutrientInterval?.message}
+          />
         </div>
+
+        <Textarea
+          id="notes"
+          label="메모"
+          placeholder="특이사항이나 관리 방법 등을 적어주세요"
+          rows={3}
+          {...register('notes')}
+          error={errors.notes?.message}
+        />
       </div>
 
       {/* 버튼 섹션 - mode에 따라 다름 */}

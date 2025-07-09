@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Input, Textarea } from '@/app/_components/common';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import KeywordsField from './KeywordsField';
 import SubmitButtons from './SubmitButtons';
@@ -236,39 +237,26 @@ export default function ArticleUploadForm({
         </div>
 
         {/* 제목 */}
-        <div className="space-y-2">
-          <label
-            htmlFor="title"
-            className="block text-lg font-medium text-gray-50">
-            제목 <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="title"
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-3 text-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-            placeholder="제목을 입력하세요"
-            required
-          />
-        </div>
+        <Input
+          id="title"
+          type="text"
+          label="제목"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          placeholder="제목을 입력하세요"
+          required
+          className="p-3 text-lg"
+        />
 
         {/* 요약 */}
-        <div className="space-y-2">
-          <label
-            htmlFor="summary"
-            className="block text-sm font-medium text-gray-50">
-            요약 <span className="text-xs text-gray-400">(선택사항)</span>
-          </label>
-          <textarea
-            id="summary"
-            value={summary}
-            onChange={e => setSummary(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-            placeholder="기사 요약을 입력하세요"
-            rows={3}
-          />
-        </div>
+        <Textarea
+          id="summary"
+          label="요약 (선택사항)"
+          value={summary}
+          onChange={e => setSummary(e.target.value)}
+          placeholder="기사 요약을 입력하세요"
+          rows={3}
+        />
 
         {/* 카테고리 선택 */}
         <div className="space-y-2">
