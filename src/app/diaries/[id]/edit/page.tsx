@@ -29,8 +29,6 @@ export default async function EditDiaryPage({ params }: EditDiaryPageProps) {
           <DiaryForm
             mode="edit"
             initialData={diary}
-            isPaidUser={true}
-            toggleSubscription={() => {}}
           />
         </ContentsLayout>
       </>
