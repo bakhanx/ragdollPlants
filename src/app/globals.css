@@ -39,17 +39,3 @@ body {
 button {
   cursor: pointer;
 }
-
-/* input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  display: none;
-} */
-
-/* input, textarea {
-  color: #f9fafb;
-} */
-
-input::placeholder,
-textarea::placeholder {
-  color: #b8bfca
-}
