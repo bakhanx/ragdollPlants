@@ -6,25 +6,22 @@ import { MenuList } from '../_components/lists/MenuList';
 import UserProfile from './_components/profile/UserProfile';
 import Link from 'next/link';
 import { EditIcon } from '../_components/icons';
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth-utils';
 import { getUserProfileData } from '../actions/userProfile';
 import LogoutButton from './_components/LogoutButton';
 
 export default async function Page() {
-  const session = await auth();
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const user = await getUserProfileData(session.user.id);
+  const session = await getCurrentUser();
+  
+  const user = await getUserProfileData(session.id);
+  
   if (!user) {
-    redirect('/login');
+    throw new Error('사용자 데이터를 찾을 수 없습니다.');
   }
 
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-06.webp" />
+      <BackgroundImage src="/images/welcome-bg-03.webp" />
       <ContentsLayout>
         <Header
           title={`${user.name || '사용자'}님의 정원`}
@@ -44,7 +41,7 @@ export default async function Page() {
             todayWaterCount={user.todayWaterCount}
             todayNutrientCount={user.todayNutrientCount}
             interests={user.interests}
-            profileImage={session.user.image}
+            profileImage={user.image}
           />
 
           {/* 프로필 편집 버튼과 로그아웃 버튼 */}
