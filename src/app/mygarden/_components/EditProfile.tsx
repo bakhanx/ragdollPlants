@@ -2,81 +2,29 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-
+import { Input, Textarea } from '@/app/_components/common';
 import { EditIcon } from '@/app/_components/icons';
 import { Button } from '@/app/_components/common/Button';
+import { PlantTitles } from '@/app/mygarden/_components/PlantTitle';
 
-// PlantTitle에서 가져온 식물 카테고리 목록
-const PlantTitles = [
-  '관엽',
-  '침엽수',
-  '다육',
-  '야생화',
-  '수경',
-  '열대',
-  '허브',
-  '착생',
-  '화초',
-  '관화',
-  '양치',
-  '과일나무',
-  '약용',
-  '정원',
-  '덩굴',
-  '분재',
-  '꽃나무',
-  '공기정화',
-  '동양란',
-  '서양란',
-  '묘목',
-  '모종',
-  '씨앗',
-  '수생',
-  '행잉',
-  '테라리움',
-  '비바리움',
-  '팔루다리움',
-  '이끼',
-  '식충',
-  '채소',
-  '곡물',
-  '리톱스'
-];
-
-type User = {
+// 사용자 기본 정보 타입
+type UserInfo = {
   id: string;
-  name: string | null;
   email: string;
-  bio: string | null;
-  image: string | null;
-  interests: string[];
-  level: number;
-  levelProgress: number;
-  waterCount: number;
-  nutrientCount: number;
-  todayWaterCount: number;
-  todayNutrientCount: number;
-  _count: {
-    plants: number;
-    followersList: number;
-    galleries: number;
-  };
+  name: string | null;
 };
 
 type EditProfileProps = {
-  userId: string;
-  onCancel: () => void;
+  userInfo: UserInfo;
+  onCancel?: () => void;
 };
 
-export default function EditProfile({ userId, onCancel }: EditProfileProps) {
-  const { data: session } = useSession();
+export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 상태 관리
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,13 +32,9 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
   // 폼 상태 관리
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     bio: '',
     profileImage: ''
   });
-
-  // 이미지 프리뷰 상태
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // 선택된 관심사 상태
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -98,44 +42,39 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
   // 사용자 프로필 데이터 로드
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!session?.user?.id) return;
-      
       try {
         setLoading(true);
-        
+
         // Server Action 동적 import
-        const { getUserProfileData } = await import('@/app/actions/userProfile');
-        
+        const { getUserProfileData } = await import(
+          '@/app/actions/userProfile'
+        );
+
         // Server Action 호출
-        const userData = await getUserProfileData(session.user.id);
-        
+        const userData = await getUserProfileData(userInfo.id);
+
         if (!userData) {
           throw new Error('사용자 데이터를 찾을 수 없습니다');
         }
-        
-        setUser({
-          ...userData,
-          email: session.user.email || ''
-        });
+
+        // 폼 데이터 설정
         setFormData({
           name: userData.name || '',
-          email: session.user.email || '',
           bio: userData.bio || '',
           profileImage: userData.image || ''
         });
-        setImagePreview(userData.image);
         setSelectedInterests(userData.interests || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다');
+        setError(
+          err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다'
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    if (session?.user?.id) {
-      fetchUserProfile();
-    }
-  }, [session]);
+    fetchUserProfile();
+  }, [userInfo.id]);
 
   // 입력 핸들러
   const handleChange = (
@@ -165,7 +104,6 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        setImagePreview(result);
         setFormData(prev => ({ ...prev, profileImage: result }));
       };
       reader.readAsDataURL(file);
@@ -185,11 +123,6 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!session?.user) {
-      setError('로그인이 필요합니다');
-      return;
-    }
-
     try {
       setSubmitting(true);
       setError(null);
@@ -203,12 +136,13 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
 
       // Server Action 동적 import
       const { updateUserProfile } = await import('@/app/actions/userProfile');
-      
+
       // Server Action 호출
       await updateUserProfile(formDataToSubmit);
-      
     } catch (err) {
-      setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다');
+      setError(
+        err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다'
+      );
       setSubmitting(false);
     }
   };
@@ -216,7 +150,7 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
   // 로딩 상태
   if (loading) {
     return (
-      <div className="space-y-5 rounded-xl border border-green-100 bg-white/50 p-5">
+      <div className="space-y-5 rounded-xl border border-green-100 bg-white/30 p-5">
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
@@ -227,16 +161,15 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
     );
   }
 
-  // 에러 상태
-  if (error && !user) {
+  // 에러 상태 (로딩 실패시에만)
+  if (error && loading) {
     return (
-      <div className="space-y-5 rounded-xl border border-red-100 bg-white/50 p-5">
-        <div className="text-center py-8">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            className="bg-red-500 hover:bg-red-600"
-          >
+      <div className="space-y-5 rounded-xl border border-red-100 bg-white/30 p-5">
+        <div className="py-8 text-center">
+          <p className="mb-4 text-red-600">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-red-500 hover:bg-red-600">
             다시 시도
           </Button>
         </div>
@@ -245,16 +178,18 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
   }
 
   return (
-    <div className="space-y-5 rounded-xl border border-green-100 bg-white/50 p-5">
+    <div className="space-y-5 rounded-xl border border-green-100 bg-white/30 p-5">
       <h2 className="text-xl font-bold text-gray-800">📝 프로필 수정</h2>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3">
-          <p className="text-red-600 text-sm">{error}</p>
+        <div className="rounded-md border border-red-200 bg-red-50 p-3">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4">
         {/* 프로필 이미지 업로드 */}
         <div className="mb-6 flex flex-col items-center">
           <input
@@ -268,16 +203,16 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
           <div
             className="group relative my-2 size-24 cursor-pointer overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg sm:size-28"
             onClick={handleImageSelect}>
-            {imagePreview ? (
+            {formData.profileImage ? (
               <Image
-                src={imagePreview}
+                src={formData.profileImage}
                 alt="프로필 이미지"
                 fill
                 style={{ objectFit: 'cover' }}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                <span className="text-gray-400 text-sm">이미지 없음</span>
+                <span className="text-sm text-gray-400">이미지 없음</span>
               </div>
             )}
 
@@ -301,62 +236,45 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
           </Button>
         </div>
 
-        <div>
-          <label
-            htmlFor="name"
-            className="mb-1 block text-sm font-medium text-gray-700">
-            이름 *
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full rounded-md border-2 border-gray-300 p-2 focus:border-green-600 focus:ring-1 focus:ring-green-600 focus:outline-none"
-            required
-            disabled={submitting}
-          />
-        </div>
+        <Input
+          id="name"
+          name="name"
+          type="text"
+          label="이름"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          disabled={submitting}
+        />
 
+        {/* 이메일 표시 (읽기 전용) */}
         <div>
-          <label
-            htmlFor="email"
-            className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-gray-700">
             이메일
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            className="w-full rounded-md border-2 border-gray-200 bg-gray-50 p-2 text-gray-500"
-            disabled
-            readOnly
-          />
-          <p className="mt-1 text-xs text-gray-500">이메일은 변경할 수 없습니다</p>
+          <div className="w-full rounded-md border-2 border-gray-200 bg-black/20 p-2 text-gray-300 ">
+            {userInfo.email}
+          </div>
+          <p className="mt-1 text-xs text-gray-50">
+            이메일은 변경할 수 없습니다
+          </p>
         </div>
 
-        <div>
-          <label
-            htmlFor="bio"
-            className="mb-1 block text-sm font-medium text-gray-700">
-            자기소개
-          </label>
-          <textarea
-            id="bio"
-            name="bio"
-            value={formData.bio}
-            onChange={handleChange}
-            className="min-h-[100px] w-full resize-none rounded-md border-2 border-gray-300 p-2 focus:border-green-600 focus:ring-1 focus:ring-green-600 focus:outline-none"
-            disabled={submitting}
-            placeholder="자신을 소개해보세요..."
-          />
-        </div>
+        <Textarea
+          id="bio"
+          name="bio"
+          label="자기소개"
+          value={formData.bio}
+          onChange={handleChange}
+          placeholder="자신을 소개해보세요..."
+          disabled={submitting}
+          resize="none"
+          rows={4}
+        />
 
         {/* 관심사 선택 */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className="mb-2 block text-sm font-medium text-gray-50">
             관심 있는 식물 카테고리 (최대 20개)
           </label>
           <div className="flex flex-wrap gap-2 rounded-md border border-gray-300 p-2">
@@ -379,23 +297,22 @@ export default function EditProfile({ userId, onCancel }: EditProfileProps) {
               </button>
             ))}
           </div>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-100">
             선택된 카테고리: {selectedInterests.length}/20
           </p>
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button 
+          <Button
             type="submit"
             disabled={submitting}
-            className="flex-1"
-          >
+            className="flex-1">
             {submitting ? '저장 중...' : '저장하기'}
           </Button>
           <Button
             type="button"
             className="flex-1 bg-gray-500 hover:bg-gray-600"
-            onClick={onCancel}
+            onClick={() => (onCancel ? onCancel() : router.push('/mygarden'))}
             disabled={submitting}>
             취소
           </Button>
