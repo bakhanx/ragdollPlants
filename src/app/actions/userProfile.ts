@@ -1,13 +1,35 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth-utils';
 
+// 사용자 프로필 데이터 타입
+type UserProfileData = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+  bio: string | null;
+  level: number;
+  levelProgress: number;
+  waterCount: number;
+  nutrientCount: number;
+  interests: string[];
+  _count: {
+    plants: number;
+    followersList: number;
+    galleries: number;
+  };
+  todayWaterCount: number;
+  todayNutrientCount: number;
+};
+
 // 사용자 프로필 조회
-export async function getUserProfileData(userId: string) {
+export async function getUserProfileData(
+  userId: string
+): Promise<UserProfileData | null> {
   // 1. 사용자 기본 정보 조회
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -15,6 +37,7 @@ export async function getUserProfileData(userId: string) {
       // 필요한 모든 필드
       id: true,
       name: true,
+      email: true,
       image: true,
       bio: true,
       level: true,
@@ -64,7 +87,7 @@ export async function getUserProfileData(userId: string) {
   };
 }
 
-// 프로필 업데이트 Server Action
+// 프로필 업데이트
 export async function updateUserProfile(formData: FormData) {
   try {
     const user = await getCurrentUser();
