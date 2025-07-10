@@ -8,38 +8,40 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  name          String?
-  email         String         @unique
-  emailVerified DateTime?      @map("email_verified")
-  image         String?        @map("profile_image")
-  coverImage    String?        @map("cover_image")
-  bio           String?
-  password      String?
-  role          String         @default("USER")
-  isActive      Boolean        @default(true) @map("is_active")
-  level         Int            @default(1)
-  levelProgress Int            @default(0) @map("level_progress")
-  waterCount    Int            @default(0) @map("water_count")
-  nutrientCount Int            @default(0) @map("nutrient_count")
-  interests     String[]
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  phone         String?        @map("phone")
-  accounts      Account[]
-  articles      Article[]
-  careRecords   CareRecord[]
-  careReminders CareReminder[]
-  comments      Comment[]
-  diaries       Diary[]
-  events        Event[]
-  followersList Follow[]       @relation("UserFollows")
-  followingList Follow[]       @relation("UserFollowing")
-  galleries     Gallery[]
-  likes         Like[]
-  notifications Notification[]
-  plants        Plant[]
-  sessions      Session[]
+  id              String         @id @default(uuid())
+  name            String?
+  email           String         @unique
+  emailVerified   DateTime?      @map("email_verified")
+  image           String?        @map("profile_image")
+  coverImage      String?        @map("cover_image")
+  bio             String?
+  password        String?
+  role            String         @default("USER")
+  isActive        Boolean        @default(true) @map("is_active")
+  level           Int            @default(1)
+  levelProgress   Int            @default(0) @map("level_progress")
+  waterCount      Int            @default(0) @map("water_count")
+  nutrientCount   Int            @default(0) @map("nutrient_count")
+  interests       String[]
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  phone           String?        @map("phone")
+  accounts        Account[]
+  articles        Article[]
+  careRecords     CareRecord[]
+  careReminders   CareReminder[]
+  comments        Comment[]
+  diaries         Diary[]
+  events          Event[]
+  followersList   Follow[]       @relation("UserFollows")
+  followingList   Follow[]       @relation("UserFollowing")
+  galleries       Gallery[]
+  likes           Like[]
+  notifications   Notification[]
+  plants          Plant[]
+  sessions        Session[]
+  reports         Report[]       @relation("UserReports")
+  reviewedReports Report[]       @relation("UserReviews")
 
   @@map("users")
 }
@@ -83,7 +85,7 @@ model VerificationToken {
 }
 
 model Category {
-  id          String    @id @default(uuid())
+  id          String    @id
   name        String    @unique
   description String?
   color       String?
@@ -118,6 +120,7 @@ model Plant {
   needsWater       Boolean        @default(false) @map("needs_water")
   needsNutrient    Boolean        @default(false) @map("needs_nutrient")
   tags             String[]
+  reportCount      Int            @default(0) @map("report_count")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
   authorId         String         @map("author_id")
@@ -175,6 +178,7 @@ model Article {
   isPublished Boolean   @default(true) @map("is_published")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   viewCount   Int       @default(0) @map("view_count")
+  reportCount Int       @default(0) @map("report_count")
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   category    Category  @relation(fields: [categoryId], references: [id])
   comments    Comment[]
@@ -183,19 +187,20 @@ model Article {
 }
 
 model Diary {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  date      DateTime
-  image     String?
-  status    String
-  tags      String[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  plantId   String?  @map("plant_id")
-  authorId  String   @map("author_id")
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  plant     Plant?   @relation(fields: [plantId], references: [id])
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  date        DateTime
+  image       String?
+  status      String
+  tags        String[]
+  reportCount Int      @default(0) @map("report_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  plantId     String?  @map("plant_id")
+  authorId    String   @map("author_id")
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  plant       Plant?   @relation(fields: [plantId], references: [id])
 
   @@map("diaries")
 }
@@ -208,6 +213,7 @@ model Gallery {
   tags         String[]
   displayOrder Int      @default(0) @map("display_order")
   isFeatured   Boolean  @default(false) @map("is_featured")
+  reportCount  Int      @default(0) @map("report_count")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
   plantId      String?  @map("plant_id")
@@ -230,6 +236,7 @@ model Event {
   thumbnailImage String?  @map("thumbnail_image")
   tags           String[]
   viewCount      Int      @default(0) @map("view_count")
+  reportCount    Int      @default(0) @map("report_count")
   participants   Int      @default(0)
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -293,4 +300,23 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  reason      String
+  description String?
+  contentType String   @map("content_type")
+  contentId   String   @map("content_id")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  reporterId  String   @map("reporter_id")
+  reviewerId  String?  @map("reviewer_id")
+  reporter    User     @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewer    User?    @relation("UserReviews", fields: [reviewerId], references: [id])
+
+  @@index([contentType, contentId])
+  @@index([status, createdAt])
+  @@map("reports")
 }
