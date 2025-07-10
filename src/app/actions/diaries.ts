@@ -309,13 +309,18 @@ export async function updateDiary(id: string, formData: FormData) {
 
     // 이미지 파일 처리
     const imageFile = formData.get('image') as File | null;
+    const existingImage = formData.get('existingImage') as string | null;
     let imageUrl: string | undefined = undefined;
 
     if (imageFile && imageFile.size > 0) {
+      // 새로운 이미지 파일이 업로드된 경우
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const base64 = buffer.toString('base64');
       imageUrl = `data:${imageFile.type};base64,${base64}`;
+    } else if (existingImage) {
+      // 기존 이미지를 유지하는 경우
+      imageUrl = existingImage;
     }
 
     // 입력 검증
