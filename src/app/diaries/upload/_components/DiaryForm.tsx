@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useImageUpload } from '@/app/_hooks/useImageUpload';
-import { Input, Textarea } from '@/app/_components/common';
+import { Input, Textarea, LoadingOverlay } from '@/app/_components/common';
 import { SelectedPlantInfo } from './SelectedPlantInfo';
 import { PlantSelector } from './PlantSelector';
 import { DiaryMoodSelector, moodOptions } from './DiaryMoodSelector';
@@ -37,6 +37,7 @@ export const DiaryForm = ({
   // 내 식물 목록 상태
   const [myPlants, setMyPlants] = useState<{ id: string; name: string }[]>([]);
   const [plantsLoading, setPlantsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 선택된 식물 ID 상태 - 편집 모드일 때 초기값 설정
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(
@@ -48,10 +49,11 @@ export const DiaryForm = ({
   const [content, setContent] = useState(initialData?.content || '');
   const [mood, setMood] = useState(initialData?.status || 'good');
 
-  // 이미지 업로드 훅 사용
+  // 이미지 업로드 훅 사용 - 편집 모드일 때 초기 이미지 설정
   const { imageFiles, imagePreviews, handleMultiImageChange } = useImageUpload({
     maxFiles: MAX_PHOTO_COUNT,
-    onError: message => alert(message)
+    onError: message => alert(message),
+    initialImages: initialData?.image ? [initialData.image] : []
   });
 
   // 내 식물 목록 로드 및 초기화
@@ -86,6 +88,8 @@ export const DiaryForm = ({
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       // FormData 생성
       const formData = new FormData();
@@ -107,7 +111,11 @@ export const DiaryForm = ({
       // 이미지 파일들 추가 (첫 번째 이미지만 사용)
       const validImages = imageFiles.filter(file => file);
       if (validImages.length > 0) {
+        // 새로 업로드된 이미지가 있는 경우
         formData.append('image', validImages[0]);
+      } else if (mode === 'edit' && initialData?.image && imagePreviews.length > 0) {
+        // 편집 모드에서 새 이미지 업로드 없이 기존 이미지 유지
+        formData.append('existingImage', initialData.image);
       }
 
       // 태그 추가 (빈 배열로 초기화)
@@ -132,11 +140,19 @@ export const DiaryForm = ({
           ? error.message
           : `다이어리 ${actionText} 중 오류가 발생했습니다.`
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
+      <LoadingOverlay
+        isVisible={isSubmitting}
+        message={mode === 'edit' ? '일기를 수정하고 있어요...' : '일기를 저장하고 있어요...'}
+        description={mode === 'edit' ? '변경사항을 저장하고 있습니다.' : '소중한 기록을 저장하고 있어요!'}
+      />
+      
       <form
         onSubmit={handleSubmit}
         className="mt-2 w-full">
@@ -199,8 +215,11 @@ export const DiaryForm = ({
           <button
             type="submit"
             className="w-full rounded-md bg-green-600 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-            disabled={!title.trim() || !content.trim()}>
-            {mode === 'edit' ? '수정하기' : '저장하기'}
+            disabled={!title.trim() || !content.trim() || isSubmitting}>
+            {isSubmitting 
+              ? (mode === 'edit' ? '수정 중...' : '저장 중...') 
+              : (mode === 'edit' ? '수정하기' : '저장하기')
+            }
           </button>
         </div>
       </form>

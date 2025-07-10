@@ -1,3 +1,6 @@
 // Form Components
 export { Input } from './Input';
-export { Textarea } from './Textarea'; 
+export { Textarea } from './Textarea';
+
+// UI Components
+export { LoadingOverlay } from './LoadingOverlay'; 

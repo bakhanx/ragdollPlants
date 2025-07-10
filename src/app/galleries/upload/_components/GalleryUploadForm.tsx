@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input, Textarea } from '@/app/_components/common';
+import { Input, Textarea, LoadingOverlay } from '@/app/_components/common';
 import GalleryUsageInfo from './GalleryUsageInfo';
 import GalleryPreview from './GalleryPreview';
 import SubmitButton from './GalleryUploadButton';
@@ -131,9 +131,16 @@ export default function GalleryUploadForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mx-auto w-full max-w-md px-4 pb-20">
+    <>
+      <LoadingOverlay
+        isVisible={isPending}
+        message="갤러리를 업로드하고 있어요..."
+        description="작품을 갤러리에 추가하고 있습니다!"
+      />
+      
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto w-full max-w-md px-4 pb-20">
       {/* 갤러리 사용 현황 정보 */}
       <GalleryUsageInfo
         used={galleryUsage.used}
@@ -196,5 +203,6 @@ export default function GalleryUploadForm() {
         isLoading={isPending}
       />
     </form>
+    </>
   );
 }
