@@ -5,15 +5,15 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { CareCardList } from './_components/CareCardList';
 import { getUserPlantsForCare } from '../actions/care';
-import { auth } from '@/auth';
+import { getCurrentUser } from '@/lib/auth-utils';
 
 // 실제 데이터 페칭 함수
 async function getCarePlantsData() {
   try {
-    const session = await auth();
+    const user = await getCurrentUser();
     
     // 인증된 사용자가 있으면 실제 데이터를 가져오고, 없으면 임시 데이터 사용
-    if (session?.user?.id) {
+    if (user?.id) {
       const plants = await getUserPlantsForCare();
       return plants;
     } else {

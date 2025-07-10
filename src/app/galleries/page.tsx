@@ -1,5 +1,5 @@
 import React from 'react';
-import { auth } from '@/auth';
+import { getCurrentUser } from '@/lib/auth-utils';
 
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
@@ -9,7 +9,7 @@ import { GalleryGrid } from './_components/GalleryGrid';
 import { getUserGalleries } from '../actions/galleries';
 
 export default async function GalleriesPage() {
-  const session = await auth();
+  const user = await getCurrentUser();
   const galleries = await getUserGalleries();
   const photoCount = galleries.length;
 
@@ -33,7 +33,7 @@ export default async function GalleriesPage() {
         {/* 갤러리 그리드 */}
         <GalleryGrid
           items={galleries}
-          session={session}
+          session={{ user, expires: '' }}
         />
       </ContentsLayout>
     </>
