@@ -33,7 +33,7 @@ export default function Page() {
         {/* 버튼 */}
         <div className="flex flex-col gap-4 w-full">
           <Link href="/login">
-            <Button text="로그인" type="primary" />
+            <Button text="로그인" type="submit" />
           </Link>
           <Button text="Login With Google" />
           <Link href="/signup">
