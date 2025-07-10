@@ -1,8 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { MenuIcon } from '@/app/_components/icons';
+import { useContentActions } from '@/app/_hooks/useContentActions';
+import { ContentType } from '@/app/_services/contentService';
+import { ReportModal, ReportReason } from './ReportModal';
 
 // 메뉴에 표시할 항목 타입 정의
 export type MenuItem = {
@@ -13,10 +15,12 @@ export type MenuItem = {
 
 type ContentMenuProps = {
   id: string; // 콘텐츠 ID
-  contentType: 'diary' | 'event' | 'article' | 'plant' | 'gallery'; // 콘텐츠 타입
+  contentType: ContentType; // 콘텐츠 타입
   customItems?: MenuItem[]; // 커스텀 메뉴 항목
   ariaLabel?: string; // 접근성 레이블
   isOwner?: boolean; // 작성자 여부
+  onEdit?: () => void; // 커스텀 수정 핸들러 (우선 사용)
+  onDelete?: () => void; // 커스텀 삭제 핸들러 (우선 사용)
 };
 
 export const ContentMenu = ({
@@ -24,41 +28,69 @@ export const ContentMenu = ({
   contentType,
   customItems,
   ariaLabel,
-  isOwner = false
+  isOwner = false,
+  onEdit,
+  onDelete
 }: ContentMenuProps) => {
-  const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [isReportSubmitting, setIsReportSubmitting] = useState(false);
+
+  // 콘텐츠 액션 훅 사용 (커스텀 핸들러가 없을 때 사용)
+  const { handleEdit: defaultHandleEdit, handleDelete: defaultHandleDelete } = useContentActions(contentType, id);
 
   const handleMenuClick = () => {
     setShowMenu(!showMenu);
   };
 
-  // 콘텐츠 타입별 기본 메뉴 항목 매핑
-  const getEditPath = () => {
-    const paths = {
-      diary: `/diaries/${id}/edit`,
-      event: `/events/${id}/edit`,
-      article: `/articles/${id}/edit`,
-      plant: `/myplants/${id}/edit`,
-      gallery: `/galleries/${id}/edit`
-    };
-    return paths[contentType];
+  // 수정 핸들러 - 커스텀 핸들러 우선, 없으면 기본 훅 사용
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit();
+    } else {
+      defaultHandleEdit();
+    }
+    setShowMenu(false);
   };
 
-  // 삭제 핸들러
+  // 삭제 핸들러 - 커스텀 핸들러 우선, 없으면 기본 훅 사용
   const handleDelete = () => {
     if (confirm('정말 삭제하시겠습니까?')) {
-      // TODO: 실제 삭제 로직 구현
-      console.log(`${contentType} ${id} 삭제`);
+      if (onDelete) {
+        onDelete();
+      } else {
+        defaultHandleDelete();
+      }
     }
+    setShowMenu(false);
   };
 
-  // 신고 핸들러
+  // 신고 모달 열기
   const handleReport = () => {
-    if (confirm('이 게시물을 신고하시겠습니까?')) {
-      // TODO: 실제 신고 로직 구현
-      console.log(`${contentType} ${id} 신고`);
+    setShowReportModal(true);
+    setShowMenu(false);
+  };
+
+  // 신고 제출
+  const handleReportSubmit = async (reason: ReportReason, description?: string) => {
+    setIsReportSubmitting(true);
+    try {
+      // TODO: 실제 신고 API 호출
+      console.log('신고 데이터:', {
+        contentType,
+        contentId: id,
+        reason,
+        description
+      });
+      
+      // 임시로 성공 처리
+      await new Promise(resolve => setTimeout(resolve, 1000));
       alert('신고가 접수되었습니다.');
+    } catch (error) {
+      console.error('신고 제출 오류:', error);
+      alert('신고 접수에 실패했습니다.');
+    } finally {
+      setIsReportSubmitting(false);
     }
   };
 
@@ -66,7 +98,7 @@ export const ContentMenu = ({
   const ownerItems: MenuItem[] = [
     {
       label: '수정하기',
-      onClick: () => router.push(getEditPath())
+      onClick: handleEdit
     },
     {
       label: '삭제하기',
@@ -133,6 +165,15 @@ export const ContentMenu = ({
           </ul>
         </div>
       )}
+
+      {/* 신고 모달 */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReportSubmit}
+        contentType={contentType}
+        isSubmitting={isReportSubmitting}
+      />
     </div>
   );
 };
