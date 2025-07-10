@@ -3,19 +3,21 @@
 import React from 'react';
 import { BellIcon } from '@/app/_components/icons';
 import { ContentMenu } from '@/app/_components/common/ContentMenu';
+import { useContentActions } from '@/app/_hooks/useContentActions';
+import { ContentType } from '@/app/_services/contentService';
 
 interface HeaderRightProps {
   showNotification: boolean;
   onNotificationClick: () => void;
   showContentMenu: boolean;
-  contentType: 'article' | 'diary' | 'event' | 'plant' | 'gallery';
+  contentType: ContentType;
   id: string;
   isOwner?: boolean;
 }
 
 /**
  * 헤더의 오른쪽 섹션 컴포넌트
- * 알림과 콘텐츠 메뉴 버튼을 표시
+ * 알림과 콘텐츠 메뉴 버튼
  */
 export const HeaderRight = ({
   showNotification,
@@ -25,6 +27,8 @@ export const HeaderRight = ({
   id,
   isOwner = false
 }: HeaderRightProps) => {
+  const { handleEdit, handleDelete } = useContentActions(contentType, id);
+
   return (
     <div className="ml-auto flex w-auto items-center justify-end gap-2">
       {/* 알림 버튼 */}
@@ -49,6 +53,8 @@ export const HeaderRight = ({
           contentType={contentType}
           id={id}
           isOwner={isOwner}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       )}
     </div>
