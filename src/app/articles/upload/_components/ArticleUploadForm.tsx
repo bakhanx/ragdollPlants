@@ -2,16 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input, Textarea } from '@/app/_components/common';
+import { ARTICLE_CATEGORIES, ArticleCategory } from '@/app/_constants/categories';
+import { useImageUpload } from '@/app/_hooks/useImageUpload';
+import {
+  Input,
+  Textarea,
+  LoadingOverlay
+} from '@/app/_components/common';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
+import ArticleEditor from './ArticleEditor';
 import KeywordsField from './KeywordsField';
 import SubmitButtons from './SubmitButtons';
-import ArticleEditor from './ArticleEditor';
-import {
-  createArticle,
-  updateArticle
-} from '@/app/actions/articles';
-import { ArticleCategory, ARTICLE_CATEGORIES } from '@/app/_constants/categories';
+import { createArticle, updateArticle } from '@/app/actions/articles';
 
 interface ArticleData {
   id: number;
@@ -46,7 +48,6 @@ export default function ArticleUploadForm({
         content: initialData.content,
         summary: initialData.summary || '',
         keywords: initialData.tags?.join(', ') || '',
-        thumbnailPreview: initialData.image || null,
         categoryId: initialData.category?.id || ''
       };
     }
@@ -57,7 +58,6 @@ export default function ArticleUploadForm({
       content: '',
       summary: '',
       keywords: '',
-      thumbnailPreview: null,
       categoryId: ''
     };
   };
@@ -69,39 +69,24 @@ export default function ArticleUploadForm({
   const [editorContent, setEditorContent] = useState(defaultValues.content);
   const [summary, setSummary] = useState(defaultValues.summary);
   const [keywords, setKeywords] = useState(defaultValues.keywords);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
-    defaultValues.thumbnailPreview
-  );
-  const [categories, setCategories] = useState<ArticleCategory[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     defaultValues.categoryId
   );
 
+  // 이미지 업로드 훅 사용 - 편집 모드일 때 초기 이미지 설정
+  const { imageFile, imagePreview, handleSingleImageChange } = useImageUpload({
+    maxFiles: 1,
+    onError: message => alert(message),
+    initialImage: initialData?.image || null
+  });
+
   // 초기 카테고리 설정
   useEffect(() => {
-    setCategories(ARTICLE_CATEGORIES);
     // 편집 모드가 아니고 초기 데이터가 없을 때만 첫 번째 카테고리 선택
     if (mode === 'create' && !initialData && ARTICLE_CATEGORIES.length > 0) {
       setSelectedCategoryId(ARTICLE_CATEGORIES[0].id);
     }
   }, [mode, initialData]);
-
-  // 썸네일 이미지 변경 핸들러
-  const handleThumbnailChange = (file: File | null) => {
-    setThumbnailFile(file);
-
-    if (file) {
-      // 이미지 미리보기 생성
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setThumbnailPreview(null);
-    }
-  };
 
   // 키워드 처리 함수
   const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +114,6 @@ export default function ArticleUploadForm({
       setEditorContent(initialData.content);
       setSummary(initialData.summary || '');
       setKeywords(initialData.tags?.join(', ') || '');
-      setThumbnailPreview(initialData.image || null);
       setSelectedCategoryId(initialData.category?.id || '');
     }
   }, [mode, initialData]);
@@ -160,7 +144,7 @@ export default function ArticleUploadForm({
       !title ||
       !editorContent ||
       !selectedCategoryId ||
-      (isImageRequired && !thumbnailFile)
+      (isImageRequired && !imageFile)
     ) {
       alert(texts.validation[mode]);
       return;
@@ -180,8 +164,8 @@ export default function ArticleUploadForm({
       console.log('전송하는 editorContent:', editorContent);
 
       // 새 이미지가 있을 때만 추가
-      if (thumbnailFile) {
-        formData.append('thumbnail', thumbnailFile);
+      if (imageFile) {
+        formData.append('thumbnail', imageFile);
       }
 
       const keywordsArray = getKeywordsArray();
@@ -211,12 +195,20 @@ export default function ArticleUploadForm({
           ? error.message
           : '기사 등록에 실패했습니다. 다시 시도해주세요.'
       );
+    } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl py-4">
+    <>
+      <LoadingOverlay
+        isVisible={isSubmitting}
+        message={mode === 'edit' ? '기사를 수정하고 있어요...' : '기사를 작성하고 있어요...'}
+        description={mode === 'edit' ? '변경사항을 저장하고 있습니다.' : '새로운 기사를 발행하고 있어요!'}
+      />
+      
+      <div className="mx-auto w-full max-w-4xl py-4">
       <form
         onSubmit={handleSubmit}
         className="space-y-6 text-gray-50">
@@ -226,8 +218,8 @@ export default function ArticleUploadForm({
             대표 이미지 (썸네일)
           </h2>
           <ImageUploader
-            imagePreview={thumbnailPreview}
-            onImageChange={handleThumbnailChange}
+            imagePreview={imagePreview}
+            onImageChange={handleSingleImageChange}
             label="대표 이미지"
             required={true}
             aspectRatio="landscape"
@@ -272,7 +264,7 @@ export default function ArticleUploadForm({
             className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none text-gray-50"
             required>
             <option value="" className='text-gray-800' >카테고리를 선택하세요</option>
-            {categories.map(category => (
+            {ARTICLE_CATEGORIES.map((category: ArticleCategory) => (
               <option
                 key={category.id}
                 value={category.id}
@@ -305,5 +297,6 @@ export default function ArticleUploadForm({
         />
       </form>
     </div>
+    </>
   );
 }

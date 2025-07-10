@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input, Textarea } from '@/app/_components/common';
+import { useImageUpload } from '@/app/_hooks/useImageUpload';
+import { Input, Textarea, LoadingOverlay } from '@/app/_components/common';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import PlantTypeSelector from './PlantTypeSelector';
 import DatePickerField from './DatePickerField';
@@ -41,7 +42,13 @@ interface PlantFormProps {
 export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // 이미지 업로드 훅 사용 - 편집 모드일 때 초기 이미지 설정
+  const { imageFile, imagePreview, handleSingleImageChange } = useImageUpload({
+    maxFiles: 1,
+    onError: message => alert(message),
+    initialImage: initialData?.image || null
+  });
 
   // 오늘 날짜 계산
   const today = new Date().toISOString().split('T')[0];
@@ -89,33 +96,13 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
   // 현재 선택된 값들 추적
   const plantType = watch('plantType');
 
-  // 편집 모드에서 기존 이미지 프리뷰 설정
-  useEffect(() => {
-    if (mode === 'edit' && initialData?.image) {
-      setImagePreview(initialData.image);
-    }
-  }, [mode, initialData?.image]);
-
-  // 이미지 변경 핸들러
+  // 이미지 변경 핸들러 - 훅의 핸들러와 폼 설정을 연결
   const handleImageChange = (file: File | null) => {
-    // 이전 미리보기 URL 정리 (편집 모드에서 기존 이미지가 아닌 경우만)
-    if (imagePreview && imagePreview.startsWith('blob:')) {
-      URL.revokeObjectURL(imagePreview);
-    }
-
-    if (file) {
-      // 폼에 파일 설정
-      setValue('image', file);
-
-      // 미리보기 생성
-      const preview = URL.createObjectURL(file);
-      setImagePreview(preview);
-    } else {
-      setValue('image', undefined);
-      
-      // 이미지 삭제 시 항상 null로 설정 (편집/생성 모드 구분 없이)
-      setImagePreview(null);
-    }
+    // 훅의 핸들러 호출
+    handleSingleImageChange(file);
+    
+    // 폼에 파일 설정
+    setValue('image', file || undefined);
   };
 
   // 폼 제출 핸들러
@@ -126,8 +113,10 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
       // FormData 생성
       const formData = new FormData();
 
-      // 이미지 처리
-      if (data.image) {
+      // 이미지 처리 - 훅에서 관리하는 파일 사용
+      if (imageFile) {
+        formData.append('image', imageFile);
+      } else if (data.image) {
         formData.append('image', data.image);
       }
 
@@ -177,9 +166,16 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="mt-4 w-full">
+    <>
+      <LoadingOverlay
+        isVisible={isSubmitting}
+        message={mode === 'create' ? '식물을 등록하고 있어요...' : '식물 정보를 수정하고 있어요...'}
+        description={mode === 'create' ? '잠시만 기다려주세요!' : '변경사항을 저장하고 있습니다.'}
+      />
+      
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="mt-4 w-full">
       {/* 이미지 업로드 섹션 */}
       <div className="mb-6">
         <ImageUploader
@@ -315,5 +311,6 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
         )}
       </div>
     </form>
+    </>
   );
 };

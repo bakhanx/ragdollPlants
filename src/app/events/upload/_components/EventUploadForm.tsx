@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useImageUpload } from '@/app/_hooks/useImageUpload';
+import { LoadingOverlay } from '@/app/_components/common';
 import { ImageUploadSection } from './ImageUploadSection';
 import { EventDetailsSection } from './EventDetailsSection';
 import { SubmitButton } from './SubmitButton';
@@ -33,25 +35,16 @@ export const EventUploadForm = ({
   const [period, setPeriod] = useState('');
   const [description, setDescription] = useState(initialData?.description || '');
   const [content, setContent] = useState(initialData?.content || '');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 이미지 변경 핸들러
-  const handleImageChange = (file: File | null) => {
-    setImageFile(file);
+  // 이미지 업로드 훅 사용 - 편집 모드일 때 초기 이미지 설정
+  const { imageFile, imagePreview, handleSingleImageChange } = useImageUpload({
+    maxFiles: 1,
+    onError: message => alert(message),
+    initialImage: initialData?.image || null
+  });
 
-    if (file) {
-      // 이미지 미리보기 생성
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setImagePreview(null);
-    }
-  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,13 +98,20 @@ export const EventUploadForm = ({
   };
 
   return (
-    <div className="mx-auto w-full max-w-md py-4">
+    <>
+      <LoadingOverlay
+        isVisible={isSubmitting}
+        message={mode === 'edit' ? '이벤트를 수정하고 있어요...' : '이벤트를 등록하고 있어요...'}
+        description={mode === 'edit' ? '변경사항을 저장하고 있습니다.' : '새로운 이벤트를 만들고 있어요!'}
+      />
+      
+      <div className="mx-auto w-full max-w-md py-4">
       <form
         onSubmit={handleSubmit}
         className="space-y-6">
         <ImageUploadSection
           imagePreview={imagePreview}
-          onImageChange={handleImageChange}
+          onImageChange={handleSingleImageChange}
         />
 
         <EventDetailsSection
@@ -133,5 +133,6 @@ export const EventUploadForm = ({
         />
       </form>
     </div>
+    </>
   );
 };
