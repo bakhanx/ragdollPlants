@@ -2,12 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { profileImg } from '@/app/_temp';
 import { Notification } from './Notification';
 import { MenuSidebar } from './MenuSidebar';
 import { HeaderLeft } from './HeaderLeft';
 import { HeaderCenter } from './HeaderCenter';
 import { HeaderRight } from './HeaderRight';
+import { ContentType } from '@/app/_services/contentService';
 
 // 헤더 변형 타입
 type HeaderVariant = 'default' | 'transparent' | 'glass';
@@ -18,7 +18,7 @@ interface HeaderProps {
   showBack?: boolean;
   title?: string;
   variant?: HeaderVariant;
-  contentType?: 'article' | 'diary' | 'event' | 'plant' | 'gallery';
+  contentType?: ContentType;
   showNotification?: boolean;
   onNotificationClick?: () => void;
   showMenuButton?: boolean;
@@ -83,7 +83,7 @@ export const Header = ({
         {/* 중앙: 타이틀 - 절대 위치로 중앙 배치 */}
         <HeaderCenter
           title={title}
-          logoSrc={profileImg}
+          logoSrc={'/images/Profile.webp'}
         />
 
         {/* 오른쪽: 알림, 메뉴 버튼 */}
