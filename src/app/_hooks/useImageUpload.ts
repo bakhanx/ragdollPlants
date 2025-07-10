@@ -6,22 +6,26 @@ type UseImageUploadOptions = {
   maxFileSize?: number;
   maxFiles?: number;
   onError?: (message: string) => void;
+  initialImage?: string | null; // 단일 이미지
+  initialImages?: string[]; // 다중 이미지
 };
 
 export function useImageUpload(options: UseImageUploadOptions = {}) {
   const {
     maxFileSize = 5 * 1024 * 1024, // 기본 5MB
     maxFiles = 10,
-    onError = (message: string) => alert(message)
+    onError = (message: string) => alert(message),
+    initialImage = null,
+    initialImages = []
   } = options;
 
   // 단일 이미지 상태
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialImage);
 
   // 다중 이미지 상태
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>(initialImages);
 
   // 파일 크기 체크 유틸리티 함수
   const checkFileSize = useCallback(
