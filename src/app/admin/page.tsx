@@ -4,6 +4,7 @@ import Link from 'next/link';
 import DataBackup from './_components/DataBackup';
 import DatabaseReset from './_components/DatabaseReset';
 import DataRestore from './_components/DataRestore';
+import { ReportManagement } from './_components/ReportManagement';
 
 export default async function AdminPage() {
   const session = await auth();
@@ -18,6 +19,11 @@ export default async function AdminPage() {
         <h1 className="mb-8 text-3xl font-bold text-gray-900">관리자 페이지</h1>
 
         <div className="space-y-6">
+          {/* 신고 관리 섹션 */}
+          <div className="rounded-lg bg-white shadow">
+            <ReportManagement />
+          </div>
+
           {/* 데이터 백업 섹션 */}
           <DataBackup />
 
