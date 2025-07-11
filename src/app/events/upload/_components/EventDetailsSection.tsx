@@ -1,13 +1,16 @@
 import React from 'react';
 import { Input, Textarea } from '@/app/_components/common';
+import DatePickerField from '@/app/myplants/_components/forms/DatePickerField';
 
 export interface EventDetailsSectionProps {
   title: string;
   setTitle: (value: string) => void;
   subtitle: string;
   setSubtitle: (value: string) => void;
-  period: string;
-  setPeriod: (value: string) => void;
+  startDate: string;
+  setStartDate: (value: string) => void;
+  endDate: string;
+  setEndDate: (value: string) => void;
   description: string;
   setDescription: (value: string) => void;
   content: string;
@@ -17,10 +20,14 @@ export interface EventDetailsSectionProps {
 export const EventDetailsSection = ({
   title, setTitle,
   subtitle, setSubtitle,
-  period, setPeriod,
+  startDate, setStartDate,
+  endDate, setEndDate,
   description, setDescription,
   content, setContent
 }: EventDetailsSectionProps) => {
+  // 오늘 날짜를 YYYY-MM-DD 형식으로 가져오기
+  const today = new Date().toISOString().split('T')[0];
+  
   return (
     <>
       <Input
@@ -41,14 +48,33 @@ export const EventDetailsSection = ({
         required
       />
 
-      <Input
-        id="period"
-        label="이벤트 기간"
-        value={period}
-        onChange={(e) => setPeriod(e.target.value)}
-        placeholder="예: 2024.05.01 ~ 2024.05.31"
-        required
-      />
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-50">
+          이벤트 기간 <span className="text-red-500">*</span>
+        </label>
+        
+        <div className="space-y-3">
+          <div>
+            <label className="mb-1 block text-xs text-gray-200">시작일</label>
+            <DatePickerField
+              value={startDate}
+              onChange={setStartDate}
+              max="9999-12-31"
+              label="시작 날짜를 선택해주세요"
+            />
+          </div>
+          
+          <div>
+            <label className="mb-1 block text-xs text-gray-200">종료일</label>
+            <DatePickerField
+              value={endDate}
+              onChange={setEndDate}
+              max="9999-12-31"
+              label="종료 날짜를 선택해주세요"
+            />
+          </div>
+        </div>
+      </div>
 
       <Textarea
         id="description"
