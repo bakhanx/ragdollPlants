@@ -1,24 +1,89 @@
 import Link from 'next/link';
 import React from 'react';
 
+type MenuItemType = {
+  id: string;
+  icon: string;
+  label: string;
+  href: string;
+  ownerOnly: boolean;
+  profileLink?: boolean;
+};
+
+const createBaseMenuItems = ({
+  userId,
+  isOwner,
+}: {
+  userId?: string;
+  isOwner: boolean;
+}): MenuItemType[] => [
+  {
+    id: 'myplants',
+    icon: '🌱',
+    label: '식물',
+    href: isOwner ? '/myplants' : `/myplants/${userId}`,
+    ownerOnly: false,
+    profileLink: true,
+  },
+  {
+    id: 'diaries',
+    icon: '📗',
+    label: '다이어리',
+    href: isOwner ? '/diaries' : `/diaries/${userId}`,
+    ownerOnly: false,
+    profileLink: true,
+  },
+  {
+    id: 'galleries',
+    icon: '🌷',
+    label: '갤러리',
+    href: isOwner ? '/galleries' : `/galleries?userId=${userId}`,
+    ownerOnly: false,
+    profileLink: true,
+  },
+  { id: 'care', icon: '💊', label: '식물 케어', href: '/care', ownerOnly: true },
+  { id: 'news', icon: '📝', label: '식물 뉴스', href: '/articles', ownerOnly: false },
+  { id: 'events', icon: '🎉', label: '이벤트', href: '/events', ownerOnly: false },
+];
+
 interface MenuListProps {
+  userId?: string;
+  currentUserId?: string;
+  isOwner: boolean;
   variant?: 'inline' | 'sidebar';
   onItemClick?: () => void;
 }
 
 export const MenuList = ({
+  userId,
+  currentUserId,
+  isOwner,
   variant = 'inline',
-  onItemClick
+  onItemClick,
 }: MenuListProps) => {
-  const menuItems = [
-    { icon: '🏡', label: '내 정원', href: '/mygarden' },
-    { icon: '🌱', label: '내 식물', href: '/myplants' },
-    { icon: '📗', label: '다이어리', href: '/diaries' },
-    { icon: '🌷', label: '식물 전시관', href: '/galleries' },
-    { icon: '💊', label: '식물 케어', href: '/care' },
-    { icon: '📝', label: '식물 뉴스', href: '/articles' },
-    { icon: '🎉', label: '이벤트', href: '/events' }
-  ];
+  const baseMenuItems = createBaseMenuItems({ userId, isOwner });
+  const isProfileContext = !!userId;
+
+  const filteredLinks = baseMenuItems.filter(
+    item =>
+      (isOwner || !item.ownerOnly) &&
+      (!item.profileLink || isProfileContext)
+  );
+
+  const myGardenMenu = currentUserId
+    ? [
+        {
+          id: 'mygarden',
+          icon: '🏡',
+          label: '내 정원',
+          href: `/mygarden/${currentUserId}`,
+          ownerOnly: false,
+          profileLink: false,
+        },
+      ]
+    : [];
+
+  const menuItems = [...myGardenMenu, ...filteredLinks];
 
   const variants = {
     inline: {
@@ -63,7 +128,7 @@ export const MenuList = ({
     <nav className={styles.nav}>
       {menuItems.map(item => (
         <Link
-          key={item.href}
+          key={item.id}
           href={item.href}
           onClick={onItemClick}
           className={styles.link}>
