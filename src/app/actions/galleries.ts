@@ -11,6 +11,8 @@ import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
+import type { Prisma } from '@prisma/client';
+import { populateLikeInfo } from './likes';
 
 // 갤러리 생성 유효성 검사 스키마
 const createGallerySchema = z.object({
@@ -24,57 +26,74 @@ const createGallerySchema = z.object({
   tags: z.array(z.string()).optional()
 });
 
-// 모든 갤러리 조회 (N+1 쿼리 최적화 직접 구현)
-export async function getGalleries() {
+// 갤러리 목록 조회
+export async function getGalleries(userId?: string) {
   try {
-    // 갤러리 목록 조회
+    const currentUser = await getCurrentUser().catch(() => null);
+
+    const where: Prisma.GalleryWhereInput = {
+      isActive: true
+    };
+
+    if (userId) {
+      where.authorId = userId;
+      // 다른 사람의 갤러리를 볼 때는 비공개 갤러리 제외
+      if (currentUser?.id !== userId) {
+        where.isPublic = true;
+      }
+    } else {
+      // 갤러리 메인 페이지에서는 공개된 것만
+      where.isPublic = true;
+    }
+
     const galleries = await prisma.gallery.findMany({
+      where,
       select: {
         id: true,
         title: true,
         image: true,
-        description: true,
+        authorId: true,
+        isFeatured: true,
+        displayOrder: true,
         createdAt: true,
-        plantId: true,
-        tags: true,
-        author: { select: { id: true, name: true, image: true } },
-        plant: { select: { id: true, name: true } }
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: [
+        { isFeatured: 'desc' },
+        { displayOrder: 'asc' },
+        { createdAt: 'desc' }
+      ]
     });
 
-    // 갤러리 ID 목록 추출
-    const galleryIds = galleries.map(g => g.id);
-
-    // 좋아요 수를 한 번의 쿼리로 조회 (N+1 쿼리 해결)
-    const likeCounts = await prisma.like.groupBy({
-      by: ['targetId'],
-      where: {
-        type: 'gallery',
-        targetId: { in: galleryIds }
-      },
-      _count: { _all: true }
-    });
-
-    // 좋아요 수 맵 생성
-    const likeCountMap = new Map(
-      likeCounts.map(item => [item.targetId, item._count._all])
+    const galleriesWithLikes = await populateLikeInfo(
+      galleries,
+      'gallery',
+      currentUser?.id
     );
 
-    // 갤러리와 좋아요 수 결합
-    return galleries.map(gallery => ({
-      ...gallery,
-      likes: likeCountMap.get(gallery.id) || 0
+    const results = galleriesWithLikes.map(g => ({
+      ...g, // id, title, image, isLiked 등 모든 속성 포함
+      _count: { likes: g.likes }
     }));
+
+    return results;
   } catch (error) {
-    console.error('갤러리 목록 조회 오류:', error);
-    throw new Error('갤러리 목록을 불러오는 중 오류가 발생했습니다.');
+    console.error('갤러리 조회 실패:', error);
+    return [];
   }
 }
 
-// 특정 갤러리 조회 (최적화 직접 구현)
+// 특정 갤러리 상세 정보 조회
 export async function getGalleryById(id: string) {
   try {
+    const currentUser = await getCurrentUser().catch(() => null);
+
     const gallery = await prisma.gallery.findUnique({
       where: { id },
       include: {
@@ -83,21 +102,32 @@ export async function getGalleryById(id: string) {
       }
     });
 
-    if (!gallery) {
-      throw new Error('갤러리를 찾을 수 없습니다.');
+    if (!gallery || !gallery.isActive) {
+      throw new Error('갤러리를 찾을 수 없거나 비활성화된 게시물입니다.');
     }
 
-    // 좋아요 수 조회
-    const likesCount = await prisma.like.count({
-      where: {
-        type: 'gallery',
-        targetId: id
-      }
-    });
+    const [likesCount, userLike] = await Promise.all([
+      prisma.like.count({
+        where: {
+          type: 'gallery',
+          targetId: id
+        }
+      }),
+      currentUser
+        ? prisma.like.findFirst({
+            where: {
+              userId: currentUser.id,
+              type: 'gallery',
+              targetId: id
+            }
+          })
+        : Promise.resolve(null)
+    ]);
 
     return {
       ...gallery,
-      likes: likesCount
+      likes: likesCount,
+      isLiked: !!userLike
     };
   } catch (error) {
     console.error('갤러리 조회 오류:', error);
@@ -105,18 +135,30 @@ export async function getGalleryById(id: string) {
   }
 }
 
-// 사용자별 갤러리 조회 (최적화 직접 구현)
+// 사용자별 갤러리 조회
 export async function getUserGalleries(userId?: string) {
   try {
     const session = await auth();
-    const targetUserId = userId || session?.user?.id;
+    const currentUserId = session?.user?.id;
+    const targetUserId = userId || currentUserId;
 
     if (!targetUserId) {
       throw new Error('로그인이 필요합니다.');
     }
 
+    const isOwner = currentUserId === targetUserId;
+
+    const where: Prisma.GalleryWhereInput = {
+      authorId: targetUserId
+    };
+
+    if (!isOwner) {
+      where.isPublic = true;
+      where.isActive = true;
+    }
+
     const galleries = await prisma.gallery.findMany({
-      where: { authorId: targetUserId },
+      where,
       select: {
         id: true,
         title: true,
@@ -133,14 +175,14 @@ export async function getUserGalleries(userId?: string) {
       orderBy: [
         { isFeatured: 'desc' }, // 대표 이미지 우선
         { displayOrder: 'asc' }, // 그 다음 순서대로
-        { createdAt: 'asc' } // 같은 순서면 오래된 순 (안정적인 순서)
+        { createdAt: 'asc' } // 같은 순서면 오래된 순
       ]
     });
 
     // 갤러리 ID 목록 추출
     const galleryIds = galleries.map(g => g.id);
 
-    // 좋아요 수를 한 번의 쿼리로 조회 (N+1 쿼리 해결)
+    // 좋아요 수
     const likeCounts = await prisma.like.groupBy({
       by: ['targetId'],
       where: {
@@ -166,7 +208,7 @@ export async function getUserGalleries(userId?: string) {
   }
 }
 
-// 갤러리 생성 (업로드) - 최적화 적용
+// 갤러리 생성
 export async function createGallery(formData: FormData) {
   try {
     const user = await getCurrentUser();
@@ -184,7 +226,6 @@ export async function createGallery(formData: FormData) {
       );
     }
 
-    // FormData에서 데이터 추출 - 직접 처리
     const title = (formData.get('title') as string)?.trim() || '';
     const description = (formData.get('description') as string)?.trim() || '';
     const plantId = (formData.get('plantId') as string)?.trim() || '';
@@ -207,7 +248,7 @@ export async function createGallery(formData: FormData) {
       }
     }
 
-    // 유효성 검사 - Zod가 모든 검증 담당
+    // 유효성 검사 - Zod
     const validatedData = createGallerySchema.parse({
       title,
       description: description || undefined,
@@ -216,7 +257,7 @@ export async function createGallery(formData: FormData) {
       tags: tags.length > 0 ? tags : undefined
     });
 
-    // 이미지 처리 - Cloudflare Images 업로드
+    // 이미지 처리
     let imageUrl = '';
     const imageFile = formData.get('image') as File | null;
 
@@ -224,7 +265,7 @@ export async function createGallery(formData: FormData) {
       // Cloudflare Images에 업로드
       imageUrl = await uploadImageToCloudflare(
         imageFile,
-        '/images/plant-default.png'
+        '/images/plant-default.webp'
       );
     }
 
@@ -260,28 +301,34 @@ export async function createGallery(formData: FormData) {
 
     return {
       success: true,
-      gallery
+      gallery,
+      redirectTo: '/galleries'
     };
   } catch (error) {
     console.error('갤러리 생성 오류:', error);
 
     if (error instanceof Error) {
-      throw error;
+      return {
+        success: false,
+        error: error.message
+      };
     }
 
-    throw new Error('갤러리 업로드 중 오류가 발생했습니다.');
+    return {
+      success: false,
+      error: '갤러리 업로드 중 오류가 발생했습니다.'
+    };
   }
 }
 
-// 갤러리 수정 - 최적화 적용
+// 갤러리 수정
 export async function updateGallery(id: string, formData: FormData) {
   try {
     const user = await getCurrentUser();
 
-    // 갤러리 존재 여부 및 권한 확인 (최적화된 함수 사용)
+    // 갤러리 존재 여부 및 권한 확인
     await validateGalleryOwnership(id, user.id);
 
-    // FormData에서 데이터 추출 (최적화된 함수 사용)
     const title = (formData.get('title') as string)?.trim() || '';
     const description = (formData.get('description') as string)?.trim() || '';
     const plantId = (formData.get('plantId') as string)?.trim() || '';
@@ -289,7 +336,7 @@ export async function updateGallery(id: string, formData: FormData) {
     const tags =
       (formData.get('tags') as string)?.split(',').map(tag => tag.trim()) || [];
 
-    // 이미지 처리 - Cloudflare Images 업로드
+    // 이미지 처리
     let imageUrl = '';
     const imageFile = formData.get('image') as File | null;
 
@@ -297,7 +344,7 @@ export async function updateGallery(id: string, formData: FormData) {
       // Cloudflare Images에 업로드
       imageUrl = await uploadImageToCloudflare(
         imageFile,
-        '/images/plant-default.png'
+        '/images/plant-default.webp'
       );
     }
 
@@ -360,25 +407,32 @@ export async function updateGallery(id: string, formData: FormData) {
 
     return {
       success: true,
-      gallery
+      gallery,
+      redirectTo: '/galleries'
     };
   } catch (error) {
     console.error('갤러리 수정 오류:', error);
 
     if (error instanceof Error) {
-      throw error;
+      return {
+        success: false,
+        error: error.message
+      };
     }
 
-    throw new Error('갤러리 수정 중 오류가 발생했습니다.');
+    return {
+      success: false,
+      error: '갤러리 수정 중 오류가 발생했습니다.'
+    };
   }
 }
 
-// 갤러리 삭제 - 최적화 적용
+// 갤러리 삭제
 export async function deleteGallery(id: string) {
   try {
     const user = await getCurrentUser();
 
-    // 갤러리 존재 여부 및 권한 확인 (최적화된 함수 사용)
+    // 갤러리 존재 여부 및 권한 확인
     const existingGallery = await validateGalleryOwnership(id, user.id);
 
     // 관련 좋아요 먼저 삭제
@@ -394,10 +448,11 @@ export async function deleteGallery(id: string) {
       where: { id }
     });
 
-    // 이미지 파일도 삭제 (Cloudflare Images에서)
+    // 이미지 파일 삭제
     if (
       existingGallery.image &&
-      !existingGallery.image.includes('/images/plant-default.png')
+      !existingGallery.image.includes('/images/plant-default.webp') &&
+      !existingGallery.image.startsWith('data:')
     ) {
       await deleteImageFromCloudflare(existingGallery.image);
     }
@@ -405,89 +460,20 @@ export async function deleteGallery(id: string) {
     // 갤러리 페이지 재검증
     revalidatePath('/galleries');
 
+    console.log('갤러리 삭제 완료:', { id, title: existingGallery.title });
+
+    // 성공 결과 반환
     return {
       success: true,
-      message: `"${existingGallery.title}" 갤러리가 삭제되었습니다.`
+      redirectTo: '/galleries'
     };
   } catch (error) {
     console.error('갤러리 삭제 오류:', error);
-
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error('갤러리 삭제 중 오류가 발생했습니다.');
-  }
-}
-
-// 갤러리 좋아요 토글 - 최적화 적용
-export async function toggleGalleryLike(id: string) {
-  try {
-    const user = await getCurrentUser();
-
-    // 갤러리 존재 여부 확인
-    const gallery = await prisma.gallery.findUnique({
-      where: { id },
-      select: {
-        id: true
-      }
-    });
-
-    if (!gallery) {
-      throw new Error('갤러리를 찾을 수 없습니다.');
-    }
-
-    // 좋아요 상태 확인
-    const existingLike = await prisma.like.findFirst({
-      where: {
-        type: 'gallery',
-        targetId: id,
-        userId: user.id
-      }
-    });
-
-    if (existingLike) {
-      // 좋아요 취소
-      await prisma.like.delete({
-        where: {
-          id: existingLike.id
-        }
-      });
-    } else {
-      // 좋아요 추가
-      await prisma.like.create({
-        data: {
-          type: 'gallery',
-          targetId: id,
-          userId: user.id
-        }
-      });
-    }
-
-    // 새로운 좋아요 수 조회
-    const newLikesCount = await prisma.like.count({
-      where: {
-        type: 'gallery',
-        targetId: id
-      }
-    });
-
-    // 갤러리 페이지 재검증
-    revalidatePath('/galleries');
-
     return {
-      success: true,
-      likes: newLikesCount,
-      isLiked: !existingLike
+      success: false,
+      error:
+        error instanceof Error ? error.message : '갤러리 삭제에 실패했습니다'
     };
-  } catch (error) {
-    console.error('갤러리 좋아요 토글 오류:', error);
-
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error('좋아요 처리 중 오류가 발생했습니다.');
   }
 }
 
@@ -571,7 +557,7 @@ export async function updateGalleriesOrder(
           tx.gallery.update({
             where: {
               id,
-              authorId: user.id // 보안: 자신의 갤러리만 수정 가능
+              authorId: user.id
             },
             data: { displayOrder: order }
           })
