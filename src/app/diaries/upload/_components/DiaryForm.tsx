@@ -122,17 +122,22 @@ export const DiaryForm = ({
       formData.append('tags', JSON.stringify([]));
 
       // mode에 따라 다른 액션 함수 호출
+      let result;
       if (mode === 'edit' && initialData) {
-        await updateDiary(initialData.id, formData);
+        result = await updateDiary(initialData.id, formData);
       } else {
-      await createDiary(formData);
-      }
-    } catch (error) {
-      // Next.js redirect 에러 무시
-      if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
-        return;
+        result = await createDiary(formData);
       }
 
+      if (result.success) {
+        // 성공 시 리다이렉트
+        router.push(result.redirectTo!);
+      } else {
+        // 실패 시 에러 메시지 표시
+        const actionText = mode === 'edit' ? '수정' : '생성';
+        alert(result.error || `다이어리 ${actionText}에 실패했습니다.`);
+      }
+    } catch (error) {
       const actionText = mode === 'edit' ? '수정' : '생성';
       console.error(`다이어리 ${actionText} 오류:`, error);
       alert(

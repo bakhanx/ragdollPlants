@@ -174,26 +174,26 @@ export default function ArticleUploadForm({
       }
 
       // mode에 따라 다른 서버 액션 호출
+      let result;
       if (mode === 'edit' && initialData) {
-        await updateArticle(initialData.id, formData);
+        result = await updateArticle(initialData.id, formData);
       } else {
-        await createArticle(formData);
+        result = await createArticle(formData);
       }
-      // 성공 시 여기까지 도달하지 않음 (redirect 발생)
+
+      if (result.success) {
+        // 성공 시 리다이렉트
+        router.push(result.redirectTo!);
+      } else {
+        // 실패 시 에러 메시지 표시
+        alert(result.error || '작업에 실패했습니다. 다시 시도해주세요.');
+      }
     } catch (error) {
-      console.error('기사 등록 실패:', error);
-
-      // NEXT_REDIRECT 에러는 정상적인 리다이렉트이므로 사용자에게 보여주지 않음
-      const errorString = String(error);
-      if (errorString.includes('NEXT_REDIRECT')) {
-        return; // 정상적인 리다이렉트이므로 아무것도 하지 않음
-      }
-
-      // 실제 에러만 사용자에게 표시
+      console.error('기사 처리 실패:', error);
       alert(
         error instanceof Error
           ? error.message
-          : '기사 등록에 실패했습니다. 다시 시도해주세요.'
+          : '기사 처리에 실패했습니다. 다시 시도해주세요.'
       );
     } finally {
       setIsSubmitting(false);
