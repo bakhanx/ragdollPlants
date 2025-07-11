@@ -8,6 +8,7 @@ import { Header } from './_components/header/Header';
 import { ArticleList } from './_components/lists/ArticleList';
 import { getLatestArticles } from './actions/articles';
 import { getActiveEventsForBanner } from './actions/events';
+import { getCurrentUser } from '@/lib/auth-utils';
 
 const ARTICLE_COUNT = 3;
 const BANNER_EVENT_COUNT = 3;
@@ -17,7 +18,7 @@ export default async function Page() {
     getLatestArticles(ARTICLE_COUNT),
     getActiveEventsForBanner(BANNER_EVENT_COUNT)
   ]);
-
+  const currentUser = await getCurrentUser();
   return (
     <>
       {/* 배경이미지 */}
@@ -28,7 +29,7 @@ export default async function Page() {
         <Header showNotification />
 
         {/* 메뉴 리스트 */}
-        <MenuList />
+        <MenuList userId={currentUser?.id} currentUserId={currentUser?.id} isOwner={true} />
 
         {/* 배너 */}
         <Banner events={activeEvents} />
