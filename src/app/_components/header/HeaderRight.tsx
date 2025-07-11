@@ -5,6 +5,7 @@ import { BellIcon } from '@/app/_components/icons';
 import { ContentMenu } from '@/app/_components/common/ContentMenu';
 import { useContentActions } from '@/app/_hooks/useContentActions';
 import { ContentType } from '@/app/_services/contentService';
+import { useNotificationStore } from '@/stores/notificationStore';
 
 interface HeaderRightProps {
   showNotification: boolean;
@@ -28,7 +29,7 @@ export const HeaderRight = ({
   isOwner = false
 }: HeaderRightProps) => {
   const { handleEdit, handleDelete } = useContentActions(contentType, id);
-
+  const { unreadCount } = useNotificationStore();
   return (
     <div className="ml-auto flex w-auto items-center justify-end gap-2">
       {/* 알림 버튼 */}
@@ -42,7 +43,7 @@ export const HeaderRight = ({
             className="[&>path]:stroke-gray-700"
           />
           <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-            2
+            {unreadCount}
           </span>
         </button>
       )}
