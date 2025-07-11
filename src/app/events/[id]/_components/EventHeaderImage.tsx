@@ -6,6 +6,7 @@ interface EventHeaderImageProps {
   imageUrl: string;
   title: string;
   isEnded: boolean;
+  isEarlyTerminated?: boolean;
   eventId: string;
 }
 
@@ -13,6 +14,7 @@ export const EventHeaderImage = ({
   imageUrl,
   title,
   isEnded,
+  isEarlyTerminated = false,
   eventId,
 }: EventHeaderImageProps) => {
   return (
@@ -41,7 +43,7 @@ export const EventHeaderImage = ({
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-md bg-gray-500 px-4 py-2">
             <span className="text-lg font-bold text-white">
-              종료된 이벤트
+              {isEarlyTerminated ? '조기종료된 이벤트' : '종료된 이벤트'}
             </span>
           </div>
         </div>
