@@ -117,7 +117,9 @@ export default function GalleryUploadForm() {
         // 갤러리 생성
         const result = await createGallery(formData);
         if (result.success) {
-          router.push('/galleries');
+          router.push(result.redirectTo!);
+        } else {
+          setError(result.error || '갤러리 업로드에 실패했습니다.');
         }
       } catch (error) {
         console.error('갤러리 업로드 실패:', error);
