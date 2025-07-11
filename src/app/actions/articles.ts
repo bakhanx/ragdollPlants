@@ -1,7 +1,6 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -11,6 +10,7 @@ import {
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
 import { ArticleWithNumberId, ArticleCategory } from '@/types/models/article';
+import { populateLikeInfo } from './likes';
 
 // 카테고리 목록 조회
 export async function getCategories() {
@@ -35,11 +35,16 @@ const createArticleSchema = z.object({
   categoryId: z.string().min(1, '카테고리는 필수입니다')
 });
 
-// 모든 아티클 조회 (최적화된 쿼리 직접 구현)
+// 모든 아티클 조회
 export async function getArticles(): Promise<ArticleWithNumberId[]> {
   try {
+    const currentUser = await getCurrentUser().catch(() => null);
+
     const articles = await prisma.article.findMany({
-      where: { isPublished: true },
+      where: {
+        isPublished: true,
+        isActive: true
+      },
       include: {
         author: {
           select: {
@@ -60,8 +65,14 @@ export async function getArticles(): Promise<ArticleWithNumberId[]> {
       }
     });
 
-    // DB 데이터를 ArticleWithNumberId 형태로 변환
-    return articles.map(article => ({
+    const articlesWithLikes = await populateLikeInfo(
+      articles,
+      'article',
+      currentUser?.id
+    );
+
+    //ArticleWithNumberId 형태로 변환
+    return articlesWithLikes.map(article => ({
       id: article.id,
       title: article.title,
       content: '', // 목록에서는 content 불필요
@@ -74,7 +85,8 @@ export async function getArticles(): Promise<ArticleWithNumberId[]> {
       },
       tags: article.tags,
       category: article.category.name as ArticleCategory,
-      likes: 0 // 임시값 (현재 스키마에 likes 테이블이 없음)
+      likes: article.likes,
+      isLiked: article.isLiked
     }));
   } catch (error) {
     console.error('아티클 조회 실패:', error);
@@ -85,6 +97,8 @@ export async function getArticles(): Promise<ArticleWithNumberId[]> {
 // 특정 아티클 조회
 export async function getArticleById(id: number) {
   try {
+    const currentUser = await getCurrentUser().catch(() => null);
+
     const article = await prisma.article.findUnique({
       where: { id },
       include: {
@@ -113,21 +127,32 @@ export async function getArticleById(id: number) {
       }
     });
 
-    if (!article) {
-      throw new Error('아티클을 찾을 수 없습니다.');
+    if (!article || !article.isActive) {
+      throw new Error('아티클을 찾을 수 없거나 비활성화된 게시물입니다.');
     }
 
-    // 조회수 증가
-    await prisma.article.update({
-      where: { id },
-      data: {
-        viewCount: {
-          increment: 1
-        }
-      }
-    });
+    // 조회수 증가, '좋아요' 정보 조회를 병렬 실행
+    const articleIdStr = String(article.id);
+    const [_, likesCount, userLike] = await Promise.all([
+      prisma.article.update({
+        where: { id },
+        data: { viewCount: { increment: 1 } }
+      }),
+      prisma.like.count({
+        where: { type: 'article', targetId: articleIdStr }
+      }),
+      currentUser
+        ? prisma.like.findFirst({
+            where: {
+              userId: currentUser.id,
+              type: 'article',
+              targetId: articleIdStr
+            }
+          })
+        : Promise.resolve(null)
+    ]);
 
-    return article;
+    return { ...article, likes: likesCount, isLiked: !!userLike };
   } catch (error) {
     console.error('아티클 조회 오류:', error);
     throw error;
@@ -139,7 +164,6 @@ export async function createArticle(formData: FormData) {
   try {
     const user = await getCurrentUser();
 
-    // FormData에서 데이터 추출
     const rawData = {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
@@ -210,11 +234,19 @@ export async function createArticle(formData: FormData) {
     // 캐시 재검증
     revalidatePath('/articles');
 
-    // 생성된 아티클 페이지로 리다이렉트
-    redirect(`/articles/${article.id}`);
+    // 성공 결과 반환
+    return {
+      success: true,
+      articleId: article.id,
+      redirectTo: `/articles/${article.id}`
+    };
   } catch (error) {
     console.error('아티클 생성 오류:', error);
-    throw error;
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '아티클 생성에 실패했습니다'
+    };
   }
 }
 
@@ -226,16 +258,12 @@ export async function updateArticle(id: number, formData: FormData) {
     // 기존 아티클 확인 및 권한 체크
     const existingArticle = await validateArticleOwnership(id, user.id);
 
-    // FormData에서 데이터 추출 (createArticle과 동일한 로직)
     const rawData = {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
       summary: formData.get('summary') as string,
       categoryId: formData.get('categoryId') as string
     };
-
-    // 디버깅: content가 제대로 전달되는지 확인
-    console.log('updateArticle - 전달받은 content:', rawData.content);
 
     const tagsJson = formData.get('tags') as string;
     let tags: string[] = [];
@@ -301,11 +329,19 @@ export async function updateArticle(id: number, formData: FormData) {
     revalidatePath('/articles');
     revalidatePath(`/articles/${id}`);
 
-    // 수정된 아티클 페이지로 리다이렉트
-    redirect(`/articles/${id}`);
+    // 성공 결과 반환
+    return {
+      success: true,
+      articleId: id,
+      redirectTo: `/articles/${id}`
+    };
   } catch (error) {
     console.error('아티클 수정 오류:', error);
-    throw error;
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '아티클 수정에 실패했습니다'
+    };
   }
 }
 
@@ -314,8 +350,10 @@ export async function getLatestArticles(
   limit: number = 3
 ): Promise<ArticleWithNumberId[]> {
   try {
+    const currentUser = await getCurrentUser().catch(() => null);
+
     const articles = await prisma.article.findMany({
-      where: { isPublished: true },
+      where: { isPublished: true, isActive: true },
       include: {
         author: {
           select: {
@@ -337,8 +375,14 @@ export async function getLatestArticles(
       take: limit
     });
 
-    // DB 데이터를 ArticleWithNumberId 형태로 변환
-    return articles.map(article => ({
+    const articlesWithLikes = await populateLikeInfo(
+      articles,
+      'article',
+      currentUser?.id
+    );
+
+    //ArticleWithNumberId 형태로 변환
+    return articlesWithLikes.map(article => ({
       id: article.id,
       title: article.title,
       content: '', // 목록에서는 content 불필요
@@ -351,7 +395,8 @@ export async function getLatestArticles(
       },
       tags: article.tags,
       category: article.category.name as ArticleCategory,
-      likes: 0 // 임시값 (현재 스키마에 likes 테이블이 없음)
+      likes: article.likes,
+      isLiked: article.isLiked
     }));
   } catch (error) {
     console.error('최신 아티클 조회 실패:', error);
@@ -377,10 +422,17 @@ export async function deleteArticle(id: number) {
     // 캐시 재검증
     revalidatePath('/articles');
 
-    // 아티클 목록으로 리다이렉트
-    redirect('/articles');
+    // 성공 결과 반환
+    return {
+      success: true,
+      redirectTo: '/articles'
+    };
   } catch (error) {
     console.error('아티클 삭제 오류:', error);
-    throw error;
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '아티클 삭제에 실패했습니다'
+    };
   }
 }
