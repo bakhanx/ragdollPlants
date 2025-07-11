@@ -13,22 +13,22 @@ import {
   PlantCareSection
 } from '../_components';
 
-interface PlantDetailPageProps {
+interface MyPlantDetailPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function PlantDetailPage({
+export default async function MyPlantDetailPage({
   params
-}: PlantDetailPageProps) {
-  const { id: plantId } = await params;
+}: MyPlantDetailPageProps) {
+  const { id } = await params;
 
   try {
-    // 식물 상세 정보와 관련 일기를 병렬로 가져오기
+    // 식물 상세 정보, 관련 일기 병렬 조회
     const [plant, diaries] = await Promise.all([
-      getPlantById(plantId),
-      getDiariesByMyPlantDetail(plantId)
+      getPlantById(id),
+      getDiariesByMyPlantDetail(id)
     ]);
 
     if (!plant) {
@@ -43,9 +43,9 @@ export default async function PlantDetailPage({
             title={plant.name}
             showBack
             contentType="plant"
-            id={plantId}
+            id={id}
             showContentMenu={true}
-            isOwner={true}
+            isOwner={plant.isOwner}
           />
 
           <div className="w-full divide-y divide-gray-100">
@@ -65,7 +65,7 @@ export default async function PlantDetailPage({
             <PlantDescription description={plant.description || undefined} />
 
             <DiaryList
-              plantId={plantId}
+              plantId={id}
               diaries={diaries}
             />
           </div>
