@@ -32,7 +32,12 @@ export const EventUploadForm = ({
   const router = useRouter();
   const [title, setTitle] = useState(initialData?.title || '');
   const [subtitle, setSubtitle] = useState(initialData?.subtitle || '');
-  const [period, setPeriod] = useState('');
+  const [startDate, setStartDate] = useState(
+    initialData?.startDate ? initialData.startDate.toISOString().split('T')[0] : ''
+  );
+  const [endDate, setEndDate] = useState(
+    initialData?.endDate ? initialData.endDate.toISOString().split('T')[0] : ''
+  );
   const [description, setDescription] = useState(initialData?.description || '');
   const [content, setContent] = useState(initialData?.content || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,8 +54,14 @@ export const EventUploadForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !subtitle || !period || !description) {
+    if (!title || !subtitle || !startDate || !endDate || !description) {
       alert('모든 필수 항목을 입력해주세요.');
+      return;
+    }
+
+    // 날짜 유효성 검사
+    if (new Date(startDate) > new Date(endDate)) {
+      alert('종료일은 시작일보다 이후여야 합니다.');
       return;
     }
 
@@ -69,8 +80,8 @@ export const EventUploadForm = ({
       formData.append('description', description);
       formData.append('content', content);
       formData.append('link', '#'); // 임시 링크
-      formData.append('startDate', new Date().toISOString());
-      formData.append('endDate', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()); // 30일 후
+      formData.append('startDate', new Date(startDate).toISOString());
+      formData.append('endDate', new Date(endDate).toISOString());
       
       if (imageFile) {
         formData.append('image', imageFile);
@@ -79,19 +90,27 @@ export const EventUploadForm = ({
       // mode에 따라 다른 액션 함수 호출
       if (mode === 'edit' && initialData) {
         const { updateEvent } = await import('@/app/actions/events');
-        await updateEvent(parseInt(initialData.id), formData);
-        alert('이벤트가 성공적으로 수정되었습니다.');
-        router.push(`/events/${initialData.id}`);
+        const result = await updateEvent(parseInt(initialData.id), formData);
+        if (result.success) {
+          alert('이벤트가 성공적으로 수정되었습니다.');
+          router.push(result.redirectTo!);
+        } else {
+          throw new Error(result.error || '이벤트 수정에 실패했습니다.');
+        }
       } else {
         const { createEvent } = await import('@/app/actions/events');
-        await createEvent(formData);
-        alert('이벤트가 성공적으로 등록되었습니다.');
-        router.push('/events');
+        const result = await createEvent(formData);
+        if (result.success) {
+          alert('이벤트가 성공적으로 등록되었습니다.');
+          router.push(result.redirectTo!);
+        } else {
+          throw new Error(result.error || '이벤트 등록에 실패했습니다.');
+        }
       }
     } catch (error) {
       const actionText = mode === 'edit' ? '수정' : '등록';
       console.error(`이벤트 ${actionText} 실패:`, error);
-      alert(`이벤트 ${actionText}에 실패했습니다. 다시 시도해주세요.`);
+      alert(error instanceof Error ? error.message : `이벤트 ${actionText}에 실패했습니다. 다시 시도해주세요.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -119,8 +138,10 @@ export const EventUploadForm = ({
           setTitle={setTitle}
           subtitle={subtitle}
           setSubtitle={setSubtitle}
-          period={period}
-          setPeriod={setPeriod}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
           description={description}
           setDescription={setDescription}
           content={content}
