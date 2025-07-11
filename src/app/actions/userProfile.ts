@@ -6,12 +6,13 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth-utils';
 
 // 사용자 프로필 데이터 타입
-type UserProfileData = {
+export type UserProfileData = {
   id: string;
   name: string | null;
   email: string | null;
   image: string | null;
   bio: string | null;
+  isProfilePublic: boolean;
   level: number;
   levelProgress: number;
   waterCount: number;
@@ -40,6 +41,7 @@ export async function getUserProfileData(
       email: true,
       image: true,
       bio: true,
+      isProfilePublic: true,
       level: true,
       levelProgress: true,
       waterCount: true, // 누적 물주기
