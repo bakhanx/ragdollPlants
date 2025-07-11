@@ -76,7 +76,7 @@ export async function getArticles(): Promise<ArticleWithNumberId[]> {
       id: article.id,
       title: article.title,
       content: '', // 목록에서는 content 불필요
-      image: article.image || '/images/plant-default.png',
+      image: article.image || '/images/plant-default.webp',
       date: article.createdAt.toISOString().split('T')[0].replace(/-/g, '.'),
       summary: article.summary || undefined,
       author: {
@@ -183,11 +183,14 @@ export async function createArticle(formData: FormData) {
     }
 
     // 썸네일 이미지 처리
-    let thumbnailUrl = '/images/plant-default.png';
+    let thumbnailUrl = '/images/plant-default.webp';
     const thumbnailFile = formData.get('thumbnail') as File | null;
 
     if (thumbnailFile && thumbnailFile.size > 0) {
-      thumbnailUrl = await uploadImageToCloudflare(thumbnailFile);
+      thumbnailUrl = await uploadImageToCloudflare(
+        thumbnailFile,
+        '/images/plant-default.webp'
+      );
     }
 
     // 입력 검증
@@ -276,17 +279,21 @@ export async function updateArticle(id: number, formData: FormData) {
     }
 
     // 썸네일 이미지 처리
-    let thumbnailUrl = existingArticle.image || '/images/plant-default.png';
+    let thumbnailUrl = existingArticle.image || '/images/plant-default.webp';
     const thumbnailFile = formData.get('thumbnail') as File | null;
 
     if (thumbnailFile && thumbnailFile.size > 0) {
       // 새 이미지 업로드
-      thumbnailUrl = await uploadImageToCloudflare(thumbnailFile);
+      thumbnailUrl = await uploadImageToCloudflare(
+        thumbnailFile,
+        '/images/plant-default.webp'
+      );
 
       // 기존 이미지 삭제 (기본 이미지가 아닌 경우)
       if (
         existingArticle.image &&
-        !existingArticle.image.includes('/images/plant-default.png')
+        !existingArticle.image.includes('/images/plant-default.webp') &&
+        !existingArticle.image.startsWith('data:')
       ) {
         await deleteImageFromCloudflare(existingArticle.image);
       }
@@ -386,7 +393,7 @@ export async function getLatestArticles(
       id: article.id,
       title: article.title,
       content: '', // 목록에서는 content 불필요
-      image: article.image || '/images/plant-default.png',
+      image: article.image || '/images/plant-default.webp',
       date: article.createdAt.toISOString().split('T')[0].replace(/-/g, '.'),
       summary: article.summary || undefined,
       author: {
@@ -412,12 +419,29 @@ export async function deleteArticle(id: number) {
     // 기존 아티클 확인 및 권한 체크
     const existingArticle = await validateArticleOwnership(id, user.id);
 
+    // 관련 좋아요 먼저 삭제
+    await prisma.like.deleteMany({
+      where: {
+        type: 'article',
+        targetId: String(id)
+      }
+    });
+
     // 아티클 삭제
     await prisma.article.delete({
       where: { id }
     });
 
-    console.log('아티클 삭제 완료:', { id });
+    // 이미지 파일도 삭제
+    if (
+      existingArticle.image &&
+      !existingArticle.image.includes('/images/plant-default.webp') &&
+      !existingArticle.image.startsWith('data:')
+    ) {
+      await deleteImageFromCloudflare(existingArticle.image);
+    }
+
+    console.log('아티클 삭제 완료:', { id, title: existingArticle.title });
 
     // 캐시 재검증
     revalidatePath('/articles');
