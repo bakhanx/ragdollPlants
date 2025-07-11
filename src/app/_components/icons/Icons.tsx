@@ -16,6 +16,9 @@ import Schedule from '@/../public/svg/schedule.svg';
 import Image from '@/../public/svg/image.svg';
 import Search from '@/../public/svg/search.svg';
 import SignOut from '@/../public/svg/sign-out.svg';
+import Heart from '@/../public/svg/heart.svg';
+import ArticleIconSvg from '@/../public/svg/text-align-justified.svg';
+import Nutrient2 from '@/../public/svg/vape-kit.svg';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
@@ -42,9 +45,11 @@ const createIcon = (
   return IconComponent;
 };
 
+// 아이콘 컴포넌트 생성
 export const WaterIcon = createIcon(Water, 'WaterIcon');
 export const Water2Icon = createIcon(Water2, 'Water2Icon');
 export const NutrientIcon = createIcon(Nutrient, 'NutrientIcon');
+export const Nutrient2Icon = createIcon(Nutrient2, 'Nutrient2Icon');
 export const PinIcon = createIcon(Pin, 'PinIcon');
 export const EditIcon = createIcon(Edit, 'EditIcon');
 
@@ -62,3 +67,27 @@ export const ScheduleIcon = createIcon(Schedule, 'ScheduleIcon');
 export const ImageIcon = createIcon(Image, 'ImageIcon');
 export const SearchIcon = createIcon(Search, 'SearchIcon');
 export const SignOutIcon = createIcon(SignOut, 'SignOutIcon');
+export const HeartIcon = createIcon(Heart, 'HeartIcon');
+export const ArticleIcon = createIcon(ArticleIconSvg, 'ArticleIcon');
+
+// 모든 아이콘을 하나의 객체로 묶어서 export
+export const Icons = {
+  Water: WaterIcon,
+  Water2: Water2Icon,
+  Nutrient: NutrientIcon,
+  Nutrient2: Nutrient2Icon,
+  Pin: PinIcon,
+  Edit: EditIcon,
+  Back: BackIcon,
+  ChevronRight: ChevronRightIcon,
+  Close: CloseIcon,
+  Menu: MenuIcon,
+  Hamburger: HamburgerIcon,
+  Bell: BellIcon,
+  Share: ShareIcon,
+  Image: ImageIcon,
+  Search: SearchIcon,
+  SignOut: SignOutIcon,
+  Heart: HeartIcon,
+  Article: ArticleIcon
+};
