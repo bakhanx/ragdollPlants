@@ -2,8 +2,13 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { requireAdmin, validateEventOwnership } from '@/lib/auth-utils';
+import {
+  uploadImageToCloudflare,
+  deleteImageFromCloudflare
+} from '@/lib/cloudflare-images';
 
 // 이벤트 생성 유효성 검사 스키마
 const createEventSchema = z.object({
@@ -19,7 +24,19 @@ const createEventSchema = z.object({
 // 모든 이벤트 조회
 export async function getEvents() {
   try {
+    const now = new Date();
+
+    // 종료 날짜가 지난 이벤트들의 isEnded를 true로 업데이트
+    await prisma.event.updateMany({
+      where: {
+        endDate: { lt: now },
+        isEnded: false
+      },
+      data: { isEnded: true }
+    });
+
     const events = await prisma.event.findMany({
+      where: { isActive: true },
       select: {
         id: true,
         title: true,
@@ -55,9 +72,21 @@ export async function getEvents() {
 // 진행중인 이벤트만 조회
 export async function getActiveEvents() {
   try {
+    const now = new Date();
+
+    // 종료 날짜가 지난 이벤트들의 isEnded를 true로 업데이트
+    await prisma.event.updateMany({
+      where: {
+        endDate: { lt: now },
+        isEnded: false
+      },
+      data: { isEnded: true }
+    });
+
     const events = await prisma.event.findMany({
       where: {
-        isEnded: false
+        isEnded: false,
+        isActive: true
       },
       select: {
         id: true,
@@ -94,9 +123,21 @@ export async function getActiveEvents() {
 // 배너용 진행중인 이벤트 조회 (최신순으로 지정된 개수만)
 export async function getActiveEventsForBanner(limit: number = 3) {
   try {
+    const now = new Date();
+
+    // 종료 날짜가 지난 이벤트들의 isEnded를 true로 업데이트
+    await prisma.event.updateMany({
+      where: {
+        endDate: { lt: now },
+        isEnded: false
+      },
+      data: { isEnded: true }
+    });
+
     const events = await prisma.event.findMany({
       where: {
-        isEnded: false
+        isEnded: false,
+        isActive: true
       },
       select: {
         id: true,
@@ -104,6 +145,7 @@ export async function getActiveEventsForBanner(limit: number = 3) {
         subtitle: true,
         image: true,
         isEnded: true,
+        endDate: true,
         createdAt: true
       },
       orderBy: {
@@ -124,6 +166,8 @@ export async function getActiveEventsForBanner(limit: number = 3) {
 // 특정 이벤트 조회
 export async function getEventById(id: number) {
   try {
+    const now = new Date();
+
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
@@ -137,8 +181,17 @@ export async function getEventById(id: number) {
       }
     });
 
-    if (!event) {
-      throw new Error('이벤트를 찾을 수 없습니다.');
+    if (!event || !event.isActive) {
+      throw new Error('이벤트를 찾을 수 없거나 비활성화된 이벤트입니다.');
+    }
+
+    // 종료 날짜가 지났고 아직 종료 처리가 안 된 경우 업데이트
+    if (event.endDate < now && !event.isEnded) {
+      await prisma.event.update({
+        where: { id },
+        data: { isEnded: true }
+      });
+      event.isEnded = true;
     }
 
     // 조회수 증가
@@ -164,7 +217,6 @@ export async function createEvent(formData: FormData) {
     // 사용자 정보 가져오기 및 관리자 권한 확인
     const user = await requireAdmin();
 
-    // FormData에서 데이터 추출
     const rawData = {
       title: formData.get('title') as string,
       subtitle: formData.get('subtitle') as string,
@@ -175,16 +227,14 @@ export async function createEvent(formData: FormData) {
     };
 
     // 이미지 파일 처리
-    const imageFile = formData.get('image') as File | null;
     let imageUrl = '';
+    const imageFile = formData.get('image') as File | null;
 
     if (imageFile && imageFile.size > 0) {
-      // 실제 구현에서는 파일 스토리지에 업로드
-      // 임시로 base64 인코딩 (실제 운영에서는 Cloudflare Images 등 사용 권장)
-      const bytes = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64 = buffer.toString('base64');
-      imageUrl = `data:${imageFile.type};base64,${base64}`;
+      imageUrl = await uploadImageToCloudflare(
+        imageFile,
+        '/images/plant-default.webp'
+      );
     }
 
     // 입력 검증
@@ -231,10 +281,19 @@ export async function createEvent(formData: FormData) {
     // 캐시 재검증
     revalidatePath('/events');
 
-    return { success: true, event };
+    // 성공 결과 반환
+    return {
+      success: true,
+      eventId: event.id,
+      redirectTo: `/events/${event.id}`
+    };
   } catch (error) {
     console.error('이벤트 생성 오류:', error);
-    throw error;
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '이벤트 생성에 실패했습니다'
+    };
   }
 }
 
@@ -247,7 +306,6 @@ export async function updateEvent(id: number, formData: FormData) {
     // 기존 이벤트 확인 및 권한 체크
     const existingEvent = await validateEventOwnership(id, user.id);
 
-    // FormData에서 데이터 추출
     const rawData = {
       title: formData.get('title') as string,
       subtitle: formData.get('subtitle') as string,
@@ -262,10 +320,19 @@ export async function updateEvent(id: number, formData: FormData) {
     let imageUrl = existingEvent.image; // 기존 이미지 유지
 
     if (imageFile && imageFile.size > 0) {
-      const bytes = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64 = buffer.toString('base64');
-      imageUrl = `data:${imageFile.type};base64,${base64}`;
+      imageUrl = await uploadImageToCloudflare(
+        imageFile,
+        '/images/plant-default.webp'
+      );
+
+      // 기존 이미지가 있고 기본 이미지가 아닌 경우 삭제
+      if (
+        existingEvent.image &&
+        !existingEvent.image.includes('/images/plant-default.webp') &&
+        !existingEvent.image.startsWith('data:')
+      ) {
+        await deleteImageFromCloudflare(existingEvent.image);
+      }
     }
 
     // 입력 검증
@@ -316,36 +383,67 @@ export async function updateEvent(id: number, formData: FormData) {
     revalidatePath('/events');
     revalidatePath(`/events/${id}`);
 
-    return { success: true, event: updatedEvent };
+    // 성공 결과 반환
+    return {
+      success: true,
+      eventId: updatedEvent.id,
+      redirectTo: `/events/${id}`
+    };
   } catch (error) {
     console.error('이벤트 수정 오류:', error);
-    throw error;
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '이벤트 수정에 실패했습니다'
+    };
   }
 }
 
 // 이벤트 삭제
 export async function deleteEvent(id: number) {
   try {
-    // 사용자 정보 가져오기 및 관리자 권한 확인
     const user = await requireAdmin();
 
-    // 기존 이벤트 확인 및 권한 체크
-    const existingEvent = await validateEventOwnership(id, user.id);
+    // 이벤트 조회
+    const event = await prisma.event.findUnique({
+      where: { id }
+    });
 
-    // 이벤트 완전 삭제
+    if (!event) {
+      throw new Error('이벤트를 찾을 수 없습니다.');
+    }
+
+    // 이미지 파일도 삭제
+    if (
+      event.image &&
+      !event.image.includes('/images/plant-default.webp') &&
+      !event.image.startsWith('data:')
+    ) {
+      await deleteImageFromCloudflare(event.image);
+    }
+
+    // 이벤트 삭제
     await prisma.event.delete({
       where: { id }
     });
 
-    console.log('이벤트 삭제 완료:', { id, title: existingEvent.title });
+    console.log('이벤트 삭제 완료:', { id });
 
     // 캐시 재검증
     revalidatePath('/events');
 
-    return { success: true };
+    // 성공 결과 반환
+    return {
+      success: true,
+      redirectTo: '/events'
+    };
   } catch (error) {
     console.error('이벤트 삭제 오류:', error);
-    throw error;
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '이벤트 삭제에 실패했습니다'
+    };
   }
 }
 
