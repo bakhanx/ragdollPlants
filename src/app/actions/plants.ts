@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { MAX_PLANTS } from '@/types/models/plant';
 import { getCurrentUser, validatePlantOwnership } from '@/lib/auth-utils';
@@ -9,6 +10,7 @@ import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
+import { populateLikeInfo } from './likes';
 
 // 식물 생성 유효성 검사 스키마
 const createPlantSchema = z.object({
@@ -95,10 +97,12 @@ export async function getMyPlants(params?: {
       })
     ]);
 
+    const plantsWithLikes = await populateLikeInfo(plants, 'plant', user.id);
+
     const totalPages = Math.ceil(totalCount / limit);
 
     return {
-      plants,
+      plants: plantsWithLikes,
       pagination: {
         currentPage: page,
         totalPages,
@@ -117,12 +121,11 @@ export async function getMyPlants(params?: {
 // 특정 식물 상세 조회
 export async function getPlantById(id: string) {
   try {
-    const user = await getCurrentUser();
+    const currentUser = await getCurrentUser().catch(() => null);
 
     const plant = await prisma.plant.findUnique({
       where: {
-        id,
-        authorId: user.id // 본인 식물만 조회 가능
+        id
       },
       include: {
         author: {
@@ -139,7 +142,29 @@ export async function getPlantById(id: string) {
       throw new Error('식물을 찾을 수 없습니다.');
     }
 
-    return plant;
+    // 접근 제어
+    const isOwner = currentUser?.id === plant.authorId;
+    if (!isOwner && (!plant.isPublic || !plant.isActive)) {
+      throw new Error('비공개 또는 비활성화된 식물입니다.');
+    }
+
+    // 좋아요 정보 조회
+    const [likesCount, userLike] = await Promise.all([
+      prisma.like.count({
+        where: { type: 'plant', targetId: id }
+      }),
+      currentUser
+        ? prisma.like.findFirst({
+            where: {
+              userId: currentUser.id,
+              type: 'plant',
+              targetId: id
+            }
+          })
+        : Promise.resolve(null)
+    ]);
+
+    return { ...plant, likes: likesCount, isLiked: !!userLike, isOwner };
   } catch (error) {
     console.error('식물 조회 오류:', error);
     throw error;
@@ -192,15 +217,17 @@ export async function createPlant(formData: FormData) {
     });
 
     // 이미지 처리
-    let imageUrl = '/images/plant-default.png';
+    let imageUrl = '/images/plant-default.webp';
     const image = formData.get('image') as File | null;
 
     if (image && image.size > 0) {
-      // Cloudflare Images에 업로드
-      imageUrl = await uploadImageToCloudflare(image);
+      imageUrl = await uploadImageToCloudflare(
+        image,
+        '/images/plant-default.webp'
+      );
     }
 
-    // 데이터베이스에 식물 정보 저장
+    // 식물 정보 저장
     const now = new Date();
     const nextWateringDate = new Date(
       now.getTime() +
@@ -250,7 +277,8 @@ export async function createPlant(formData: FormData) {
     return {
       success: true,
       message: '식물이 성공적으로 등록되었습니다.',
-      plant
+      plant,
+      redirectTo: `/myplants/${plant.id}`
     };
   } catch (error) {
     console.error('식물 등록 오류:', error);
@@ -278,7 +306,6 @@ export async function updatePlant(id: string, formData: FormData) {
     // 기존 식물 확인
     const existingPlant = await validatePlantOwnership(id, user.id);
 
-    // 폼 데이터 추출 - 직접 처리
     const plantName = (formData.get('plantName') as string)?.trim() || '';
     const plantType = (formData.get('plantType') as string)?.trim() || '';
     const location = (formData.get('location') as string)?.trim() || '';
@@ -296,7 +323,7 @@ export async function updatePlant(id: string, formData: FormData) {
       ? parseInt(nutrientIntervalString)
       : existingPlant.nutrientInterval;
 
-    // 유효성 검사 - Zod가 모든 검증 담당
+    // 유효성 검사 - Zod
     const validatedData = createPlantSchema.parse({
       name: plantName,
       category: plantType,
@@ -317,18 +344,22 @@ export async function updatePlant(id: string, formData: FormData) {
 
     if (image && image.size > 0) {
       // 새 이미지 업로드
-      imageUrl = await uploadImageToCloudflare(image);
+      imageUrl = await uploadImageToCloudflare(
+        image,
+        '/images/plant-default.webp'
+      );
 
       // 기존 이미지 삭제 (기본 이미지가 아닌 경우)
       if (
         existingPlant.image &&
-        !existingPlant.image.includes('/images/plant-default.png')
+        !existingPlant.image.includes('/images/plant-default.webp') &&
+        !existingPlant.image.startsWith('data:')
       ) {
         await deleteImageFromCloudflare(existingPlant.image);
       }
     }
 
-    // 데이터베이스 업데이트
+    // 업데이트
     const updatedPlant = await prisma.plant.update({
       where: { id },
       data: {
@@ -362,7 +393,8 @@ export async function updatePlant(id: string, formData: FormData) {
     return {
       success: true,
       message: '식물 정보가 성공적으로 수정되었습니다.',
-      plant: updatedPlant
+      plant: updatedPlant,
+      redirectTo: `/myplants/${id}`
     };
   } catch (error) {
     console.error('식물 수정 오류:', error);
@@ -387,54 +419,55 @@ export async function deletePlant(id: string) {
   try {
     const user = await getCurrentUser();
 
-    // 기존 식물 확인
+    // 식물 존재 여부 및 권한 확인
     const existingPlant = await validatePlantOwnership(id, user.id);
 
-    // 관련 데이터 삭제 (케어 기록, 다이어리 등)
-    await prisma.$transaction([
-      // 케어 기록 삭제
+    // 연관된 데이터 삭제
+    await Promise.all([
+      // 관리 기록 삭제
       prisma.careRecord.deleteMany({
-        where: { plantId: id }
-      }),
-      // 케어 알림 삭제
-      prisma.careReminder.deleteMany({
         where: { plantId: id }
       }),
       // 다이어리 삭제
       prisma.diary.deleteMany({
         where: { plantId: id }
       }),
-      // 갤러리 삭제
-      prisma.gallery.deleteMany({
-        where: { plantId: id }
-      }),
-      // 식물 삭제
-      prisma.plant.delete({
-        where: { id }
+      // 갤러리 연결 해제 (삭제가 아닌 null로 업데이트)
+      prisma.gallery.updateMany({
+        where: { plantId: id },
+        data: { plantId: null }
       })
     ]);
 
-    // 이미지 파일도 삭제 (Cloudflare Images에서)
+    // 식물 삭제
+    await prisma.plant.delete({
+      where: { id }
+    });
+
+    // 이미지 파일도 삭제
     if (
       existingPlant.image &&
-      !existingPlant.image.includes('/images/plant-default.png')
+      !existingPlant.image.includes('/images/plant-default.webp') &&
+      !existingPlant.image.startsWith('data:')
     ) {
       await deleteImageFromCloudflare(existingPlant.image);
     }
 
-    // 캐시 재검증
+    console.log('식물 삭제 완료:', { id, name: existingPlant.name });
+
+    // 내 식물 페이지 재검증
     revalidatePath('/myplants');
 
+    // 성공 결과 반환
     return {
       success: true,
-      message: '식물이 성공적으로 삭제되었습니다.'
+      redirectTo: '/myplants'
     };
   } catch (error) {
     console.error('식물 삭제 오류:', error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : '식물 삭제에 실패했습니다.'
+      error: error instanceof Error ? error.message : '식물 삭제에 실패했습니다'
     };
   }
 }
