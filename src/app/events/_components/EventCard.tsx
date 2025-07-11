@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { EventCardProps } from '@/types/components/events';
 
 export default function EventCard({ event }: EventCardProps) {
+  const now = new Date();
+  const isEarlyTerminated = event.isEnded && new Date(event.endDate) > now;
+  
   return (
     <Link
       href={`/events/${event.id}`}
@@ -27,7 +30,7 @@ export default function EventCard({ event }: EventCardProps) {
         {/* 종료 뱃지 */}
         {event.isEnded && (
           <div className="absolute top-3 right-3 rounded bg-red-500/80 px-2 py-1 text-xs font-medium text-white">
-            종료
+            {isEarlyTerminated ? '조기종료' : '종료'}
           </div>
         )}
 
