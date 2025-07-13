@@ -26,7 +26,7 @@ export default function ArticleEditor({
   showError = false 
 }: ArticleEditorProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 text-black">
       <label className="block text-lg font-medium text-gray-50">
         내용 <span className="text-red-500">*</span>
       </label>
