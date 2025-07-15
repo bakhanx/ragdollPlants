@@ -6,7 +6,7 @@ import { CareCardListProps } from '@/types/components/care';
 
 export const CareCardList = ({ plants: initialPlants }: CareCardListProps) => {
   return (
-    <div className="space-y-4 pb-20">
+    <div className="space-y-4 py-10">
       {initialPlants.map(plant => (
         <CareCard
           key={plant.id}
