@@ -25,7 +25,7 @@ export default async function EventDetailPage(props: {
 
     return (
       <>
-        <BackgroundImage src={event.image} />
+        <BackgroundImage src="/images/welcome-bg-05.webp" />
         <ContentsLayout noPadding>
           <Header
             title={event.title}
@@ -39,7 +39,7 @@ export default async function EventDetailPage(props: {
           />
 
           <div className="w-full rounded-2xl">
-            <EventCard eventData={event} />
+            <EventCard eventData={event} isAdmin={isAdmin} />
           </div>
         </ContentsLayout>
       </>
