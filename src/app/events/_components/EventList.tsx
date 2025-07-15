@@ -1,11 +1,9 @@
 'use client';
 
 import { useTabItems } from '@/app/_hooks/useTabItems';
-import { SearchInput } from '@/app/_components/common/SearchInput';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import EventCard from './EventCard';
-import { UploadButton } from '@/app/_components/common/UploadButton';
 import { EventListProps, EventWithAuthor } from '@/types/components/events';
 import { EventTabType } from '@/types/models/event';
 
@@ -47,20 +45,6 @@ export default function EventList({
 
   return (
     <>
-      <div className="mt-4 mb-6 flex items-center justify-between">
-        <div className="w-full max-w-xs">
-          <SearchInput
-            onSearch={handleSearch}
-            placeholder="이벤트 검색"
-          />
-        </div>
-        {isAdmin && (
-          <UploadButton
-            link="/events/upload"
-            title="이벤트 등록"
-          />
-        )}
-      </div>
       <TabNavigation
         tabs={tabs}
         activeTab={activeTab}

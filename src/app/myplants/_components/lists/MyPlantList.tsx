@@ -2,13 +2,10 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition, useCallback } from 'react';
-import { SearchInput } from '@/app/_components/common/SearchInput';
 import { Pagination } from '@/app/_components/common/Pagination';
 import Image from 'next/image';
 import Link from 'next/link';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons/Icons';
-import { UploadButton } from '@/app/_components/common/UploadButton';
-import { MAX_PLANTS } from '@/types/models/plant';
 import { getMyPlants } from '@/app/actions/plants';
 
 interface MyPlantFrom {
@@ -28,15 +25,10 @@ interface MyPlantFrom {
 
 interface MyPlantListProps {
   plantsData: Awaited<ReturnType<typeof getMyPlants>> | null;
-  currentPage: number;
   searchQuery: string;
 }
 
-export const MyPlantList = ({
-  plantsData,
-  currentPage,
-  searchQuery
-}: MyPlantListProps) => {
+export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -54,54 +46,15 @@ export const MyPlantList = ({
     [searchParams, router, startTransition]
   );
 
-  // 검색 핸들러
-  const handleSearch = useCallback(
-    (query: string) => {
-      const params = new URLSearchParams(searchParams);
-
-      if (query.trim()) {
-        params.set('search', query.trim());
-      } else {
-        params.delete('search');
-      }
-      params.delete('page'); // 검색 시 첫 페이지로 리셋
-
-      startTransition(() => {
-        router.push(`/myplants?${params.toString()}`);
-      });
-    },
-    [searchParams, router, startTransition]
-  );
-
   // 데이터 추출
   const plants = plantsData?.plants || [];
   const pagination = plantsData?.pagination;
   const totalCount = pagination?.totalCount || 0;
-
-  const isMax = totalCount >= MAX_PLANTS;
-  const hasPlants = plants.length > 0;
   const isSearching = searchQuery.trim().length > 0;
 
   return (
     <div className="py-8">
-      <div className="mt-4 mb-6 flex justify-between">
-        <div className="w-full max-w-xs">
-          <SearchInput
-            onSearch={handleSearch}
-            placeholder="식물 이름 또는 종류 검색"
-            defaultValue={searchQuery}
-          />
-        </div>
-        <UploadButton
-          link="/myplants/upload"
-          disabled={isMax}
-          count={totalCount}
-          maxCount={MAX_PLANTS}
-          title="식물 등록"
-        />
-      </div>
-
-      {/* 식물 목록 - 서버에서 데이터를 가져왔으므로 바로 표시 */}
+      {/* 식물 목록 */}
       {plants.length > 0 ? (
         <div
           className={`grid grid-cols-2 gap-3 transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
@@ -174,7 +127,7 @@ export const MyPlantList = ({
       {/* 페이지네이션 - 검색 결과가 있고 페이지가 2개 이상일 때만 표시 */}
       {pagination && pagination.totalPages > 1 && (
         <Pagination
-          currentPage={currentPage}
+          currentPage={pagination.currentPage}
           totalPages={pagination.totalPages}
           onPageChange={handlePageChange}
         />

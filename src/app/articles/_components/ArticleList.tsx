@@ -1,11 +1,9 @@
 'use client';
 
 import { useTabItems } from '@/app/_hooks/useTabItems';
-import { SearchInput } from '@/app/_components/common/SearchInput';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { ArticleItem } from './ArticleItem';
-import { UploadButton } from '@/app/_components/common/UploadButton';
 import { ArticleWithNumberId, ArticleTabType } from '@/types/models/article';
 
 export default function ArticleList({
@@ -57,21 +55,6 @@ export default function ArticleList({
 
   return (
     <>
-      <div className="mt-4 mb-6 flex items-center justify-between">
-        <div className="w-full max-w-xs">
-          <SearchInput
-            onSearch={handleSearch}
-            placeholder="기사 검색"
-          />
-        </div>
-        {isAdmin && (
-          <UploadButton
-            link="/articles/upload"
-            title="기사 등록"
-          />
-        )}
-      </div>
-
       <TabNavigation
         tabs={tabs}
         activeTab={activeTab}
