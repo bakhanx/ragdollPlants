@@ -5,10 +5,9 @@ import CategoryBadge from './CategoryBadge';
 import { ArticleWithNumberId } from '@/types/models/article';
 import Image from 'next/image';
 /**
- * 개별 기사 아이템 컴포넌트 (최적화를 위해 분리)
+ * 개별 기사 아이템 컴포넌트
  */
 export const ArticleItem = ({ post }: { post: ArticleWithNumberId }) => {
-  // post.category가 없으면 카테고리 추론
   const category = useMemo(() => {
     return (
       post.category || inferArticleCategory(post.title, post.content, post.tags)
@@ -33,7 +32,7 @@ export const ArticleItem = ({ post }: { post: ArticleWithNumberId }) => {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
-          {/* 카테고리 배지 - 오른쪽 상단에 표시 */}
+          {/* 카테고리 배지 */}
           <div className="absolute top-2 right-2 z-10">
             <CategoryBadge category={category} />
           </div>
@@ -45,7 +44,7 @@ export const ArticleItem = ({ post }: { post: ArticleWithNumberId }) => {
             {post.title}
           </h2>
           <p className="mb-3 line-clamp-2 text-sm text-gray-600">
-            {post.content}
+            {post.summary}
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div>{post.author?.name && `by ${post.author.name}`}</div>
