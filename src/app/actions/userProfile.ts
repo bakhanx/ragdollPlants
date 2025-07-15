@@ -31,11 +31,9 @@ export type UserProfileData = {
 export async function getUserProfileData(
   userId: string
 ): Promise<UserProfileData | null> {
-  // 1. 사용자 기본 정보 조회
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      // 필요한 모든 필드
       id: true,
       name: true,
       email: true,
