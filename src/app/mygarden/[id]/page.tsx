@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth-utils';
@@ -7,22 +7,22 @@ import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import { MenuList } from '@/app/_components/lists/MenuList';
-import UserProfile from '@/app/mygarden/_components/profile/UserProfile';
+import { UserProfileWrapper } from '@/app/mygarden/_components/profile/UserProfileWrapper';
+import { UserProfileSkeleton } from '@/app/mygarden/_components/profile/UserProfileSkeleton';
 import { EditIcon } from '@/app/_components/icons';
 import LogoutButton from '@/app/mygarden/_components/LogoutButton';
 
 interface PageProps {
   params: Promise<{
-    userId: string;
+    id: string;
   }>;
 }
 
-export default async function Page({ params }: PageProps) {
-  const { userId } = await params;
-
+// 사용자 기본 정보와 권한만 확인하는 함수
+async function getUserBasicInfo(userId: string) {
   const [user, currentUser] = await Promise.all([
     getUserProfileData(userId),
-    getCurrentUser().catch(() => null) // 로그인 안 한 경우를 대비
+    getCurrentUser().catch(() => null)
   ]);
 
   if (!user) {
@@ -30,6 +30,13 @@ export default async function Page({ params }: PageProps) {
   }
 
   const isOwner = currentUser?.id === user.id;
+
+  return { user, currentUser, isOwner };
+}
+
+export default async function Page({ params }: PageProps) {
+  const { id: userId } = await params;
+  const { user, currentUser, isOwner } = await getUserBasicInfo(userId);
 
   // 비공개 프로필이며, 소유자가 아닐 경우 접근 제한
   if (!user.isProfilePublic && !isOwner) {
@@ -56,15 +63,14 @@ export default async function Page({ params }: PageProps) {
       <ContentsLayout>
         <Header
           title={`${user.name || '사용자'}님의 정원`}
-          showNotification={isOwner} // 자신의 프로필에서만 알림 표시
-          showBack={!isOwner} // 다른 사람 프로필에서만 뒤로가기 표시
+          showNotification={isOwner}
+          showBack={!isOwner}
         />
 
         <div className="relative mb-4">
-          <UserProfile
-            user={user}
-            isOwner={isOwner}
-          />
+          <Suspense fallback={<UserProfileSkeleton showCareStatus={isOwner} />}>
+            <UserProfileWrapper userId={userId} />
+          </Suspense>
 
           {isOwner && (
             <div className="absolute top-7 right-5 flex gap-2">
@@ -82,7 +88,6 @@ export default async function Page({ params }: PageProps) {
           )}
         </div>
 
-        {/* MenuList도 isOwner 여부에 따라 다르게 표시해야 할 수 있음 */}
         <MenuList
           userId={userId}
           isOwner={isOwner}

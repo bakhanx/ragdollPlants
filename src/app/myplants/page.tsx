@@ -1,10 +1,12 @@
-import React from 'react';
+import { Suspense } from 'react';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
-import { getMyPlants } from '../actions/plants';
-import { MyPlantList } from './_components';
-import { PAGINATION } from '@/app/_constants/pagination';
+import { SearchInput } from '../_components/common/SearchInput';
+import { UploadButton } from '../_components/common/UploadButton';
+import MyPlantListWrapper from './_components/MyPlantListWrapper';
+import MyPlantCardsSkeleton from './_components/MyPlantCardsSkeleton';
+import { MAX_PLANTS } from '@/types/models/plant';
 
 interface MyPlantsPageProps {
   searchParams: Promise<{
@@ -20,21 +22,6 @@ export default async function MyPlantsPage({
   const currentPage = Number(params.page) || 1;
   const searchQuery = params.search || '';
 
-  let plantsData: Awaited<ReturnType<typeof getMyPlants>> | null = null;
-  let hasError = false;
-
-  try {
-    plantsData = await getMyPlants({
-      page: currentPage,
-      limit: PAGINATION.ITEMS_PER_PAGE,
-      search: searchQuery
-    });
-  } catch (error) {
-    console.error('식물 데이터 로딩 오류:', error);
-    hasError = true;
-    plantsData = null;
-  }
-
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-05.webp" />
@@ -45,24 +32,30 @@ export default async function MyPlantsPage({
         />
 
         <div className="w-full py-4">
-          {/* 에러 발생 시 메시지 표시 */}
-          {hasError && (
-            <div className="mb-4 rounded-lg bg-red-50 p-4 text-center">
-              <p className="text-red-600">
-                식물 데이터를 불러오는 중 오류가 발생했습니다.
-              </p>
-              <p className="text-sm text-red-500">
-                페이지를 새로고침해 주세요.
-              </p>
+          <div className="py-8">
+            {/* 검색 및 업로드 버튼 영역 */}
+            <div className="mt-4 mb-6 flex justify-between">
+              <div className="w-full max-w-xs">
+                <SearchInput
+                  placeholder="식물 이름 또는 종류 검색"
+                  defaultValue={searchQuery}
+                />
+              </div>
+              <UploadButton
+                link="/myplants/upload"
+                title="식물 등록"
+                maxCount={MAX_PLANTS}
+              />
             </div>
-          )}
 
-          {/* 식물 목록 */}
-          <MyPlantList
-            plantsData={plantsData}
-            currentPage={currentPage}
-            searchQuery={searchQuery}
-          />
+            {/* 식물 목록  */}
+            <Suspense fallback={<MyPlantCardsSkeleton />}>
+              <MyPlantListWrapper
+                currentPage={currentPage}
+                searchQuery={searchQuery}
+              />
+            </Suspense>
+          </div>
         </div>
       </ContentsLayout>
     </>
