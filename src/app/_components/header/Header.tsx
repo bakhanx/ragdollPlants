@@ -1,9 +1,4 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { Notification } from './Notification';
-import { MenuSidebar } from './MenuSidebar';
+import React from 'react';
 import { HeaderLeft } from './HeaderLeft';
 import { HeaderCenter } from './HeaderCenter';
 import { HeaderRight } from './HeaderRight';
@@ -20,11 +15,8 @@ interface HeaderProps {
   variant?: HeaderVariant;
   contentType?: ContentType;
   showNotification?: boolean;
-  onNotificationClick?: () => void;
   showMenuButton?: boolean;
-  onBackClick?: () => void;
   showContentMenu?: boolean;
-  isOwner?: boolean;
 }
 
 // 스타일 변형에 대한 클래스 매핑
@@ -36,49 +28,19 @@ const variantClasses: Record<HeaderVariant, string> = {
 };
 
 export const Header = ({
-  id = '1',
+  id,
   showBack = false,
   title = '랙돌플랜츠',
   variant = 'default',
-  contentType = 'article',
+  contentType,
   showNotification = false,
-  onNotificationClick,
-  showMenuButton = false,
-  onBackClick,
-  showContentMenu = false,
-  isOwner = false
+  showContentMenu = false
 }: HeaderProps) => {
-  const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
-  // 알림 버튼 핸들러
-  const handleNotificationClick = () => {
-    if (onNotificationClick) {
-      onNotificationClick();
-    } else {
-      setIsNotificationOpen(true);
-    }
-  };
-
-  // 뒤로가기 버튼 핸들러
-  const handleBackClick = () => {
-    if (onBackClick) {
-      onBackClick();
-    } else {
-      router.back();
-    }
-  };
-
   return (
     <>
       <div className={variantClasses[variant]}>
         {/* 왼쪽: 메뉴 버튼 또는 뒤로가기 */}
-        <HeaderLeft
-          showBack={showBack}
-          onBackClick={handleBackClick}
-          onMenuOpen={() => setIsMenuOpen(true)}
-        />
+        <HeaderLeft showBack={showBack} />
 
         {/* 중앙: 타이틀 - 절대 위치로 중앙 배치 */}
         <HeaderCenter
@@ -89,25 +51,11 @@ export const Header = ({
         {/* 오른쪽: 알림, 메뉴 버튼 */}
         <HeaderRight
           showNotification={showNotification}
-          onNotificationClick={handleNotificationClick}
           showContentMenu={showContentMenu}
           contentType={contentType}
-          id={id}
-          isOwner={isOwner}
+          contentId={id}
         />
       </div>
-
-      {/* 메뉴 사이드바 패널 */}
-      <MenuSidebar
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-      />
-
-      {/* 알림 패널 */}
-      <Notification
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-      />
     </>
   );
 };
