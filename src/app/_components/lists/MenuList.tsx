@@ -10,81 +10,74 @@ type MenuItemType = {
   profileLink?: boolean;
 };
 
-const createBaseMenuItems = ({
-  userId,
-  isOwner,
-}: {
-  userId?: string;
-  isOwner: boolean;
-}): MenuItemType[] => [
+const menuItems: MenuItemType[] = [
+  {
+    id: 'mygarden',
+    icon: '🏡',
+    label: '내 정원',
+    href: `/mygarden/my`,
+    ownerOnly: false,
+    profileLink: false
+  },
   {
     id: 'myplants',
     icon: '🌱',
     label: '식물',
-    href: isOwner ? '/myplants' : `/myplants/${userId}`,
+    href: '/myplant',
     ownerOnly: false,
-    profileLink: true,
+    profileLink: true
   },
   {
     id: 'diaries',
     icon: '📗',
     label: '다이어리',
-    href: isOwner ? '/diaries' : `/diaries/${userId}`,
+    href: '/diaries',
     ownerOnly: false,
-    profileLink: true,
+    profileLink: true
   },
   {
     id: 'galleries',
     icon: '🌷',
     label: '갤러리',
-    href: isOwner ? '/galleries' : `/galleries?userId=${userId}`,
+    href: '/galleries',
     ownerOnly: false,
-    profileLink: true,
+    profileLink: true
   },
-  { id: 'care', icon: '💊', label: '식물 케어', href: '/care', ownerOnly: true },
-  { id: 'news', icon: '📝', label: '식물 뉴스', href: '/articles', ownerOnly: false },
-  { id: 'events', icon: '🎉', label: '이벤트', href: '/events', ownerOnly: false },
+  {
+    id: 'care',
+    icon: '💊',
+    label: '식물 케어',
+    href: '/care',
+    ownerOnly: true
+  },
+  {
+    id: 'news',
+    icon: '📝',
+    label: '식물 뉴스',
+    href: '/articles',
+    ownerOnly: false
+  },
+  {
+    id: 'events',
+    icon: '🎉',
+    label: '이벤트',
+    href: '/events',
+    ownerOnly: false
+  }
 ];
 
 interface MenuListProps {
   userId?: string;
   currentUserId?: string;
-  isOwner: boolean;
+
   variant?: 'inline' | 'sidebar';
   onItemClick?: () => void;
 }
 
 export const MenuList = ({
-  userId,
-  currentUserId,
-  isOwner,
   variant = 'inline',
-  onItemClick,
+  onItemClick
 }: MenuListProps) => {
-  const baseMenuItems = createBaseMenuItems({ userId, isOwner });
-  const isProfileContext = !!userId;
-
-  const filteredLinks = baseMenuItems.filter(
-    item =>
-      (isOwner || !item.ownerOnly) &&
-      (!item.profileLink || isProfileContext)
-  );
-
-  const myGardenMenu = currentUserId
-    ? [
-        {
-          id: 'mygarden',
-          icon: '🏡',
-          label: '내 정원',
-          href: `/mygarden/${currentUserId}`,
-          ownerOnly: false,
-          profileLink: false,
-        },
-      ]
-    : [];
-
-  const menuItems = [...myGardenMenu, ...filteredLinks];
-
   const variants = {
     inline: {
       nav: 'grid grid-cols-2 gap-4 w-full py-4',
