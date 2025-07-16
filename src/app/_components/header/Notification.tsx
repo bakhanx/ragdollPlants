@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { Icons } from '@/app/_components/icons';
 import type { Notification as NotificationType } from '@prisma/client';
+import { getNotifications } from '@/app/actions/notifications';
 
 interface NotificationProps {
   isOpen: boolean;
@@ -50,16 +51,16 @@ export const Notification = ({ isOpen, onClose }: NotificationProps) => {
     notifications,
     unreadCount,
     isLoading,
-    fetchNotifications,
+
     markAsRead,
     markAllAsRead
   } = useNotificationStore();
 
   useEffect(() => {
     if (isOpen) {
-      fetchNotifications();
+      getNotifications();
     }
-  }, [isOpen, fetchNotifications]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
