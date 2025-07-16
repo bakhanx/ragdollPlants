@@ -8,11 +8,8 @@ import { MenuList } from './_components/lists/MenuList';
 import { Header } from './_components/header/Header';
 import { ArticleListWrapper } from './_components/lists/ArticleListWrapper';
 import { ArticleListSkeleton } from './_components/lists/ArticleListSkeleton';
-import { getCurrentUser } from '@/lib/auth-utils';
 
 export default async function Page() {
-  const currentUser = await getCurrentUser();
-  
   return (
     <>
       {/* 배경이미지 */}
@@ -23,7 +20,7 @@ export default async function Page() {
         <Header showNotification />
 
         {/* 메뉴 리스트 */}
-        <MenuList userId={currentUser?.id} currentUserId={currentUser?.id} isOwner={true} />
+        <MenuList />
 
         {/* 배너 */}
         <Suspense fallback={<BannerSkeleton />}>
