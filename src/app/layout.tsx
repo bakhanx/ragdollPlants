@@ -33,7 +33,7 @@ export default function RootLayout({
           {children}
         </main>
         <ScrollToTopButton />
-        <NavigationScrollManager />
+        {/* <NavigationScrollManager /> */}
       </body>
     </html>
   );
