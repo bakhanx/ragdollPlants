@@ -1,19 +1,26 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { CloseIcon } from '@/app/_components/icons';
 import { MenuList } from '@/app/_components/lists/MenuList';
 
 interface MenuSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
+  currentUserId?: string;
+  isOwner?: boolean;
+  isOpen?: boolean;
+  onClose: ()=>void;
 }
 
 /**
  * 사이드바 형태의 메뉴 컴포넌트
  * 헤더의 햄버거 버튼 클릭 시 표시되는 슬라이드 메뉴
  */
-export const MenuSidebar = ({ isOpen, onClose }: MenuSidebarProps) => {
+export const MenuSidebar = ({
+  currentUserId,
+  isOpen,
+  onClose
+}: MenuSidebarProps) => {
+
   if (!isOpen) return null;
 
   return (
@@ -45,9 +52,10 @@ export const MenuSidebar = ({ isOpen, onClose }: MenuSidebarProps) => {
           <MenuList
             variant="sidebar"
             onItemClick={onClose}
+            currentUserId={currentUserId}
           />
         </div>
       </div>
     </>
   );
-} 
+};
