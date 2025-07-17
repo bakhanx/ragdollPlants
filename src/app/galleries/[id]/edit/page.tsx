@@ -22,6 +22,9 @@ export default async function EditGalleryPage({
         <BackgroundImage src="/images/welcome-bg-04.webp" />
         <ContentsLayout>
           <Header
+            id={id}
+            contentType="gallery"
+            showContentMenu
             title="갤러리 관리"
             showBack
           />
