@@ -16,7 +16,7 @@ export default async function DiaryDetail(props: {
   const id = params.id;
 
   try {
-    const { diary, isOwner } = await getDiaryWithOwnership(id);
+    const { diary } = await getDiaryWithOwnership(id);
 
     const diaryDetail = {
       id: diary.id,
@@ -38,8 +38,7 @@ export default async function DiaryDetail(props: {
             variant="glass"
             contentType="diary"
             id={id}
-            showContentMenu={true}
-            isOwner={isOwner}
+            showContentMenu
           />
 
           <div className="w-full overflow-hidden rounded-2xl">
