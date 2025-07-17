@@ -1,14 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import Water2 from '@/../public/svg/water2.svg';
+import { Water2Icon, NutrientIcon } from '@/app/_components/icons/Icons';
 import ProgressBar from './ProgressBar';
 import {
   formatDate,
   calculateProgressPercentage
 } from '@/app/_utils/dateUtils';
 import { useState, useEffect } from 'react';
-import { NutrientIcon } from '@/app/_components/icons';
 import { addCareRecord } from '@/app/actions/care';
 import { useRouter } from 'next/navigation';
 
@@ -230,7 +229,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                 }`}
                 aria-label="물주기 완료"
                 title={!canWater ? '아직 물을 줄 필요가 없습니다' : '물주기'}>
-                <Water2
+                <Water2Icon
                   className={`size-5 transition-all duration-300 ${
                     waterStatus
                       ? 'text-blue-600 [&>path]:fill-blue-600'
