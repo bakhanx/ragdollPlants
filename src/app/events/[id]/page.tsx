@@ -35,11 +35,13 @@ export default async function EventDetailPage(props: {
             showNotification
             variant="glass"
             contentType="event"
-            isOwner={isAdmin}
           />
 
           <div className="w-full rounded-2xl">
-            <EventCard eventData={event} isAdmin={isAdmin} />
+            <EventCard
+              eventData={event}
+              isAdmin={isAdmin}
+            />
           </div>
         </ContentsLayout>
       </>
