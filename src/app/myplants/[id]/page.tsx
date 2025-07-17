@@ -40,12 +40,11 @@ export default async function MyPlantDetailPage({
         <BackgroundImage src="/images/welcome-bg-05.webp" />
         <ContentsLayout>
           <Header
+            id={id}
             title={plant.name}
             showBack
             contentType="plant"
-            id={id}
             showContentMenu={true}
-            isOwner={plant.isOwner}
           />
 
           <div className="w-full divide-y divide-gray-100">
