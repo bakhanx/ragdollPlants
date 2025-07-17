@@ -18,18 +18,14 @@ interface ArticleDetailPageProps {
   }>;
 }
 
-export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
+export default async function ArticleDetailPage({
+  params
+}: ArticleDetailPageProps) {
   const { id } = await params;
   const isAdmin = await checkIsAdmin();
 
-  // ID를 숫자로 변환
-  const articleId = parseInt(id, 10);
-  if (isNaN(articleId)) {
-    notFound();
-  }
-
   try {
-    const article = await getArticleById(articleId);
+    const article = await getArticleById(Number(id));
 
     // ArticleContent에 전달할 형태로 변환
     const articleData = {
@@ -54,7 +50,6 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             showNotification
             variant="glass"
             contentType="article"
-            isOwner={isAdmin}
           />
 
           <div className="w-full rounded-2xl">
