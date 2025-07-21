@@ -90,7 +90,6 @@ export default async function Page({ params }: PageProps) {
 
         <MenuList
           userId={userId}
-          isOwner={isOwner}
           currentUserId={currentUser?.id}
         />
       </ContentsLayout>
