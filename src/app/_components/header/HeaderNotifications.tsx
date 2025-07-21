@@ -6,11 +6,11 @@ import { useEffect, useState } from 'react';
 import { getNotifications } from '@/app/actions/notifications';
 import { BellIcon } from '../icons';
 
-export const HeaderNotifications = ({
-  showNotification
-}: {
-  showNotification: boolean;
-}) => {
+interface NotificationsProps {
+  notifications: Awaited<ReturnType<typeof getNotifications>>;
+}
+
+export const HeaderNotifications = ({ notifications }: NotificationsProps) => {
   const { unreadCount } = useNotificationStore();
   const [isMounted, setIsMounted] = useState(false);
 
@@ -21,16 +21,9 @@ export const HeaderNotifications = ({
     setIsNotificationOpen(true);
   };
 
-  // 클라이언트 마운트 확인 및 데이터 페칭
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (isMounted) {
-      getNotifications();
-    }
-  }, [isMounted]);
 
   return (
     <>
@@ -41,7 +34,7 @@ export const HeaderNotifications = ({
       />
 
       {/* 알림 버튼 */}
-      {showNotification && (
+      {
         <button
           onClick={handleNotificationClick}
           className="group relative flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all hover:bg-white/70 hover:shadow-md"
@@ -57,7 +50,7 @@ export const HeaderNotifications = ({
             </span>
           )}
         </button>
-      )}
+      }
     </>
   );
 };
