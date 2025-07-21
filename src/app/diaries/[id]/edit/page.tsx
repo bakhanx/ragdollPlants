@@ -28,7 +28,7 @@ export default async function EditDiaryPage({ params }: EditDiaryPageProps) {
 
           <DiaryForm
             mode="edit"
-            initialData={diary}
+            initialData={diary || undefined}
           />
         </ContentsLayout>
       </>
