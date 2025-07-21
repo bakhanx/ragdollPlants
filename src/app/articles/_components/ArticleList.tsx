@@ -3,6 +3,7 @@
 import { useTabItems } from '@/app/_hooks/useTabItems';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
+import { SearchInput } from '@/app/_components/common/SearchInput';
 import { ArticleItem } from './ArticleItem';
 import { ArticleWithNumberId, ArticleTabType } from '@/types/models/article';
 
@@ -10,14 +11,12 @@ export default function ArticleList({
   allArticles,
   tipsArticles,
   newsArticles,
-  guideArticles,
-  isAdmin
+  guideArticles
 }: {
   allArticles: ArticleWithNumberId[];
   tipsArticles: ArticleWithNumberId[];
   newsArticles: ArticleWithNumberId[];
   guideArticles: ArticleWithNumberId[];
-  isAdmin: boolean;
 }) {
   // 서버에서 미리 처리된 참조값을 그대로 사용
   const allItems = {
@@ -55,6 +54,14 @@ export default function ArticleList({
 
   return (
     <>
+      {/* 검색 입력 */}
+      <div className="mb-6">
+        <SearchInput
+          placeholder="기사 검색..."
+          onSearch={handleSearch}
+        />
+      </div>
+
       <TabNavigation
         tabs={tabs}
         activeTab={activeTab}
