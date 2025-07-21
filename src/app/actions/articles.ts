@@ -2,7 +2,6 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getCurrentUser, validateArticleOwnership } from '@/lib/auth-utils';
 import {
@@ -10,7 +9,6 @@ import {
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
 import { ArticleWithNumberId, ArticleCategory } from '@/types/models/article';
-import { populateLikeInfo } from './likes';
 
 // 카테고리 목록 조회
 export async function getCategories() {
@@ -35,11 +33,9 @@ const createArticleSchema = z.object({
   categoryId: z.string().min(1, '카테고리는 필수입니다')
 });
 
-// 모든 아티클 조회
+// 모든 아티클 조회 (공개용 - auth 불필요)
 export async function getArticles(): Promise<ArticleWithNumberId[]> {
   try {
-    const currentUser = await getCurrentUser().catch(() => null);
-
     const articles = await prisma.article.findMany({
       where: {
         isPublished: true,
@@ -65,14 +61,8 @@ export async function getArticles(): Promise<ArticleWithNumberId[]> {
       }
     });
 
-    const articlesWithLikes = await populateLikeInfo(
-      articles,
-      'article',
-      currentUser?.id
-    );
-
-    //ArticleWithNumberId 형태로 변환
-    return articlesWithLikes.map(article => ({
+    // ArticleWithNumberId 형태로 변환 (좋아요 기능 제거)
+    return articles.map(article => ({
       id: article.id,
       title: article.title,
       content: '', // 목록에서는 content 불필요
@@ -85,8 +75,8 @@ export async function getArticles(): Promise<ArticleWithNumberId[]> {
       },
       tags: article.tags,
       category: article.category.name as ArticleCategory,
-      likes: article.likes,
-      isLiked: article.isLiked
+      likes: 0, // 좋아요 기능 제거
+      isLiked: false // 좋아요 기능 제거
     }));
   } catch (error) {
     console.error('아티클 조회 실패:', error);
@@ -352,13 +342,11 @@ export async function updateArticle(id: number, formData: FormData) {
   }
 }
 
-// 홈페이지용 최신 아티클 조회 (3개)
+// 홈페이지용 최신 아티클 조회 (3개) - 공개용
 export async function getLatestArticles(
   limit: number = 3
 ): Promise<ArticleWithNumberId[]> {
   try {
-    const currentUser = await getCurrentUser().catch(() => null);
-
     const articles = await prisma.article.findMany({
       where: { isPublished: true, isActive: true },
       include: {
@@ -382,14 +370,8 @@ export async function getLatestArticles(
       take: limit
     });
 
-    const articlesWithLikes = await populateLikeInfo(
-      articles,
-      'article',
-      currentUser?.id
-    );
-
-    //ArticleWithNumberId 형태로 변환
-    return articlesWithLikes.map(article => ({
+    // ArticleWithNumberId 형태로 변환 (좋아요 기능 제거)
+    return articles.map(article => ({
       id: article.id,
       title: article.title,
       content: '', // 목록에서는 content 불필요
@@ -402,8 +384,8 @@ export async function getLatestArticles(
       },
       tags: article.tags,
       category: article.category.name as ArticleCategory,
-      likes: article.likes,
-      isLiked: article.isLiked
+      likes: 0, // 좋아요 기능 제거
+      isLiked: false // 좋아요 기능 제거
     }));
   } catch (error) {
     console.error('최신 아티클 조회 실패:', error);
