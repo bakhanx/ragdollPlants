@@ -1,14 +1,12 @@
 import { getArticles } from '@/app/actions/articles';
-import { checkIsAdmin } from '@/lib/auth-utils';
 import ArticleList from './ArticleList';
 
 export default async function ArticleListWrapper() {
   let articles: Awaited<ReturnType<typeof getArticles>> = [];
-  let isAdmin = false;
   let hasError = false;
 
   try {
-    [articles, isAdmin] = await Promise.all([getArticles(), checkIsAdmin()]);
+    articles = await getArticles();
   } catch (error) {
     console.error('아티클 목록 로딩 오류:', error);
     hasError = true;
@@ -36,7 +34,6 @@ export default async function ArticleListWrapper() {
       tipsArticles={tipsArticles}
       newsArticles={newsArticles}
       guideArticles={guideArticles}
-      isAdmin={isAdmin}
     />
   );
 }
