@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { SearchIcon } from '../icons';
 
 interface SearchInputProps {
@@ -9,39 +8,21 @@ interface SearchInputProps {
   className?: string;
   defaultValue?: string;
   debounceTime?: number;
-  searchParam?: string; // URL 파라미터 이름 (기본값: 'search')
+  onSearch?: (query: string) => void; // 검색 콜백 함수
 }
 
 export const SearchInput = ({
   placeholder = '검색하기',
   defaultValue = '',
   debounceTime = 300,
-  searchParam = 'search'
+  onSearch
 }: SearchInputProps) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(defaultValue);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setSearchQuery(defaultValue);
   }, [defaultValue]);
-
-  // URL 파라미터 업데이트 함수
-  const updateSearchParams = (query: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (query) {
-      params.set(searchParam, query);
-    } else {
-      params.delete(searchParam);
-    }
-    
-    // 페이지 파라미터 제거 (검색 시 첫 페이지로)
-    params.delete('page');
-    
-    router.push(`?${params.toString()}`);
-  };
 
   // 사용자 입력 핸들러
   const handleInputChange = (value: string) => {
@@ -54,7 +35,7 @@ export const SearchInput = ({
 
     // 디바운스 타이머 설정
     timeoutRef.current = setTimeout(() => {
-      updateSearchParams(value);
+      onSearch?.(value);
     }, debounceTime);
   };
 
