@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import { CloseIcon } from '@/app/_components/icons';
 import { MenuList } from '@/app/_components/lists/MenuList';
@@ -8,7 +6,7 @@ interface MenuSidebarProps {
   currentUserId?: string;
   isOwner?: boolean;
   isOpen?: boolean;
-  onClose: ()=>void;
+  onClose: () => void;
 }
 
 /**
@@ -20,7 +18,6 @@ export const MenuSidebar = ({
   isOpen,
   onClose
 }: MenuSidebarProps) => {
-
   if (!isOpen) return null;
 
   return (
