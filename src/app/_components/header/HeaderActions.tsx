@@ -39,28 +39,6 @@ export const HeaderActions = ({
     setShowMenu(!showMenu);
   };
 
-  // 수정 핸들러 - 커스텀 핸들러 우선, 없으면 기본 훅 사용
-  // const handleEdit = () => {
-  //   if (onEdit) {
-  //     onEdit();
-  //   } else {
-  //     defaultHandleEdit();
-  //   }
-  //   setShowMenu(false);
-  // };
-
-  // 삭제 핸들러 - 커스텀 핸들러 우선, 없으면 기본 훅 사용
-  // const handleDelete = () => {
-  //   if (confirm('정말 삭제하시겠습니까?')) {
-  //     if (onDelete) {
-  //       onDelete();
-  //     } else {
-  //       defaultHandleDelete();
-  //     }
-  //   }
-  //   setShowMenu(false);
-  // };
-
   // 신고 모달 열기
   const handleReport = () => {
     setShowReportModal(true);
