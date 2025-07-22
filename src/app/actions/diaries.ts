@@ -31,7 +31,9 @@ export async function getDiaries(params?: {
 }) {
   try {
     const user = await getCurrentUser();
-    
+    if (!user) {
+      return null;
+    }
     const page = params?.page || 1;
     const limit = params?.limit || 4;
     const search = params?.search?.trim();
@@ -171,7 +173,10 @@ export async function getDiaryWithOwnership(id: string) {
 // 사용자별 다이어리 조회
 export async function getUserDiaries(userId?: string) {
   try {
-    const currentUser = await getCurrentUser().catch(() => null);
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return null;
+    }
     const targetUserId = userId || currentUser?.id;
 
     if (!targetUserId) {
@@ -235,7 +240,9 @@ export async function getUserDiaries(userId?: string) {
 export async function createDiary(formData: FormData) {
   try {
     const user = await getCurrentUser();
-
+    if (!user) {
+      return null;
+    }
     const rawData = {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
@@ -310,16 +317,17 @@ export async function createDiary(formData: FormData) {
     revalidatePath('/diaries');
 
     // 성공 결과 반환
-    return { 
-      success: true, 
+    return {
+      success: true,
       diaryId: diary.id,
-      redirectTo: `/diaries/${diary.id}` 
+      redirectTo: `/diaries/${diary.id}`
     };
   } catch (error) {
     console.error('다이어리 생성 오류:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : '다이어리 생성에 실패했습니다' 
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '다이어리 생성에 실패했습니다'
     };
   }
 }
@@ -328,7 +336,9 @@ export async function createDiary(formData: FormData) {
 export async function updateDiary(id: string, formData: FormData) {
   try {
     const user = await getCurrentUser();
-
+    if (!user) {
+      return null;
+    }
     // 기존 다이어리 확인 및 권한 체크
     const existingDiary = await validateDiaryOwnership(id, user.id);
 
@@ -429,16 +439,17 @@ export async function updateDiary(id: string, formData: FormData) {
     revalidatePath(`/diaries/${id}`);
 
     // 성공 결과 반환
-    return { 
-      success: true, 
+    return {
+      success: true,
       diaryId: id,
-      redirectTo: `/diaries/${id}` 
+      redirectTo: `/diaries/${id}`
     };
   } catch (error) {
     console.error('다이어리 수정 오류:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : '다이어리 수정에 실패했습니다' 
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '다이어리 수정에 실패했습니다'
     };
   }
 }
@@ -447,7 +458,9 @@ export async function updateDiary(id: string, formData: FormData) {
 export async function deleteDiary(id: string) {
   try {
     const user = await getCurrentUser();
-
+    if (!user) {
+      return null;
+    }
     // 기존 다이어리 확인 및 권한 체크
     const existingDiary = await validateDiaryOwnership(id, user.id);
 
@@ -479,15 +492,16 @@ export async function deleteDiary(id: string) {
     revalidatePath('/diaries');
 
     // 성공 결과 반환
-    return { 
+    return {
       success: true,
-      redirectTo: '/diaries' 
+      redirectTo: '/diaries'
     };
   } catch (error) {
     console.error('다이어리 삭제 오류:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : '다이어리 삭제에 실패했습니다' 
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : '다이어리 삭제에 실패했습니다'
     };
   }
 }
@@ -499,7 +513,7 @@ export async function getDiariesByPlant(plantId: string) {
       where: {
         plantId: plantId,
         isPublic: true,
-        isActive: true,
+        isActive: true
       },
       select: {
         id: true,
@@ -542,14 +556,17 @@ export async function getDiariesByPlant(plantId: string) {
 export async function getDiariesByMyPlantDetail(plantId: string) {
   try {
     const user = await getCurrentUser();
+    if (!user) {
+      return null;
+    }
     const diaries = await prisma.diary.findMany({
       where: {
         plantId: plantId,
         authorId: user.id,
-        isActive: true,
+        isActive: true
       },
       orderBy: {
-        date: 'desc',
+        date: 'desc'
       },
       take: 3 // 최근 3개만 조회
     });

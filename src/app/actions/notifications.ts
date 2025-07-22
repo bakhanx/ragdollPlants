@@ -11,8 +11,8 @@ import { prisma } from '@/lib/prisma';
  */
 export async function getNotifications(limit: number = 10, cursor?: string) {
   const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error('인증되지 않은 사용자입니다.');
+  if (!session?.user) {
+    return null;
   }
 
   const notifications = await prisma.notification.findMany({
