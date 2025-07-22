@@ -1,16 +1,15 @@
-// auth.ts에서 핵심 함수들 re-export  
-export { auth, signIn, signOut } from "@/auth"
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import { prisma } from '@/lib/prisma'
+// auth.ts에서 핵심 함수들 re-export
+export { auth, signIn, signOut } from '@/auth';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
 
 // 사용자 역할 정의
 export const USER_ROLES = {
-  USER: "USER",
-  ADMIN: "ADMIN",
-} as const
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+} as const;
 
-export type UserRole = keyof typeof USER_ROLES
+export type UserRole = keyof typeof USER_ROLES;
 
 /**
  * 현재 로그인한 사용자 정보 조회
@@ -20,7 +19,7 @@ export async function getCurrentUser() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error('로그인이 필요합니다.');
+    return null;
   }
 
   return {
@@ -53,16 +52,16 @@ export async function checkIsAdmin(): Promise<boolean> {
  * 관리자 권한 확인 및 사용자 정보 반환
  */
 export async function requireAdmin() {
-  const session = await auth()
-  
+  const session = await auth();
+
   if (!session?.user) {
     throw new Error('로그인이 필요합니다.');
   }
-  
+
   if (session.user.role !== USER_ROLES.ADMIN) {
     throw new Error('관리자만 접근할 수 있습니다.');
   }
-  
+
   // 사용자 정보를 바로 반환 (추가 호출 불필요)
   return {
     id: session.user.id,
@@ -165,22 +164,32 @@ export async function validateEventOwnership(
 /**
  * 관리자에게 필요없는 필드들을 필터링
  */
-export function filterUserFields(user: { 
-  role: string, 
-  following?: number,
-  followers?: number,
-  posts?: number,
-  level?: number,
-  levelProgress?: number,
-  waterCount?: number,
-  nutrientCount?: number,
-  interests?: string[],
-  [key: string]: unknown 
+export function filterUserFields(user: {
+  role: string;
+  following?: number;
+  followers?: number;
+  posts?: number;
+  level?: number;
+  levelProgress?: number;
+  waterCount?: number;
+  nutrientCount?: number;
+  interests?: string[];
+  [key: string]: unknown;
 }) {
   if (user.role !== USER_ROLES.USER) {
     // 관리자는 식물 관련 필드 제거
-    const { following, followers, posts, level, levelProgress, waterCount, nutrientCount, interests, ...adminUser } = user
-    return adminUser
+    const {
+      following,
+      followers,
+      posts,
+      level,
+      levelProgress,
+      waterCount,
+      nutrientCount,
+      interests,
+      ...adminUser
+    } = user;
+    return adminUser;
   }
-  return user
-} 
+  return user;
+}
