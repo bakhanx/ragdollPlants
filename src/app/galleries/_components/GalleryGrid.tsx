@@ -1,8 +1,12 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Session } from 'next-auth';
 import { GalleryImageModal } from './GalleryImageModal';
+import { getUserGalleries } from '@/app/actions/galleries';
+import { getCurrentUser } from '@/lib/auth-utils';
 
 export interface GalleryItem {
   id: string;
@@ -24,12 +28,68 @@ export interface GalleryItem {
   } | null;
 }
 
-export interface GalleryGridProps {
-  items: GalleryItem[];
-  session?: Session | null;
-}
+export const GalleryGrid = () => {
+  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
-export const GalleryGrid = ({ items, session }: GalleryGridProps) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [user, galleries] = await Promise.all([
+          getCurrentUser().catch(() => null), // 로그인하지 않은 경우 null 반환
+          getUserGalleries()
+        ]);
+
+        setSession(user ? { user, expires: '' } : null);
+        setItems(galleries);
+      } catch (error) {
+        console.error('갤러리 데이터 로딩 오류:', error);
+        setHasError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto w-full max-w-md px-4 pb-20">
+        <div className="mb-6">
+          <div className="aspect-[4/3] animate-pulse rounded-2xl bg-white/10" />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[...Array(9)].map((_, i) => (
+            <div
+              key={i}
+              className="aspect-square animate-pulse rounded-lg bg-white/10"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="mx-auto w-full max-w-md px-4 pb-20">
+        <div className="mb-4 rounded-lg bg-red-50 p-4 text-center">
+          <p className="text-red-600">
+            갤러리 데이터를 불러오는 중 오류가 발생했습니다.
+          </p>
+          <p className="text-sm text-red-500">페이지를 새로고침해 주세요.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+            새로고침
+          </button>
+        </div>
+      </div>
+    );
+  }
   const photoCount = items.length;
 
   if (photoCount === 0) {
