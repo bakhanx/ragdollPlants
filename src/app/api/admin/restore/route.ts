@@ -10,26 +10,36 @@ export async function POST(request: Request) {
 
     // 관리자 권한 확인
     if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: '관리자 권한이 필요합니다' }, { status: 403 });
+      return NextResponse.json(
+        { error: '관리자 권한이 필요합니다' },
+        { status: 403 }
+      );
     }
 
     console.log('🔄 데이터 복원 시작...');
 
     let backupData;
-    
+
     // 요청 본문에서 backupData 확인
     const body = await request.json().catch(() => null);
-    
+
     if (body && body.backupData) {
       // 파일 업로드로 받은 백업 데이터 사용
       backupData = body.backupData;
       console.log('📂 업로드된 백업 파일 사용');
     } else {
       // 기본 백업 파일 사용
-      const backupPath = path.join(process.cwd(), 'public', 'backup-2025-07-04.json');
-      
+      const backupPath = path.join(
+        process.cwd(),
+        'public',
+        'backup-2025-07-04.json'
+      );
+
       if (!fs.existsSync(backupPath)) {
-        return NextResponse.json({ error: '백업 파일을 찾을 수 없습니다' }, { status: 404 });
+        return NextResponse.json(
+          { error: '백업 파일을 찾을 수 없습니다' },
+          { status: 404 }
+        );
       }
 
       backupData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
@@ -61,23 +71,6 @@ export async function POST(request: Request) {
 
     let restoredEvents = 0;
     let restoredArticles = 0;
-
-    // 1. 필요한 카테고리 생성
-    const requiredCategories = ['news', 'tips', 'guide'];
-    for (const categoryName of requiredCategories) {
-      await prisma.category.upsert({
-        where: { name: categoryName },
-        update: {},
-        create: {
-          name: categoryName,
-          description: `${categoryName} 카테고리`,
-          color: '#6366f1',
-          icon: '📝',
-          order: 0,
-          isActive: true
-        }
-      });
-    }
 
     // 2. Events 복원 (link 필드 제외)
     for (const event of events) {
@@ -115,7 +108,9 @@ export async function POST(request: Request) {
         });
 
         if (!category) {
-          console.error(`❌ 카테고리를 찾을 수 없습니다: ${article.categoryId}`);
+          console.error(
+            `❌ 카테고리를 찾을 수 없습니다: ${article.categoryId}`
+          );
           continue;
         }
 
@@ -139,7 +134,9 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log(`✅ 복원 완료: Events ${restoredEvents}개, Articles ${restoredArticles}개`);
+    console.log(
+      `✅ 복원 완료: Events ${restoredEvents}개, Articles ${restoredArticles}개`
+    );
 
     return NextResponse.json({
       success: true,
@@ -149,9 +146,11 @@ export async function POST(request: Request) {
         articles: restoredArticles
       }
     });
-
   } catch (error) {
     console.error('❌ 데이터 복원 중 오류 발생:', error);
-    return NextResponse.json({ error: '복원 중 오류가 발생했습니다' }, { status: 500 });
+    return NextResponse.json(
+      { error: '복원 중 오류가 발생했습니다' },
+      { status: 500 }
+    );
   }
-} 
+}
