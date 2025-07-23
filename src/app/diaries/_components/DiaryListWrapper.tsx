@@ -1,15 +1,16 @@
 import { getDiaries } from '@/app/actions/diaries';
 import { PAGINATION } from '@/app/_constants/pagination';
 import DiaryList from './DiaryList';
+import DiaryCardsSkeleton from './DiaryCardsSkeleton';
 
 interface DiaryListWrapperProps {
   currentPage: number;
   searchQuery: string;
 }
 
-export default async function DiaryListWrapper({ 
-  currentPage, 
-  searchQuery 
+export default async function DiaryListWrapper({
+  currentPage,
+  searchQuery
 }: DiaryListWrapperProps) {
   let diariesData: Awaited<ReturnType<typeof getDiaries>> | null = null;
   let hasError = false;
@@ -32,18 +33,22 @@ export default async function DiaryListWrapper({
         <p className="text-red-600">
           다이어리 데이터를 불러오는 중 오류가 발생했습니다.
         </p>
-        <p className="text-sm text-red-500">
-          페이지를 새로고침해 주세요.
-        </p>
+        <p className="text-sm text-red-500">페이지를 새로고침해 주세요.</p>
       </div>
     );
   }
 
   return (
-    <DiaryList
-      diariesData={diariesData}
-      currentPage={currentPage}
-      searchQuery={searchQuery}
-    />
+    <>
+      {!diariesData ? (
+        <DiaryCardsSkeleton />
+      ) : (
+        <DiaryList
+          diariesData={diariesData}
+          currentPage={currentPage}
+          searchQuery={searchQuery}
+        />
+      )}
+    </>
   );
 }
