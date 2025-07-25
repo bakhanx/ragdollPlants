@@ -2,10 +2,7 @@ import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth-utils';
-import {
-  getUserProfileByUsername,
-  getUserProfileData
-} from '@/app/actions/userProfile';
+import { getUserProfileData } from '@/app/actions/userProfile';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
@@ -34,11 +31,11 @@ async function getUserBasicInfo(username?: string) {
 
   if (username) {
     // 다른 사용자의 정원 조회
-    user = await getUserProfileByUsername(username);
+    user = await getUserProfileData(username);
     isOwner = currentUser.id === user?.id;
   } else {
-    // 본인 정원 조회
-    user = await getUserProfileData(currentUser.id);
+    // 본인 정원 조회 (현재 사용자의 name 사용)
+    user = await getUserProfileData(currentUser.name || currentUser.id);
     isOwner = true;
   }
 
