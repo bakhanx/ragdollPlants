@@ -15,7 +15,7 @@ const menuItems: MenuItemType[] = [
     id: 'mygarden',
     icon: '🏡',
     label: '내 정원',
-    href: `/mygarden/my`,
+    href: `/mygarden`,
     ownerOnly: false,
     profileLink: false
   },
@@ -23,7 +23,7 @@ const menuItems: MenuItemType[] = [
     id: 'myplants',
     icon: '🌱',
     label: '식물',
-    href: '/myplant',
+    href: '/myplants',
     ownerOnly: false,
     profileLink: true
   },
