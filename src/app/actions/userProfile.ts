@@ -27,12 +27,12 @@ export type UserProfileData = {
   todayNutrientCount: number;
 };
 
-// 사용자 프로필 조회
+// 사용자 프로필 조회 (사용자명으로)
 export async function getUserProfileData(
-  userId: string
+  username: string
 ): Promise<UserProfileData | null> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
+  const user = await prisma.user.findFirst({
+    where: { name: username },
     select: {
       id: true,
       name: true,
@@ -64,7 +64,7 @@ export async function getUserProfileData(
   // 3. 오늘의 물주기 카운트
   const todayWaterCount = await prisma.careRecord.count({
     where: {
-      authorId: userId,
+      authorId: user.id,
       type: 'water',
       date: { gte: todayStart }
     }
@@ -73,7 +73,7 @@ export async function getUserProfileData(
   // 4. 오늘의 영양제 카운트
   const todayNutrientCount = await prisma.careRecord.count({
     where: {
-      authorId: userId,
+      authorId: user.id,
       type: 'nutrient',
       date: { gte: todayStart }
     }
@@ -92,6 +92,9 @@ export async function updateUserProfile(formData: FormData) {
   try {
     const user = await getCurrentUser();
 
+    if (!user) {
+      return;
+    }
     // FormData에서 데이터 추출
     const name = formData.get('name') as string;
     const bio = formData.get('bio') as string;
