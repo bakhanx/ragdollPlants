@@ -8,16 +8,20 @@ type MenuItemType = {
   href: string;
   ownerOnly: boolean;
   profileLink?: boolean;
+  getHref?: (userLoginId: string, currentUserId?: string) => string;
 };
 
 const menuItems: MenuItemType[] = [
   {
-    id: 'mygarden',
+    id: 'garden',
     icon: '🏡',
-    label: '내 정원',
-    href: `/mygarden`,
+    label: '정원',
+    href: '/garden',
     ownerOnly: false,
-    profileLink: false
+    profileLink: false,
+    getHref: (userLoginId, currentUserId) => {
+      return `/gardens/${userLoginId}`;
+    }
   },
   {
     id: 'myplants',
@@ -25,7 +29,12 @@ const menuItems: MenuItemType[] = [
     label: '식물',
     href: '/myplants',
     ownerOnly: false,
-    profileLink: true
+    profileLink: true,
+    getHref: (userLoginId, currentUserId) => {
+      return userLoginId === currentUserId
+        ? '/myplants'
+        : `/gardens/${userLoginId}/plants`;
+    }
   },
   {
     id: 'diaries',
@@ -33,7 +42,12 @@ const menuItems: MenuItemType[] = [
     label: '다이어리',
     href: '/diaries',
     ownerOnly: false,
-    profileLink: true
+    profileLink: true,
+    getHref: (userLoginId, currentUserId) => {
+      return userLoginId === currentUserId
+        ? '/diaries'
+        : `/gardens/${userLoginId}/diaries`;
+    }
   },
   {
     id: 'galleries',
@@ -41,43 +55,57 @@ const menuItems: MenuItemType[] = [
     label: '갤러리',
     href: '/galleries',
     ownerOnly: false,
-    profileLink: true
+    profileLink: true,
+    getHref: (userLoginId, currentUserId) => {
+      return userLoginId === currentUserId
+        ? '/galleries'
+        : `/gardens/${userLoginId}/galleries`;
+    }
   },
   {
     id: 'care',
     icon: '💊',
     label: '식물 케어',
     href: '/care',
-    ownerOnly: true
+    ownerOnly: true,
+    getHref: (userLoginId, currentUserId) => {
+      // 본인 페이지에서만 표시
+      return '/care';
+    }
   },
   {
     id: 'news',
     icon: '📝',
     label: '식물 뉴스',
     href: '/articles',
-    ownerOnly: false
+    ownerOnly: false,
+    getHref: () => '/articles' // 공통 페이지
   },
   {
     id: 'events',
     icon: '🎉',
     label: '이벤트',
     href: '/events',
-    ownerOnly: false
+    ownerOnly: false,
+    getHref: () => '/events' // 공통 페이지
   }
 ];
 
 interface MenuListProps {
-  userId?: string;
-  currentUserId?: string;
-
+  userLoginId?: string; // 현재 보고 있는 사용자 loginId
+  currentUserId?: string; // 로그인한 사용자 ID
   variant?: 'inline' | 'sidebar';
   onItemClick?: () => void;
 }
 
 export const MenuList = ({
+  userLoginId,
+  currentUserId,
   variant = 'inline',
   onItemClick
 }: MenuListProps) => {
+  const isOwner = userLoginId === currentUserId;
+
   const variants = {
     inline: {
       nav: 'grid grid-cols-2 gap-4 w-full py-4',
@@ -117,18 +145,34 @@ export const MenuList = ({
 
   const styles = variants[variant];
 
+  // 표시할 메뉴 아이템 필터링
+  const visibleItems = menuItems.filter(item => {
+    if (item.ownerOnly && !isOwner) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <nav className={styles.nav}>
-      {menuItems.map(item => (
-        <Link
-          key={item.id}
-          href={item.href}
-          onClick={onItemClick}
-          className={styles.link}>
-          <div className={styles.iconWrapper}>{item.icon}</div>
-          <span className={styles.label}>{item.label}</span>
-        </Link>
-      ))}
+      {visibleItems.map(item => {
+        // 동적 href 생성
+        const href =
+          item.getHref && userLoginId
+            ? item.getHref(userLoginId, currentUserId)
+            : item.href;
+
+        return (
+          <Link
+            key={item.id}
+            href={href}
+            onClick={onItemClick}
+            className={styles.link}>
+            <div className={styles.iconWrapper}>{item.icon}</div>
+            <span className={styles.label}>{item.label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 };
