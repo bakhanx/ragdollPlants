@@ -91,8 +91,8 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
   try {
     // FormData를 객체로 변환
     const rawData = {
-      username: formData.get('username') as string,
-      name: formData.get('name') as string,
+      loginId: formData.get('loginId') as string,
+      nickName: formData.get('nickName') as string,
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
       password: formData.get('password') as string,
@@ -121,18 +121,44 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
       };
     }
 
-    const { username, name, email, phone, password } = validationResult.data;
+    const { loginId, nickName, email, phone, password } = validationResult.data;
 
     // 이메일 중복 확인
-    const existingUser = await prisma.user.findUnique({
+    const existingEmailUser = await prisma.user.findUnique({
       where: { email }
     });
 
-    if (existingUser) {
+    if (existingEmailUser) {
       return {
         success: false,
         message: '이미 가입된 이메일입니다',
         errors: { email: ['이미 가입된 이메일입니다'] }
+      };
+    }
+
+    // 로그인 ID 중복 확인
+    const existingLoginIdUser = await prisma.user.findUnique({
+      where: { loginId }
+    });
+
+    if (existingLoginIdUser) {
+      return {
+        success: false,
+        message: '이미 사용중인 아이디입니다',
+        errors: { loginId: ['이미 사용중인 아이디입니다'] }
+      };
+    }
+
+    // 닉네임 중복 확인
+    const existingNickNameUser = await prisma.user.findUnique({
+      where: { nickName }
+    });
+
+    if (existingNickNameUser) {
+      return {
+        success: false,
+        message: '이미 사용중인 닉네임입니다',
+        errors: { nickName: ['이미 사용중인 닉네임입니다'] }
       };
     }
 
@@ -142,7 +168,8 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
     // 사용자 생성
     const newUser = await prisma.user.create({
       data: {
-        name,
+        loginId,
+        nickName,
         email,
         password: hashedPassword,
         phone: phone || null // 빈 문자열이면 null로 저장
