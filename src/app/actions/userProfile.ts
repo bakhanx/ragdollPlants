@@ -8,7 +8,8 @@ import { getCurrentUser } from '@/lib/auth-utils';
 // 사용자 프로필 데이터 타입
 export type UserProfileData = {
   id: string;
-  name: string | null;
+  loginId: string | null;
+  nickName: string | null;
   email: string | null;
   image: string | null;
   bio: string | null;
@@ -27,15 +28,16 @@ export type UserProfileData = {
   todayNutrientCount: number;
 };
 
-// 사용자 프로필 조회 (사용자명으로)
+// 사용자 프로필 조회 (loginId로)
 export async function getUserProfileData(
-  username: string
+  loginId: string
 ): Promise<UserProfileData | null> {
-  const user = await prisma.user.findFirst({
-    where: { name: username },
+  const user = await prisma.user.findUnique({
+    where: { loginId: loginId },
     select: {
       id: true,
-      name: true,
+      loginId: true,
+      nickName: true,
       email: true,
       image: true,
       bio: true,
