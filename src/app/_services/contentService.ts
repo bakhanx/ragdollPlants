@@ -129,6 +129,7 @@ export class ContentService {
       // 소유자 권한이 필요한 콘텐츠 (diary, gallery, plant)
       if (config.validateOwnership) {
         const user = await getCurrentUser();
+        if (!user) return false;
         await config.validateOwnership(contentId, user.id);
         return true;
       }
