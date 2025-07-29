@@ -2,7 +2,6 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { DiaryMoodStatus } from '@/types/models/diary';
 import { getCurrentUser, validateDiaryOwnership } from '@/lib/auth-utils';
