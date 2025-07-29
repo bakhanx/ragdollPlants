@@ -8,7 +8,7 @@ export const signUpSchema = z.object({
     .max(20, "아이디는 최대 20글자까지 가능합니다")
     .regex(/^[a-zA-Z0-9_]+$/, "아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다"),
   
-  nickName: z
+  name: z
     .string()
     .min(2, "닉네임은 최소 2글자 이상이어야 합니다")
     .max(10, "닉네임은 최대 10글자까지 가능합니다"),
