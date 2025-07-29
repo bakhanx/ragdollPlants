@@ -20,7 +20,7 @@ const menuItems: MenuItemType[] = [
     ownerOnly: false,
     profileLink: false,
     getHref: (userLoginId, currentUserId) => {
-      return `/gardens/${userLoginId}`;
+      return `/garden/${userLoginId}`;
     }
   },
   {
@@ -33,7 +33,7 @@ const menuItems: MenuItemType[] = [
     getHref: (userLoginId, currentUserId) => {
       return userLoginId === currentUserId
         ? '/myplants'
-        : `/gardens/${userLoginId}/plants`;
+        : `/garden/${userLoginId}/plants`;
     }
   },
   {
@@ -46,7 +46,7 @@ const menuItems: MenuItemType[] = [
     getHref: (userLoginId, currentUserId) => {
       return userLoginId === currentUserId
         ? '/diaries'
-        : `/gardens/${userLoginId}/diaries`;
+        : `/garden/${userLoginId}/diaries`;
     }
   },
   {
@@ -59,7 +59,7 @@ const menuItems: MenuItemType[] = [
     getHref: (userLoginId, currentUserId) => {
       return userLoginId === currentUserId
         ? '/galleries'
-        : `/gardens/${userLoginId}/galleries`;
+        : `/garden/${userLoginId}/galleries`;
     }
   },
   {
