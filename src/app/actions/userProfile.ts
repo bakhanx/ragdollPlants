@@ -28,10 +28,75 @@ export type UserProfileData = {
   todayNutrientCount: number;
 };
 
-// 사용자 프로필 조회 (loginId로)
-export async function getUserProfileData(
-  loginId: string
-): Promise<UserProfileData | null> {
+// UUID 판별 유틸리티 함수
+function isUUID(identifier: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+}
+
+// 외부 통합 인터페이스
+export async function getUserProfile(identifier: string): Promise<UserProfileData | null> {
+  return isUUID(identifier)
+    ? getUserProfileById(identifier)
+    : getUserProfileByLoginId(identifier);
+}
+
+// 내부 구현: UUID로 조회
+async function getUserProfileById(id: string): Promise<UserProfileData | null> {
+  const user = await prisma.user.findUnique({
+    where: { id: id },
+    select: {
+      id: true,
+      loginId: true,
+      nickName: true,
+      email: true,
+      image: true,
+      bio: true,
+      isProfilePublic: true,
+      level: true,
+      levelProgress: true,
+      waterCount: true,
+      nutrientCount: true,
+      interests: true,
+      _count: {
+        select: {
+          plants: true,
+          followersList: true,
+          galleries: true
+        }
+      }
+    }
+  });
+
+  if (!user) return null;
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todayWaterCount = await prisma.careRecord.count({
+    where: {
+      authorId: user.id,
+      type: 'water',
+      date: { gte: todayStart }
+    }
+  });
+
+  const todayNutrientCount = await prisma.careRecord.count({
+    where: {
+      authorId: user.id,
+      type: 'nutrient',
+      date: { gte: todayStart }
+    }
+  });
+
+  return {
+    ...user,
+    todayWaterCount,
+    todayNutrientCount
+  };
+}
+
+// 내부 구현: loginId로 조회
+async function getUserProfileByLoginId(loginId: string): Promise<UserProfileData | null> {
   const user = await prisma.user.findUnique({
     where: { loginId: loginId },
     select: {
@@ -117,7 +182,7 @@ export async function updateUserProfile(formData: FormData) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        name: name.trim(),
+        nickName: name.trim(),
         bio: bio?.trim() || null,
         interests: parsedInterests,
         image: image || null
@@ -136,3 +201,6 @@ export async function updateUserProfile(formData: FormData) {
     throw error;
   }
 }
+
+// 레거시 호환성을 위한 별칭
+export const getUserProfileData = getUserProfile;
