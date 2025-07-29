@@ -65,7 +65,7 @@ export default async function MyPlantDetailPage({
 
             <DiaryList
               plantId={id}
-              diaries={diaries}
+              diaries={diaries || []}
             />
           </div>
         </ContentsLayout>
