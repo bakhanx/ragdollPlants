@@ -1,6 +1,5 @@
 'use server';
 
-import { z } from 'zod';
 import bcryptjs from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { signIn, signOut } from '@/auth';
@@ -92,7 +91,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
     // FormData를 객체로 변환
     const rawData = {
       loginId: formData.get('loginId') as string,
-      nickName: formData.get('nickName') as string,
+      name: formData.get('name') as string,
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
       password: formData.get('password') as string,
@@ -121,7 +120,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
       };
     }
 
-    const { loginId, nickName, email, phone, password } = validationResult.data;
+    const { loginId, name, email, phone, password } = validationResult.data;
 
     // 이메일 중복 확인
     const existingEmailUser = await prisma.user.findUnique({
@@ -150,15 +149,15 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
     }
 
     // 닉네임 중복 확인
-    const existingNickNameUser = await prisma.user.findUnique({
-      where: { nickName }
+    const existingNameUser = await prisma.user.findUnique({
+      where: { name }
     });
 
-    if (existingNickNameUser) {
+    if (existingNameUser) {
       return {
         success: false,
         message: '이미 사용중인 닉네임입니다',
-        errors: { nickName: ['이미 사용중인 닉네임입니다'] }
+        errors: { name: ['이미 사용중인 닉네임입니다'] }
       };
     }
 
@@ -169,7 +168,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
     const newUser = await prisma.user.create({
       data: {
         loginId,
-        nickName,
+        name,
         email,
         password: hashedPassword,
         phone: phone || null // 빈 문자열이면 null로 저장

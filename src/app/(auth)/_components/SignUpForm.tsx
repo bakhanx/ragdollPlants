@@ -37,7 +37,7 @@ export const SignUpForm: React.FC = () => {
     mode: 'onBlur',
     defaultValues: {
       loginId: '',
-      nickName: '',
+      name: '',
       email: '',
       phone: '',
       password: '',
@@ -90,7 +90,7 @@ export const SignUpForm: React.FC = () => {
       // FormData 생성
       const formData = new FormData();
       formData.append('loginId', data.loginId);
-      formData.append('nickName', data.nickName);
+      formData.append('nickName', data.name);
       formData.append('email', data.email);
       formData.append('phone', data.phone || '');
       formData.append('password', data.password);
@@ -170,10 +170,10 @@ export const SignUpForm: React.FC = () => {
         />
 
         <Input
-          {...register('nickName')}
+          {...register('name')}
           placeholder="닉네임"
           type="text"
-          error={errors.nickName?.message}
+          error={errors.name?.message}
         />
 
         <Input

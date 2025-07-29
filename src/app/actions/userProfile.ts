@@ -8,8 +8,8 @@ import { getCurrentUser } from '@/lib/auth-utils';
 // 사용자 프로필 데이터 타입
 export type UserProfileData = {
   id: string;
-  loginId: string | null;
-  nickName: string | null;
+  loginId: string;
+  name: string;
   email: string | null;
   image: string | null;
   bio: string | null;
@@ -47,7 +47,7 @@ async function getUserProfileById(id: string): Promise<UserProfileData | null> {
     select: {
       id: true,
       loginId: true,
-      nickName: true,
+      name: true,
       email: true,
       image: true,
       bio: true,
@@ -102,7 +102,7 @@ async function getUserProfileByLoginId(loginId: string): Promise<UserProfileData
     select: {
       id: true,
       loginId: true,
-      nickName: true,
+      name: true,
       email: true,
       image: true,
       bio: true,
@@ -182,7 +182,7 @@ export async function updateUserProfile(formData: FormData) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        nickName: name.trim(),
+        name: name.trim(),
         bio: bio?.trim() || null,
         interests: parsedInterests,
         image: image || null
