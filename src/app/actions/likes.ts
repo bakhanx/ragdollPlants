@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth-utils';
+import { requireAuth } from '@/lib/auth-utils';
 import { revalidatePath } from 'next/cache';
 
 type ContentType = 'diary' | 'plant' | 'gallery';
@@ -41,7 +41,7 @@ async function findContent(
 
 export async function toggleLike(contentType: ContentType, contentId: string) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     const content = await findContent(contentType, contentId);
 

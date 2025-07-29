@@ -3,10 +3,10 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+
 import { z } from 'zod';
-import { GalleryCreateInput, MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
-import { getCurrentUser, validateGalleryOwnership } from '@/lib/auth-utils';
+import {  MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
+import { getCurrentUser, requireAuth, validateGalleryOwnership } from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
@@ -211,7 +211,7 @@ export async function getUserGalleries(userId?: string) {
 // 갤러리 생성
 export async function createGallery(formData: FormData) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 사용자의 현재 갤러리 개수 확인
     const currentCount = await prisma.gallery.count({
@@ -324,7 +324,7 @@ export async function createGallery(formData: FormData) {
 // 갤러리 수정
 export async function updateGallery(id: string, formData: FormData) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 갤러리 존재 여부 및 권한 확인
     await validateGalleryOwnership(id, user.id);
@@ -430,7 +430,7 @@ export async function updateGallery(id: string, formData: FormData) {
 // 갤러리 삭제
 export async function deleteGallery(id: string) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 갤러리 존재 여부 및 권한 확인
     const existingGallery = await validateGalleryOwnership(id, user.id);
@@ -480,7 +480,7 @@ export async function deleteGallery(id: string) {
 // 대표 이미지 설정
 export async function setFeaturedGallery(itemId: string) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 갤러리 존재 여부 및 권한 확인
     await validateGalleryOwnership(itemId, user.id);
@@ -548,7 +548,7 @@ export async function updateGalleriesOrder(
   galleryOrder: { id: string; order: number }[]
 ) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 트랜잭션으로 순서 업데이트
     await prisma.$transaction(async tx => {

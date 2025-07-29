@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-import { getCurrentUser } from '@/lib/auth-utils';
+import { requireAuth } from '@/lib/auth-utils';
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
 
@@ -89,7 +89,7 @@ export async function addCareRecord(
   amount?: number,
   notes?: string
 ) {
-  const user = await getCurrentUser();
+  const user = await requireAuth();
 
   // 간단한 입력 검증
   if (!plantId || !type) {

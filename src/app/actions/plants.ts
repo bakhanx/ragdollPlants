@@ -2,10 +2,13 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { MAX_PLANTS } from '@/types/models/plant';
-import { getCurrentUser, validatePlantOwnership } from '@/lib/auth-utils';
+import {
+  getCurrentUser,
+  requireAuth,
+  validatePlantOwnership
+} from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
@@ -34,7 +37,7 @@ export async function getMyPlants(params?: {
 }) {
   try {
     const user = await getCurrentUser();
-
+    if (!user) return null;
     const page = params?.page || 1;
     const limit = params?.limit || 4;
     const search = params?.search?.trim();
@@ -174,7 +177,7 @@ export async function getPlantById(id: string) {
 // 식물 등록 (업로드)
 export async function createPlant(formData: FormData) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 사용자의 현재 식물 개수 확인
     const currentCount = await prisma.plant.count({
@@ -301,7 +304,7 @@ export async function createPlant(formData: FormData) {
 // 식물 정보 수정
 export async function updatePlant(id: string, formData: FormData) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 기존 식물 확인
     const existingPlant = await validatePlantOwnership(id, user.id);
@@ -417,7 +420,7 @@ export async function updatePlant(id: string, formData: FormData) {
 // 식물 삭제
 export async function deletePlant(id: string) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     // 식물 존재 여부 및 권한 확인
     const existingPlant = await validatePlantOwnership(id, user.id);
@@ -475,7 +478,7 @@ export async function deletePlant(id: string) {
 // 물주기 기록
 export async function updateWatering(id: string) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     const plant = await validatePlantOwnership(id, user.id);
 
@@ -529,7 +532,7 @@ export async function updateWatering(id: string) {
 // 영양제 기록
 export async function updateNutrient(id: string) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     const plant = await validatePlantOwnership(id, user.id);
 
@@ -583,7 +586,7 @@ export async function updateNutrient(id: string) {
 // 다이어리 작성용 간단한 식물 목록 조회 (id, name만 포함)
 export async function getMyPlantsBasicInfo() {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAuth();
 
     const plants = await prisma.plant.findMany({
       where: {

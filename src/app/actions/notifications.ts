@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth-utils';
 
 /**
  * 현재 로그인된 사용자의 알림 목록
@@ -10,38 +11,36 @@ import { prisma } from '@/lib/prisma';
  * @param cursor 페이징을 위한 커서 ID
  */
 export async function getNotifications(limit: number = 10, cursor?: string) {
-  const session = await auth();
-  if (!session?.user) {
-    return null;
-  }
+  const session = await requireAuth();
 
   const notifications = await prisma.notification.findMany({
     where: {
-      recipientId: session.user.id,
+      recipientId: session.id
     },
     take: limit,
     ...(cursor && {
       cursor: {
-        id: cursor,
+        id: cursor
       },
-      skip: 1,
+      skip: 1
     }),
     orderBy: {
-      createdAt: 'desc',
-    },
+      createdAt: 'desc'
+    }
   });
 
   const unreadCount = await prisma.notification.count({
     where: {
-      recipientId: session.user.id,
-      isRead: false,
-    },
+      recipientId: session.id,
+      isRead: false
+    }
   });
 
   return {
     notifications,
     unreadCount,
-    nextCursor: notifications.length === limit ? notifications[limit - 1].id : undefined,
+    nextCursor:
+      notifications.length === limit ? notifications[limit - 1].id : undefined
   };
 }
 
@@ -56,7 +55,7 @@ export async function markNotificationAsRead(notificationId: string) {
   }
 
   const notification = await prisma.notification.findUnique({
-    where: { id: notificationId },
+    where: { id: notificationId }
   });
 
   if (!notification || notification.recipientId !== session.user.id) {
@@ -65,11 +64,11 @@ export async function markNotificationAsRead(notificationId: string) {
 
   const updatedNotification = await prisma.notification.update({
     where: {
-      id: notificationId,
+      id: notificationId
     },
     data: {
-      isRead: true,
-    },
+      isRead: true
+    }
   });
 
   revalidatePath('/mygarden');
@@ -90,13 +89,13 @@ export async function markAllNotificationsAsRead() {
   await prisma.notification.updateMany({
     where: {
       recipientId: session.user.id,
-      isRead: false,
+      isRead: false
     },
     data: {
-      isRead: true,
-    },
+      isRead: true
+    }
   });
 
   revalidatePath('/mygarden');
   revalidatePath('/articles');
-} 
+}
