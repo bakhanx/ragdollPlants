@@ -3,7 +3,13 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { getCurrentUser, validateArticleOwnership } from '@/lib/auth-utils';
+import {
+  getCurrentUser,
+  validateArticleOwnership,
+  ServerActionResult,
+  requireAuth,
+  requireAdmin
+} from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
@@ -150,9 +156,20 @@ export async function getArticleById(id: number) {
 }
 
 // 아티클 생성
-export async function createArticle(formData: FormData) {
+export async function createArticle(
+  formData: FormData
+): Promise<ServerActionResult<{ articleId: number; redirectTo: string }>> {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAdmin();
+
+    if (!user) {
+      return {
+        success: false,
+        needsAuth: true,
+        redirectTo: '/auth/login',
+        error: '로그인이 필요합니다.'
+      };
+    }
 
     const rawData = {
       title: formData.get('title') as string,
@@ -230,11 +247,15 @@ export async function createArticle(formData: FormData) {
     // 성공 결과 반환
     return {
       success: true,
-      articleId: article.id,
-      redirectTo: `/articles/${article.id}`
+      data: {
+        articleId: article.id,
+        redirectTo: `/articles/${article.id}`
+      },
+      message: '아티클이 성공적으로 생성되었습니다.'
     };
   } catch (error) {
     console.error('아티클 생성 오류:', error);
+
     return {
       success: false,
       error:
@@ -246,7 +267,16 @@ export async function createArticle(formData: FormData) {
 // 아티클 수정
 export async function updateArticle(id: number, formData: FormData) {
   try {
-    const user = await getCurrentUser();
+    const user = await requireAdmin();
+
+    if (!user) {
+      return {
+        success: false,
+        needsAuth: true,
+        redirectTo: '/auth/login',
+        error: '로그인이 필요합니다.'
+      };
+    }
 
     // 기존 아티클 확인 및 권한 체크
     const existingArticle = await validateArticleOwnership(id, user.id);
@@ -397,6 +427,15 @@ export async function getLatestArticles(
 export async function deleteArticle(id: number) {
   try {
     const user = await getCurrentUser();
+
+    if (!user) {
+      return {
+        success: false,
+        needsAuth: true,
+        redirectTo: '/auth/signin',
+        error: '로그인이 필요합니다.'
+      };
+    }
 
     // 기존 아티클 확인 및 권한 체크
     const existingArticle = await validateArticleOwnership(id, user.id);
