@@ -36,8 +36,8 @@ export const SignUpForm: React.FC = () => {
     resolver: zodResolver(signUpSchema),
     mode: 'onBlur',
     defaultValues: {
-      username: '',
-      name: '',
+      loginId: '',
+      nickName: '',
       email: '',
       phone: '',
       password: '',
@@ -89,8 +89,8 @@ export const SignUpForm: React.FC = () => {
 
       // FormData 생성
       const formData = new FormData();
-      formData.append('username', data.username);
-      formData.append('name', data.name);
+      formData.append('loginId', data.loginId);
+      formData.append('nickName', data.nickName);
       formData.append('email', data.email);
       formData.append('phone', data.phone || '');
       formData.append('password', data.password);
@@ -163,17 +163,17 @@ export const SignUpForm: React.FC = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="flex w-full flex-col gap-4">
         <Input
-          {...register('username')}
+          {...register('loginId')}
           placeholder="아이디"
           type="text"
-          error={errors.username?.message}
+          error={errors.loginId?.message}
         />
 
         <Input
-          {...register('name')}
-          placeholder="이름"
+          {...register('nickName')}
+          placeholder="닉네임"
           type="text"
-          error={errors.name?.message}
+          error={errors.nickName?.message}
         />
 
         <Input
