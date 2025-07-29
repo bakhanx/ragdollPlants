@@ -12,8 +12,8 @@ export const USER_ROLES = {
 export type UserRole = keyof typeof USER_ROLES;
 
 /**
- * 현재 로그인한 사용자 정보 조회
- * 일반적인 사용자 액션에서 사용
+ * 현재 로그인한 사용자 정보 조회 (nullable)
+ * 모든 페이지에서 사용 - 로그인 여부에 관계없이 안전
  */
 export async function getCurrentUser() {
   const session = await auth();
@@ -24,6 +24,7 @@ export async function getCurrentUser() {
 
   return {
     id: session.user.id,
+    loginId: session.user.loginId,
     name: session.user.name,
     email: session.user.email,
     image: session.user.image,
@@ -32,11 +33,37 @@ export async function getCurrentUser() {
 }
 
 /**
- * 세션 정보 조회 (로그인하지 않은 경우에도 안전)
- * 공개 페이지에서 UI 차별화 목적으로 사용
+ * 로그인이 필요한 액션용 - 로그인하지 않으면 에러
+ * Server Actions에서만 사용
  */
-export async function getSession() {
-  return await auth();
+export async function requireAuth() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error('AUTH_REQUIRED');
+  }
+
+  return {
+    id: session.user.id,
+    loginId: session.user.loginId,
+    name: session.user.name,
+    email: session.user.email,
+    image: session.user.image,
+    role: session.user.role
+  };
+}
+
+/**
+ * 관리자 권한 확인
+ */
+export async function requireAdmin() {
+  const user = await requireAuth();
+
+  if (user.role !== USER_ROLES.ADMIN) {
+    throw new Error('ADMIN_REQUIRED');
+  }
+
+  return user;
 }
 
 /**
@@ -48,30 +75,8 @@ export async function checkIsAdmin(): Promise<boolean> {
 }
 
 /**
- * * 관리자 전용 액션
- * 관리자 권한 확인 및 사용자 정보 반환
+ * 소유권 확인 헬퍼들
  */
-export async function requireAdmin() {
-  const session = await auth();
-
-  if (!session?.user) {
-    throw new Error('로그인이 필요합니다.');
-  }
-
-  if (session.user.role !== USER_ROLES.ADMIN) {
-    throw new Error('관리자만 접근할 수 있습니다.');
-  }
-
-  // 사용자 정보를 바로 반환 (추가 호출 불필요)
-  return {
-    id: session.user.id,
-    name: session.user.name,
-    email: session.user.email,
-    image: session.user.image,
-    role: session.user.role
-  };
-}
-
 /**
  * 식물 소유권 확인
  */
@@ -162,34 +167,55 @@ export async function validateEventOwnership(
 }
 
 /**
- * 관리자에게 필요없는 필드들을 필터링
+ * Server Action 표준 응답 타입
  */
-export function filterUserFields(user: {
-  role: string;
-  following?: number;
-  followers?: number;
-  posts?: number;
-  level?: number;
-  levelProgress?: number;
-  waterCount?: number;
-  nutrientCount?: number;
-  interests?: string[];
-  [key: string]: unknown;
-}) {
-  if (user.role !== USER_ROLES.USER) {
-    // 관리자는 식물 관련 필드 제거
-    const {
-      following,
-      followers,
-      posts,
-      level,
-      levelProgress,
-      waterCount,
-      nutrientCount,
-      interests,
-      ...adminUser
-    } = user;
-    return adminUser;
+export type ServerActionResult<T = unknown> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  redirectTo?: string;
+  needsAuth?: boolean;
+  message?: string;
+};
+
+/**
+ * Server Action 에러 처리
+ */
+export function handleAuthError(error: Error): ServerActionResult {
+  if (error.message === 'AUTH_REQUIRED') {
+    return {
+      success: false,
+      needsAuth: true,
+      message: '로그인이 필요합니다.',
+      error: '로그인이 필요합니다.'
+    };
   }
-  return user;
+
+  if (error.message === 'ADMIN_REQUIRED') {
+    return {
+      success: false,
+      error: '관리자만 접근할 수 있습니다.'
+    };
+  }
+
+  return {
+    success: false,
+    error: error.message
+  };
+}
+
+/**
+ * 클라이언트용 인증 에러 처리
+ */
+export function handleClientAuthError(
+  result: ServerActionResult,
+  router: { push: (path: string) => void },
+  showToast?: (message: string) => void
+) {
+  if (!result.success && result.needsAuth) {
+    showToast?.(result.message || '로그인이 필요합니다.');
+    router.push('/login');
+    return true;
+  }
+  return false;
 }
