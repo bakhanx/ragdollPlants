@@ -7,7 +7,6 @@ import {
   getCurrentUser,
   validateArticleOwnership,
   ServerActionResult,
-  requireAuth,
   requireAdmin
 } from '@/lib/auth-utils';
 import {
@@ -166,7 +165,7 @@ export async function createArticle(
       return {
         success: false,
         needsAuth: true,
-        redirectTo: '/auth/login',
+        redirectTo: '/login',
         error: '로그인이 필요합니다.'
       };
     }
@@ -273,7 +272,7 @@ export async function updateArticle(id: number, formData: FormData) {
       return {
         success: false,
         needsAuth: true,
-        redirectTo: '/auth/login',
+        redirectTo: '/login',
         error: '로그인이 필요합니다.'
       };
     }
@@ -432,7 +431,7 @@ export async function deleteArticle(id: number) {
       return {
         success: false,
         needsAuth: true,
-        redirectTo: '/auth/signin',
+        redirectTo: '/signin',
         error: '로그인이 필요합니다.'
       };
     }
