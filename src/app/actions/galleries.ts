@@ -1,18 +1,21 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-
 import { z } from 'zod';
-import {  MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
-import { getCurrentUser, requireAuth, validateGalleryOwnership } from '@/lib/auth-utils';
+import { MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
+import {
+  getCurrentUser,
+  requireAuth,
+  validateGalleryOwnership
+} from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
 import type { Prisma } from '@prisma/client';
 import { populateLikeInfo } from './likes';
+import { DEMO_GALLERIES_RESPONSE } from '@/app/_constants/demoData';
 
 // 갤러리 생성 유효성 검사 스키마
 const createGallerySchema = z.object({
@@ -29,7 +32,7 @@ const createGallerySchema = z.object({
 // 갤러리 목록 조회
 export async function getGalleries(userId?: string) {
   try {
-    const currentUser = await getCurrentUser().catch(() => null);
+    const currentUser = await getCurrentUser();
 
     const where: Prisma.GalleryWhereInput = {
       isActive: true
@@ -138,12 +141,13 @@ export async function getGalleryById(id: string) {
 // 사용자별 갤러리 조회
 export async function getUserGalleries(userId?: string) {
   try {
-    const session = await auth();
-    const currentUserId = session?.user?.id;
+    const session = await getCurrentUser();
+    const currentUserId = session?.id;
     const targetUserId = userId || currentUserId;
 
+    // 비로그인 데모 데이터
     if (!targetUserId) {
-      throw new Error('로그인이 필요합니다.');
+      return DEMO_GALLERIES_RESPONSE;
     }
 
     const isOwner = currentUserId === targetUserId;

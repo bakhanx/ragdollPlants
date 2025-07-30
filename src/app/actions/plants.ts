@@ -14,6 +14,7 @@ import {
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
 import { populateLikeInfo } from './likes';
+import { DEMO_PLANTS_RESPONSE } from '@/app/_constants/demoData';
 
 // 식물 생성 유효성 검사 스키마
 const createPlantSchema = z.object({
@@ -29,6 +30,8 @@ const createPlantSchema = z.object({
   nutrientInterval: z.number().min(1).max(365).optional()
 });
 
+
+
 // 내 식물 목록 조회
 export async function getMyPlants(params?: {
   page?: number;
@@ -37,7 +40,11 @@ export async function getMyPlants(params?: {
 }) {
   try {
     const user = await getCurrentUser();
-    if (!user) return null;
+    
+    // 비로그인 데모 데이터
+    if (!user) {
+      return DEMO_PLANTS_RESPONSE;
+    }
     const page = params?.page || 1;
     const limit = params?.limit || 4;
     const search = params?.search?.trim();

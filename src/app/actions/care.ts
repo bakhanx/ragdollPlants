@@ -4,8 +4,12 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { requireAuth } from '@/lib/auth-utils';
+import { DEMO_CARE_RESPONSE } from '@/app/_constants/demoData';
+
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
+
+
 
 /**
  * 사용자의 식물 케어 데이터 조회
@@ -15,8 +19,9 @@ export async function getUserPlantsForCare(userId?: string) {
     const session = await auth();
     const targetUserId = userId || session?.user?.id;
 
+    // 비로그인 데모 데이터
     if (!targetUserId) {
-      throw new Error('인증이 필요합니다');
+      return DEMO_CARE_RESPONSE;
     }
 
     // 사용자의 모든 활성 식물 조회

@@ -11,6 +11,7 @@ import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
+import { DEMO_DIARIES_RESPONSE } from '@/app/_constants/demoData';
 
 // 다이어리 생성 유효성 검사 스키마
 const createDiarySchema = z.object({
@@ -22,6 +23,8 @@ const createDiarySchema = z.object({
   tags: z.array(z.string()).optional()
 });
 
+
+
 // 모든 다이어리 조회 (현재 사용자의 다이어리만)
 export async function getDiaries(params?: {
   page?: number;
@@ -30,8 +33,10 @@ export async function getDiaries(params?: {
 }) {
   try {
     const user = await getCurrentUser();
+    
+    // 비로그인 데모 데이터
     if (!user) {
-      return null;
+      return DEMO_DIARIES_RESPONSE;
     }
     const page = params?.page || 1;
     const limit = params?.limit || 4;
