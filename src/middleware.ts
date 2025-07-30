@@ -13,7 +13,7 @@ const ADMIN_PATHS = [
 // 로그인이 필요한 사용자 경로 정의
 const PROTECTED_PATHS = [
   '/myplants',
-  '/mygarden',
+  '/garden',
   '/diaries/upload',
   '/galleries/upload'
 ];
@@ -69,8 +69,10 @@ export const config = {
     '/events/upload/:path*', 
     '/events/:id/edit',
     // 로그인이 필요한 사용자 페이지
-    '/myplants/:path*',
-    '/mygarden/:path*',
+    '/myplants/upload/:path*',
+    '/myplants/edit/:path*',
+    '/garden/upload/:path*',
+    '/garden/edit/:path*',
     '/diaries/upload/:path*',
     '/galleries/upload/:path*'
   ]
