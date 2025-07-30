@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth-utils';
+import { getCurrentUser } from '@/lib/auth-utils';
 
 /**
  * 현재 로그인된 사용자의 알림 목록
@@ -11,7 +11,16 @@ import { requireAuth } from '@/lib/auth-utils';
  * @param cursor 페이징을 위한 커서 ID
  */
 export async function getNotifications(limit: number = 10, cursor?: string) {
-  const session = await requireAuth();
+  const session = await getCurrentUser();
+
+  // 로그인하지 않은 경우 빈 결과 반환
+  if (!session?.id) {
+    return {
+      notifications: [],
+      unreadCount: 0,
+      nextCursor: undefined
+    };
+  }
 
   const notifications = await prisma.notification.findMany({
     where: {
