@@ -38,7 +38,7 @@ export const GalleryGrid = () => {
     const fetchData = async () => {
       try {
         const [user, galleries] = await Promise.all([
-          getCurrentUser().catch(() => null), // 로그인하지 않은 경우 null 반환
+          getCurrentUser(),
           getUserGalleries()
         ]);
 
