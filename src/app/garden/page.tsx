@@ -5,7 +5,7 @@ export default async function MyGardenPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect('/auth/login');
+    redirect('/login');
   }
 
   redirect(`/garden/${user.loginId}`);
