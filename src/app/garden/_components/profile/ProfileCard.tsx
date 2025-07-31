@@ -31,7 +31,7 @@ export default function ProfileCard({
     <Card className="p-5" isHover={false}>
       <div className="relative flex gap-5">
         <Link
-          href="/mygarden/profile"
+          href="/garden/profile"
           className="hover:opacity-80">
           <ProfileImage
             src={profileImage || "/images/Profile.webp"}

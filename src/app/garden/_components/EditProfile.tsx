@@ -312,7 +312,7 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
           <Button
             type="button"
             className="flex-1 bg-gray-500 hover:bg-gray-600"
-            onClick={() => (onCancel ? onCancel() : router.push('/mygarden'))}
+            onClick={() => (onCancel ? onCancel() : router.push('/garden'))}
             disabled={submitting}>
             취소
           </Button>
