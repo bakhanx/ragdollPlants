@@ -13,7 +13,6 @@ const ADMIN_PATHS = [
 // 로그인이 필요한 사용자 경로 정의
 const PROTECTED_PATHS = [
   '/myplants',
-  '/garden',
   '/diaries/upload',
   '/galleries/upload'
 ];
