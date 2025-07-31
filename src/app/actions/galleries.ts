@@ -202,10 +202,15 @@ export async function getUserGalleries(userId?: string) {
     );
 
     // 갤러리와 좋아요 수 결합
-    return galleries.map(gallery => ({
+    const galleriesWithLikes = galleries.map(gallery => ({
       ...gallery,
       likes: likeCountMap.get(gallery.id) || 0
     }));
+
+    return {
+      galleries: galleriesWithLikes,
+      isOwner
+    };
   } catch (error) {
     console.error('사용자 갤러리 조회 오류:', error);
     throw error;
