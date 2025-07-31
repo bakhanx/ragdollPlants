@@ -80,7 +80,7 @@ export async function markNotificationAsRead(notificationId: string) {
     }
   });
 
-  revalidatePath('/mygarden');
+  revalidatePath('/garden');
   revalidatePath('/articles');
 
   return updatedNotification;
@@ -105,6 +105,6 @@ export async function markAllNotificationsAsRead() {
     }
   });
 
-  revalidatePath('/mygarden');
+  revalidatePath('/garden');
   revalidatePath('/articles');
 }
