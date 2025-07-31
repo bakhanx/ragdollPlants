@@ -10,12 +10,11 @@ import {
   setFeaturedGallery
 } from '@/app/actions/galleries';
 import type { GalleryItem } from './GalleryGrid';
-import type { Session } from 'next-auth';
 
 interface GalleryImageModalProps {
   item: GalleryItem;
   children: React.ReactNode;
-  session?: Session | null;
+  isOwner?: boolean;
   onUpdate?: (updatedItem: GalleryItem) => void;
   onDelete?: (deletedId: string) => void;
   onSetFeatured?: (itemId: string) => void;
@@ -24,7 +23,7 @@ interface GalleryImageModalProps {
 export const GalleryImageModal = ({
   item,
   children,
-  session,
+  isOwner = false,
   onUpdate,
   onDelete,
   onSetFeatured
@@ -204,9 +203,6 @@ export const GalleryImageModal = ({
   // 고정 모달 크기
   const modalWidth = Math.min(window.innerWidth * 0.9, 1200);
   const modalHeight = Math.min(window.innerHeight * 0.9, 800);
-
-  // 현재 사용자가 작성자인지 확인
-  const isOwner = session?.user?.id === item.author?.id;
 
   return (
     <>
