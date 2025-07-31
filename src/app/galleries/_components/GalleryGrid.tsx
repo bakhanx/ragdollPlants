@@ -3,10 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Session } from 'next-auth';
 import { GalleryImageModal } from './GalleryImageModal';
 import { getUserGalleries } from '@/app/actions/galleries';
-import { getCurrentUser } from '@/lib/auth-utils';
 
 export interface GalleryItem {
   id: string;
@@ -30,20 +28,16 @@ export interface GalleryItem {
 
 export const GalleryGrid = () => {
   const [items, setItems] = useState<GalleryItem[]>([]);
-  const [session, setSession] = useState<Session | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [user, galleries] = await Promise.all([
-          getCurrentUser(),
-          getUserGalleries()
-        ]);
-
-        setSession(user ? { user, expires: '' } : null);
-        setItems(galleries);
+        const result = await getUserGalleries();
+        setItems(result.galleries);
+        setIsOwner(result.isOwner);
       } catch (error) {
         console.error('갤러리 데이터 로딩 오류:', error);
         setHasError(true);
@@ -184,7 +178,7 @@ export const GalleryGrid = () => {
       <div className="mb-6">
         <GalleryImageModal
           item={featuredItem}
-          session={session}>
+          isOwner={isOwner}>
           <div className="relative cursor-pointer overflow-hidden rounded-2xl shadow-2xl transition-transform duration-300 hover:scale-[1.02]">
             <div className="relative aspect-[4/3]">
               <Image
@@ -261,7 +255,7 @@ export const GalleryGrid = () => {
             <GalleryImageModal
               key={item.id}
               item={item}
-              session={session}>
+              isOwner={isOwner}>
               <div className="group relative cursor-pointer overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 <div className="relative aspect-square">
                   <Image
