@@ -1,4 +1,5 @@
 import type { Plant, Diary, Gallery, User } from '@prisma/client';
+import type { UserProfileData } from '@/app/actions/userProfile';
 
 export type DemoPlant = Plant & {
   likes: number;
@@ -24,6 +25,9 @@ export type DemoGallery = Gallery & {
     name: string;
   } | null;
 };
+
+// 데모 사용자 프로필은 UserProfileData 타입 사용
+export type DemoUserProfile = UserProfileData;
 
 // 케어 커스텀 별도 정의
 export interface DemoCare {
@@ -286,6 +290,29 @@ const DEMO_CARE_DATA: DemoCare[] = [
 ];
 //
 
+// 데모 사용자 프로필 데이터
+export const DEMO_USER_PROFILE: DemoUserProfile = {
+  id: 'demo-user',
+  loginId: 'demo-user',
+  name: '식물초보',
+  email: null,
+  image: '/images/demo-avatar.webp',
+  bio: '식물을 처음 키우기 시작한 초보입니다. 몬스테라와 스킨답서스를 키우고 있어요!',
+  isProfilePublic: true,
+  level: 2,
+  levelProgress: 45,
+  waterCount: 15,
+  nutrientCount: 8,
+  interests: ['실내식물', '초보가이드', '몬스테라'],
+  _count: {
+    plants: 2,
+    followersList: 12,
+    galleries: 2
+  },
+  todayWaterCount: 1,
+  todayNutrientCount: 0
+};
+
 // Export 데이터
 export const DEMO_PLANTS = DEMO_PLANTS_DATA;
 export const DEMO_DIARIES = DEMO_DIARIES_DATA;
@@ -303,5 +330,8 @@ export const DEMO_DIARIES_RESPONSE = {
   pagination: DEMO_PAGINATION
 };
 
-export const DEMO_GALLERIES_RESPONSE = DEMO_GALLERIES_DATA;
+export const DEMO_GALLERIES_RESPONSE = {
+  galleries: DEMO_GALLERIES_DATA,
+  isOwner: false // 데모 데이터는 편집 불가
+};
 export const DEMO_CARE_RESPONSE = DEMO_CARE_DATA;
