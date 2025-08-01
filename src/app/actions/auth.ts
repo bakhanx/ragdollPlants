@@ -81,8 +81,10 @@ export async function signInAction(formData: FormData) {
     };
   }
 
-  // 성공 시 홈페이지로 리다이렉트
-  redirect('/');
+  return {
+    success: true,
+    message: '로그인이 완료되었습니다.'
+  };
 }
 
 // 회원가입 액션
