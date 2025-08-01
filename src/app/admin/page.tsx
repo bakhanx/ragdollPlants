@@ -4,6 +4,8 @@ import Link from 'next/link';
 import DataBackup from './_components/DataBackup';
 import DatabaseReset from './_components/DatabaseReset';
 import DataRestore from './_components/DataRestore';
+import DataUpload from './_components/DataUpload';
+import EventManagement from './_components/EventManagement';
 import { ReportManagement } from './_components/ReportManagement';
 
 export default async function AdminPage() {
@@ -24,6 +26,12 @@ export default async function AdminPage() {
             <ReportManagement />
           </div>
 
+          {/* 데이터 업로드 섹션 */}
+          <DataUpload />
+
+          {/* 이벤트 관리 섹션 */}
+          <EventManagement />
+
           {/* 데이터 백업 섹션 */}
           <DataBackup />
 
@@ -37,39 +45,37 @@ export default async function AdminPage() {
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-4 text-xl font-semibold">시스템 관리</h2>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
                   <h3 className="font-medium text-blue-900">이벤트 관리</h3>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="mt-1 text-sm text-blue-700">
                     이벤트 생성, 수정, 삭제
                   </p>
-                  <Link 
-                    href="/events/upload" 
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block"
-                  >
+                  <Link
+                    href="/events/upload"
+                    className="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-800">
                     이벤트 생성 →
                   </Link>
                 </div>
 
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="rounded-lg border border-green-200 bg-green-50 p-4">
                   <h3 className="font-medium text-green-900">아티클 관리</h3>
-                  <p className="text-sm text-green-700 mt-1">
+                  <p className="mt-1 text-sm text-green-700">
                     아티클 생성, 수정, 삭제
                   </p>
-                  <Link 
-                    href="/articles/upload" 
-                    className="text-green-600 hover:text-green-800 text-sm font-medium mt-2 inline-block"
-                  >
+                  <Link
+                    href="/articles/upload"
+                    className="mt-2 inline-block text-sm font-medium text-green-600 hover:text-green-800">
                     아티클 생성 →
                   </Link>
                 </div>
 
-                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
                   <h3 className="font-medium text-purple-900">사용자 관리</h3>
-                  <p className="text-sm text-purple-700 mt-1">
+                  <p className="mt-1 text-sm text-purple-700">
                     사용자 권한 및 계정 관리
                   </p>
-                  <span className="text-purple-600 text-sm font-medium mt-2 inline-block">
+                  <span className="mt-2 inline-block text-sm font-medium text-purple-600">
                     개발 예정
                   </span>
                 </div>
