@@ -40,11 +40,14 @@ export default function Page() {
       formData.append('email', data.email);
       formData.append('password', data.password);
 
-      // 서버 액션 호출 (성공 시 서버에서 redirect 처리)
+      // 서버 액션 호출
       const result = await signInAction(formData);
 
-      // 이 코드는 에러가 있을 때만 실행됨
-      if (result && !result.success) {
+      if (result.success) {
+        // 성공 시 클라이언트에서 리다이렉트
+        setServerMessage(result.message || '로그인이 완료되었습니다.');
+        router.push('/');
+      } else {
         setServerMessage(result.message || '로그인에 실패했습니다.');
 
         // 서버에서 반환된 필드별 에러 처리
@@ -160,12 +163,15 @@ export default function Page() {
 
                 try {
                   const formData = new FormData();
-                  formData.append('email', 'admin@ragdollplants.com');
-                  formData.append('password', 'admin7777@');
+                  formData.append('email', 'ragdollplants@gamil.com');
+                  formData.append('password', 'admin7777');
 
                   const result = await signInAction(formData);
 
-                  if (result && !result.success) {
+                  if (result.success) {
+                    setServerMessage(result.message || 'Admin 로그인이 완료되었습니다.');
+                    router.push('/');
+                  } else {
                     setServerMessage(
                       result.message || 'Admin 로그인에 실패했습니다.'
                     );
