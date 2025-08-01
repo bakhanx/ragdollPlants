@@ -90,7 +90,7 @@ export const SignUpForm: React.FC = () => {
       // FormData 생성
       const formData = new FormData();
       formData.append('loginId', data.loginId);
-      formData.append('nickName', data.name);
+      formData.append('name', data.name);
       formData.append('email', data.email);
       formData.append('phone', data.phone || '');
       formData.append('password', data.password);
