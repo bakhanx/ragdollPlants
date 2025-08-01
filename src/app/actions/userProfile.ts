@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth-utils';
+import { DEMO_USER_PROFILE } from '@/app/_constants/demoData';
 
 // 사용자 프로필 데이터 타입
 export type UserProfileData = {
@@ -33,8 +34,15 @@ function isUUID(identifier: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
 }
 
+
+
 // 외부 통합 인터페이스
 export async function getUserProfile(identifier: string): Promise<UserProfileData | null> {
+  // 데모 사용자 처리
+  if (identifier === 'demo-user') {
+    return DEMO_USER_PROFILE;
+  }
+  
   return isUUID(identifier)
     ? getUserProfileById(identifier)
     : getUserProfileByLoginId(identifier);
@@ -190,11 +198,11 @@ export async function updateUserProfile(formData: FormData) {
     });
 
     // 캐시 재검증
-    revalidatePath('/mygarden');
-    revalidatePath('/mygarden/profile');
+    revalidatePath('/garden');
+    revalidatePath('/garden/profile');
 
-    // 성공 시 마이가든으로 리다이렉트
-    redirect('/mygarden');
+    // 성공 시 정원으로 리다이렉트
+    redirect('/garden');
   } catch (error) {
     // 에러 처리
     console.error('프로필 업데이트 오류:', error);
