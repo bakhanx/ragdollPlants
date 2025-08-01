@@ -12,7 +12,7 @@ const ADMIN_PATHS = [
 
 // 로그인이 필요한 사용자 경로 정의
 const PROTECTED_PATHS = [
-  '/myplants',
+  '/garden/profile',
   '/diaries/upload',
   '/galleries/upload'
 ];
@@ -27,15 +27,17 @@ export default async function middleware(request: NextRequest) {
   }
 
   // 관리자 전용 페이지 체크 (동적 경로 포함)
-  if (ADMIN_PATHS.some(path => {
-    if (path.includes('[id]')) {
-      // 동적 경로 패턴 매칭
-      const pattern = path.replace(/\[id\]/g, '[^/]+');
-      const regex = new RegExp(`^${pattern}$`);
-      return regex.test(pathname);
-    }
-    return pathname.startsWith(path);
-  })) {
+  if (
+    ADMIN_PATHS.some(path => {
+      if (path.includes('[id]')) {
+        // 동적 경로 패턴 매칭
+        const pattern = path.replace(/\[id\]/g, '[^/]+');
+        const regex = new RegExp(`^${pattern}$`);
+        return regex.test(pathname);
+      }
+      return pathname.startsWith(path);
+    })
+  ) {
     // 로그인 안된 상태
     if (!session) {
       return NextResponse.redirect(new URL('/login', request.url));
@@ -62,17 +64,13 @@ export const config = {
   matcher: [
     '/login',
     // 관리자 페이지
-    '/admin/:path*',
-    '/articles/upload/:path*',
-    '/articles/:id/edit',
-    '/events/upload/:path*', 
-    '/events/:id/edit',
+    ...ADMIN_PATHS.map(path => {
+      if (path.includes('[id]')) {
+        return path.replace(/\[id\]/g, '*');
+      }
+      return `${path}/:path*`;
+    }),
     // 로그인이 필요한 사용자 페이지
-    '/myplants/upload/:path*',
-    '/myplants/edit/:path*',
-    '/garden/upload/:path*',
-    '/garden/edit/:path*',
-    '/diaries/upload/:path*',
-    '/galleries/upload/:path*'
+    ...PROTECTED_PATHS.map(path => `${path}/:path*`)
   ]
 };
