@@ -63,8 +63,8 @@ export interface DemoPagination {
 // 공통 사용자 정보
 const DEMO_USER = {
   id: 'demo-user',
-  name: '식물초보',
-  image: '/images/demo-avatar.webp'
+  name: '게스트',
+  image: '/images/Profile.webp'
 };
 
 // 기본 pagination 설정
@@ -82,7 +82,7 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
   {
     id: 'demo-plant-1',
     name: '내 첫 몬스테라',
-    image: '/images/demo-plant-1.webp',
+    image: '/images/monstera01.webp',
     category: '몬스테라',
     description: '처음 키우는 몬스테라예요. 잎이 점점 커지고 있어서 뿌듯해요!',
     location: '거실 창가',
@@ -113,7 +113,7 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
   {
     id: 'demo-plant-2',
     name: '귀여운 스킨답서스',
-    image: '/images/demo-plant-2.webp',
+    image: '/images/scindapsus01.webp',
     category: '스킨답서스',
     description: '물꽂이로 뿌리를 내린 후 화분에 옮겨 심었어요.',
     location: '침실',
@@ -151,7 +151,7 @@ const DEMO_DIARIES_DATA: DemoDiary[] = [
     content:
       '오늘 몬스테라에서 새로운 잎이 나오는 걸 발견했어요. 정말 신기하고 뿌듯합니다. 처음에는 작은 새싹 같았는데 점점 커지고 있어요.',
     date: new Date('2024-01-20'),
-    image: '/images/demo-diary-1.webp',
+    image: '/images/monstera02.webp',
     status: 'good',
     tags: ['새잎', '성장', '기쁨'],
     isPublic: true,
@@ -176,7 +176,7 @@ const DEMO_DIARIES_DATA: DemoDiary[] = [
     content:
       '스킨답서스 가지를 물에 꽂아둔 지 2주 만에 뿌리가 나왔어요. 이제 화분에 옮겨 심어야겠어요.',
     date: new Date('2024-01-18'),
-    image: '/images/demo-diary-2.webp',
+    image: '/images/scindapsus02.webp',
     status: 'good',
     tags: ['물꽂이', '뿌리', '성공'],
     isPublic: true,
@@ -201,10 +201,10 @@ const DEMO_DIARIES_DATA: DemoDiary[] = [
 const DEMO_GALLERIES_DATA: DemoGallery[] = [
   {
     id: 'demo-gallery-1',
-    title: '내 첫 번째 몬스테라',
-    image: '/images/demo-plant-1.webp',
-    description: '처음 키우는 몬스테라가 이렇게 예쁘게 자랐어요!',
-    tags: ['몬스테라', '실내식물', '초보'],
+    title: '울집 앞마당 수국',
+    image: '/images/hydrangea01.webp',
+    description: '우리집 앞마당 수국이 이렇게 예쁘게 폈어요!',
+    tags: ['수국', '실내식물', '초보'],
     isPublic: true,
     isActive: true,
     displayOrder: 0,
@@ -219,15 +219,15 @@ const DEMO_GALLERIES_DATA: DemoGallery[] = [
     author: DEMO_USER,
     plant: {
       id: 'demo-plant-1',
-      name: '내 첫 몬스테라'
+      name: '내 앞마당 수국'
     }
   },
   {
     id: 'demo-gallery-2',
-    title: '햇살 받는 스킨답서스',
-    image: '/images/demo-plant-2.webp',
-    description: '아침 햇살을 받으며 반짝이는 스킨답서스',
-    tags: ['스킨답서스', '햇살', '아침'],
+    title: '분홍 연꽃',
+    image: '/images/lotus01.webp',
+    description: '물위에 떠오른 분홍 연꽃',
+    tags: ['수생식물', '햇살', '아침'],
     isPublic: true,
     isActive: true,
     displayOrder: 1,
@@ -242,7 +242,53 @@ const DEMO_GALLERIES_DATA: DemoGallery[] = [
     author: DEMO_USER,
     plant: {
       id: 'demo-plant-2',
-      name: '귀여운 스킨답서스'
+      name: '분홍 연꽃'
+    }
+  },
+  {
+    id: 'demo-gallery-3',
+    title: '거실 관엽 식물들',
+    image: '/images/greenplants01.webp',
+    description: '푸릇푸릇한 이쁜 관엽 식물들',
+    tags: ['관엽', '햇살', '아침'],
+    isPublic: true,
+    isActive: true,
+    displayOrder: 1,
+    isFeatured: false,
+    reportCount: 0,
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-01-10'),
+    plantId: 'demo-plant-3',
+    authorId: 'demo-user',
+    // 추가 필드
+    likes: 8,
+    author: DEMO_USER,
+    plant: {
+      id: 'demo-plant-3',
+      name: '푸릇푸릇 관엽 식물'
+    }
+  },
+  {
+    id: 'demo-gallery-4',
+    title: '선인장 외 다육이들',
+    image: '/images/cactus01.webp',
+    description: '아침 햇살을 받으며 반짝이는 선인장들',
+    tags: ['선인장', '햇살', '아침'],
+    isPublic: true,
+    isActive: true,
+    displayOrder: 1,
+    isFeatured: false,
+    reportCount: 0,
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-01-10'),
+    plantId: 'demo-plant-2',
+    authorId: 'demo-user',
+    // 추가 필드
+    likes: 8,
+    author: DEMO_USER,
+    plant: {
+      id: 'demo-plant-4',
+      name: '반짝이느 선인장들'
     }
   }
 ];
@@ -252,7 +298,7 @@ const DEMO_CARE_DATA: DemoCare[] = [
   {
     id: 'demo-plant-1',
     name: '내 첫 몬스테라',
-    image: '/images/demo-plant-1.webp',
+    image: '/images/monstera01.webp',
     isNew: false,
     status: true,
     waterStatus: true,
@@ -271,7 +317,7 @@ const DEMO_CARE_DATA: DemoCare[] = [
   {
     id: 'demo-plant-2',
     name: '귀여운 스킨답서스',
-    image: '/images/demo-plant-2.webp',
+    image: '/images/scindapsus01.webp',
     isNew: false,
     status: true,
     waterStatus: false,
@@ -294,9 +340,9 @@ const DEMO_CARE_DATA: DemoCare[] = [
 export const DEMO_USER_PROFILE: DemoUserProfile = {
   id: 'demo-user',
   loginId: 'demo-user',
-  name: '식물초보',
+  name: '게스트',
   email: null,
-  image: '/images/demo-avatar.webp',
+  image: '/images/Profile.webp',
   bio: '식물을 처음 키우기 시작한 초보입니다. 몬스테라와 스킨답서스를 키우고 있어요!',
   isProfilePublic: true,
   level: 2,
