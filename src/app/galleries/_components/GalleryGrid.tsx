@@ -261,6 +261,8 @@ export const GalleryGrid = () => {
                   <Image
                     src={item.image}
                     alt={item.title}
+                    sizes='224px'
+                    quality={75}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
