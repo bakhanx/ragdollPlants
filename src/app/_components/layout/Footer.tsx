@@ -24,7 +24,7 @@ export const Footer = () => {
           <div>
             <h3 className="mb-1 font-medium">서비스</h3>
             <div className="flex flex-col space-y-1">
-              <Link href="/mygarden" className="hover:text-green-600">내 정원</Link>
+              <Link href="/garden" className="hover:text-green-600">내 정원</Link>
               <Link href="/care" className="hover:text-green-600">식물 케어</Link>
               <Link href="/gallery" className="hover:text-green-600">식물 갤러리</Link>
             </div>
