@@ -63,16 +63,7 @@ export async function getDiaries(params?: {
     const [diaries, totalCount] = await Promise.all([
       prisma.diary.findMany({
         where: whereCondition,
-        select: {
-          id: true,
-          title: true,
-          content: true,
-          image: true,
-          status: true,
-          date: true,
-          plantId: true,
-          tags: true,
-          createdAt: true,
+        include: {
           author: {
             select: {
               id: true,
@@ -200,16 +191,7 @@ export async function getUserDiaries(userId?: string) {
 
     const diaries = await prisma.diary.findMany({
       where,
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        image: true,
-        status: true,
-        date: true,
-        plantId: true,
-        tags: true,
-        createdAt: true,
+      include: {
         author: {
           select: {
             id: true,

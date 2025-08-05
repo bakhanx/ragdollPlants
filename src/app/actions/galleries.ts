@@ -51,14 +51,7 @@ export async function getGalleries(userId?: string) {
 
     const galleries = await prisma.gallery.findMany({
       where,
-      select: {
-        id: true,
-        title: true,
-        image: true,
-        authorId: true,
-        isFeatured: true,
-        displayOrder: true,
-        createdAt: true,
+      include: {
         author: {
           select: {
             id: true,

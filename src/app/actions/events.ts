@@ -36,18 +36,7 @@ export async function getEvents() {
 
     const events = await prisma.event.findMany({
       where: { isActive: true },
-      select: {
-        id: true,
-        title: true,
-        subtitle: true,
-        description: true,
-        image: true,
-        startDate: true,
-        endDate: true,
-        isEnded: true,
-        viewCount: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         author: {
           select: {
             id: true,
