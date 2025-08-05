@@ -1,8 +1,16 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
 import { z } from 'zod';
+import { CacheTags } from '@/lib/cache/cacheTags';
+import {
+  revalidateUserCache,
+  revalidatePlantUpdate
+} from '@/lib/cache/cacheInvalidation';
+import { CachedPlant, PlantsResponse } from '@/types/plant';
+import { plantForCache } from '@/app/_utils/dateUtils';
+
 import { MAX_PLANTS } from '@/types/models/plant';
 import {
   getCurrentUser,
@@ -30,113 +38,39 @@ const createPlantSchema = z.object({
   nutrientInterval: z.number().min(1).max(365).optional()
 });
 
-
-
-// 내 식물 목록 조회
-export async function getMyPlants(params?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-}) {
-  try {
-    const user = await getCurrentUser();
-    
-    // 비로그인 데모 데이터
-    if (!user) {
-      return DEMO_PLANTS_RESPONSE;
-    }
-    const page = params?.page || 1;
-    const limit = params?.limit || 4;
-    const search = params?.search?.trim();
-    const skip = (page - 1) * limit;
-
-    // 검색 조건 설정
-    const searchCondition = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' as const } },
-            { category: { contains: search, mode: 'insensitive' as const } }
-          ]
-        }
-      : {};
-
-    const whereCondition = {
-      authorId: user.id,
-      ...searchCondition
-    };
-
-    // 식물 목록과 총 개수를 병렬로 조회
-    const [plants, totalCount] = await Promise.all([
-      prisma.plant.findMany({
-        where: whereCondition,
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          category: true,
-          description: true,
-          location: true,
-          purchaseDate: true,
-          needsWater: true,
-          needsNutrient: true,
-          lastWateredDate: true,
-          nextWateringDate: true,
-          lastNutrientDate: true,
-          nextNutrientDate: true,
-          wateringInterval: true,
-          nutrientInterval: true,
-          createdAt: true,
-          updatedAt: true,
-          tags: true,
-          author: {
-            select: {
-              id: true,
-              name: true,
-              image: true
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        skip,
-        take: limit
-      }),
-      prisma.plant.count({
-        where: whereCondition
-      })
-    ]);
-
-    const plantsWithLikes = await populateLikeInfo(plants, 'plant', user.id);
-
-    const totalPages = Math.ceil(totalCount / limit);
-
-    return {
-      plants: plantsWithLikes,
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalCount,
-        limit,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
-      }
-    };
-  } catch (error) {
-    console.error('내 식물 목록 조회 오류:', error);
-    throw new Error('식물 목록을 불러오는 중 오류가 발생했습니다.');
+// 캐시된 식물 목록 조회 함수
+async function getMyPlantsInternal(
+  userId: string,
+  params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
   }
-}
+): Promise<PlantsResponse> {
+  const page = params?.page || 1;
+  const limit = params?.limit || 4;
+  const search = params?.search?.trim();
+  const skip = (page - 1) * limit;
 
-// 특정 식물 상세 조회
-export async function getPlantById(id: string) {
-  try {
-    const currentUser = await getCurrentUser().catch(() => null);
+  // 검색 조건 설정
+  const searchCondition = search
+    ? {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' as const } },
+          { category: { contains: search, mode: 'insensitive' as const } }
+        ]
+      }
+    : {};
 
-    const plant = await prisma.plant.findUnique({
-      where: {
-        id
-      },
+  const whereCondition = {
+    authorId: userId,
+    ...searchCondition
+  };
+
+  // 식물 목록과 총 개수를 병렬로 조회
+  const [plants, totalCount] = await Promise.all([
+    prisma.plant.findMany({
+      where: whereCondition,
       include: {
         author: {
           select: {
@@ -145,36 +79,153 @@ export async function getPlantById(id: string) {
             image: true
           }
         }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      skip,
+      take: limit
+    }),
+    prisma.plant.count({
+      where: whereCondition
+    })
+  ]);
+
+  const plantsWithLikes = await populateLikeInfo(plants, 'plant', userId);
+
+  // 캐시용 데이터로 변환
+  const cachedPlants = plantsWithLikes.map(plant => plantForCache(plant));
+
+  const totalPages = Math.ceil(totalCount / limit);
+
+  return {
+    plants: cachedPlants,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalCount,
+      limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1
+    }
+  };
+}
+
+// 내 식물 목록 조회
+export async function getMyPlants(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<PlantsResponse> {
+  try {
+    const user = await getCurrentUser();
+
+    // 비로그인 데모 데이터
+    if (!user) {
+      return DEMO_PLANTS_RESPONSE;
+    }
+
+    // 검색이 있는 경우 캐시하지 않음
+    if (params?.search?.trim()) {
+      return await getMyPlantsInternal(user.id, params);
+    }
+
+    // 캐시된 버전 사용
+    const getCachedMyPlants = unstable_cache(
+      async (userId: string, page: number, limit: number) => {
+        return await getMyPlantsInternal(userId, { page, limit });
+      },
+      ['my-plants'],
+      {
+        tags: [CacheTags.plants(user.id)]
       }
-    });
+    );
 
-    if (!plant) {
-      throw new Error('식물을 찾을 수 없습니다.');
+    return await getCachedMyPlants(
+      user.id,
+      params?.page || 1,
+      params?.limit || 4
+    );
+  } catch (error) {
+    console.error('내 식물 목록 조회 오류:', error);
+    throw new Error('식물 목록을 불러오는 중 오류가 발생했습니다.');
+  }
+}
+
+// 캐시된 식물 상세 조회 함수
+async function getPlantByIdInternal(
+  id: string,
+  currentUserId?: string
+): Promise<CachedPlant> {
+  const plant = await prisma.plant.findUnique({
+    where: {
+      id
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
+        }
+      }
     }
+  });
 
-    // 접근 제어
-    const isOwner = currentUser?.id === plant.authorId;
-    if (!isOwner && (!plant.isPublic || !plant.isActive)) {
-      throw new Error('비공개 또는 비활성화된 식물입니다.');
-    }
+  if (!plant) {
+    throw new Error('식물을 찾을 수 없습니다.');
+  }
 
-    // 좋아요 정보 조회
-    const [likesCount, userLike] = await Promise.all([
-      prisma.like.count({
-        where: { type: 'plant', targetId: id }
-      }),
-      currentUser
-        ? prisma.like.findFirst({
-            where: {
-              userId: currentUser.id,
-              type: 'plant',
-              targetId: id
-            }
-          })
-        : Promise.resolve(null)
-    ]);
+  // 접근 제어
+  const isOwner = currentUserId === plant.authorId;
+  if (!isOwner && (!plant.isPublic || !plant.isActive)) {
+    throw new Error('비공개 또는 비활성화된 식물입니다.');
+  }
 
-    return { ...plant, likes: likesCount, isLiked: !!userLike, isOwner };
+  // 좋아요 정보 조회 (실시간 - 캐시하지 않음)
+  const [likesCount, userLike] = await Promise.all([
+    prisma.like.count({
+      where: { type: 'plant', targetId: id }
+    }),
+    currentUserId
+      ? prisma.like.findFirst({
+          where: {
+            userId: currentUserId,
+            type: 'plant',
+            targetId: id
+          }
+        })
+      : Promise.resolve(null)
+  ]);
+
+  // 캐시용 데이터로 변환
+  const plantWithExtras = {
+    ...plant,
+    likes: likesCount,
+    isLiked: !!userLike,
+    isOwner
+  };
+
+  return plantForCache(plantWithExtras);
+}
+
+// 특정 식물 상세 조회
+export async function getPlantById(id: string): Promise<CachedPlant> {
+  try {
+    const currentUser = await getCurrentUser().catch(() => null);
+
+    // 캐시된 버전 사용 (좋아요 정보는 실시간으로 별도 조회)
+    const getCachedPlant = unstable_cache(
+      async (plantId: string, userId?: string) => {
+        return await getPlantByIdInternal(plantId, userId);
+      },
+      ['plant-detail'],
+      {
+        tags: [CacheTags.plant(id)]
+      }
+    );
+
+    return await getCachedPlant(id, currentUser?.id);
   } catch (error) {
     console.error('식물 조회 오류:', error);
     throw error;
@@ -280,9 +331,8 @@ export async function createPlant(formData: FormData) {
       }
     });
 
-    // 캐시 재검증
-    revalidatePath('/myplants');
-    revalidatePath(`/myplants/${plant.id}`);
+    // 캐시 무효화
+    revalidateUserCache('plantCreate', user.id);
 
     return {
       success: true,
@@ -396,9 +446,8 @@ export async function updatePlant(id: string, formData: FormData) {
       }
     });
 
-    // 캐시 재검증
-    revalidatePath('/myplants');
-    revalidatePath(`/myplants/${id}`);
+    // 캐시 무효화
+    revalidatePlantUpdate(user.id, id);
 
     return {
       success: true,
@@ -465,8 +514,8 @@ export async function deletePlant(id: string) {
 
     console.log('식물 삭제 완료:', { id, name: existingPlant.name });
 
-    // 내 식물 페이지 재검증
-    revalidatePath('/myplants');
+    // 캐시 무효화 - 식물 삭제는 plantCreate와 동일한 태그들 무효화
+    revalidateUserCache('plantCreate', user.id);
 
     // 성공 결과 반환
     return {
@@ -517,9 +566,8 @@ export async function updateWatering(id: string) {
       }
     });
 
-    // 캐시 재검증
-    revalidatePath('/myplants');
-    revalidatePath(`/myplants/${id}`);
+    // 캐시 무효화 - 식물 관리 기록
+    revalidateUserCache('plantCare', user.id);
 
     return {
       success: true,
@@ -571,9 +619,8 @@ export async function updateNutrient(id: string) {
       }
     });
 
-    // 캐시 재검증
-    revalidatePath('/myplants');
-    revalidatePath(`/myplants/${id}`);
+    // 캐시 무효화 - 식물 관리 기록
+    revalidateUserCache('plantCare', user.id);
 
     return {
       success: true,
