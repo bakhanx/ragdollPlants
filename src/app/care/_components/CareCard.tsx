@@ -5,7 +5,8 @@ import { Water2Icon, NutrientIcon } from '@/app/_components/icons/Icons';
 import ProgressBar from './ProgressBar';
 import {
   formatDate,
-  calculateProgressPercentage
+  calculateCareProgressPercentage,
+  formatDateForInput
 } from '@/app/_utils/dateUtils';
 import { useState, useEffect } from 'react';
 import { addCareRecord } from '@/app/actions/care';
@@ -15,9 +16,9 @@ interface Plant {
   id: string;
   name: string;
   image: string;
-  lastWateredDate: Date | null;
+  lastWateredDate: string | null;
   wateringInterval: number | null;
-  lastNutrientDate: Date | null;
+  lastNutrientDate: string | null;
   nutrientInterval: number | null;
 }
 
@@ -32,10 +33,8 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
   const [isNutrientUpdating, setIsNutrientUpdating] = useState(false);
 
   // 케어 데이터 계산
-  const lastWateredStr =
-    plant.lastWateredDate?.toISOString().split('T')[0] || '';
-  const lastNutrientStr =
-    plant.lastNutrientDate?.toISOString().split('T')[0] || '';
+  const lastWateredStr = formatDateForInput(plant.lastWateredDate);
+  const lastNutrientStr = formatDateForInput(plant.lastNutrientDate);
 
   const calculateNextDate = (lastDate: string, interval: number): string => {
     if (!lastDate) return '';
@@ -52,19 +51,11 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
   const nutrientNextDate = calculateNextDate(lastNutrientStr, nutrientInterval);
 
   const waterProgress = lastWateredStr
-    ? calculateProgressPercentage(
-        lastWateredStr,
-        waterNextDate,
-        wateringInterval
-      )
+    ? calculateCareProgressPercentage(lastWateredStr, waterNextDate)
     : 0;
 
   const nutrientProgress = lastNutrientStr
-    ? calculateProgressPercentage(
-        lastNutrientStr,
-        nutrientNextDate,
-        nutrientInterval
-      )
+    ? calculateCareProgressPercentage(lastNutrientStr, nutrientNextDate)
     : 0;
 
   // 남은 일수 계산 (정확한 D-day 값)
