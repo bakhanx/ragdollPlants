@@ -3,17 +3,10 @@
 import React from 'react';
 import { CareCard } from '@/app/care/_components/CareCard';
 import Link from 'next/link';
+import { CachedPlant } from '@/types/plant';
 
 interface PlantCareSectionProps {
-  plant: {
-    id: string;
-    name: string;
-    image: string | null;
-    lastWateredDate: Date | null;
-    wateringInterval: number | null;
-    lastNutrientDate: Date | null;
-    nutrientInterval: number | null;
-  };
+  plant: CachedPlant;
 }
 
 export const PlantCareSection = ({ plant }: PlantCareSectionProps) => {
