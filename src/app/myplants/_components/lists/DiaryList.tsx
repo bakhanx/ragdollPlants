@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { formatDateKorean, formatTimeOnly } from '@/app/_utils/dateUtils';
+import { formatDateKorean, formatTimeOnly, formatDateForInput } from '@/app/_utils/dateUtils';
 
 interface DiaryEntry {
   id: string;
@@ -43,7 +43,7 @@ export const DiaryList = ({ plantId, diaries }: DiaryListProps) => {
 
             <div className="ml-3 flex flex-col py-1 text-right text-xs text-gray-500">
               <div className="leading-none">
-                {formatDateKorean(diary.date.toISOString().split('T')[0])}
+                {formatDateKorean(formatDateForInput(diary.date))}
               </div>
               <div className="mt-1">{formatTimeOnly(diary.date)}</div>
             </div>
