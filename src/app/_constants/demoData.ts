@@ -1,9 +1,26 @@
 import type { Plant, Diary, Gallery, User } from '@prisma/client';
 import type { UserProfileData } from '@/app/actions/userProfile';
 
-export type DemoPlant = Plant & {
+export type DemoPlant = Omit<
+  Plant,
+  | 'purchaseDate'
+  | 'lastWateredDate'
+  | 'nextWateringDate'
+  | 'lastNutrientDate'
+  | 'nextNutrientDate'
+  | 'createdAt'
+  | 'updatedAt'
+> & {
+  purchaseDate: string | null;
+  lastWateredDate: string | null;
+  nextWateringDate: string | null;
+  lastNutrientDate: string | null;
+  nextNutrientDate: string | null;
+  createdAt: string;
+  updatedAt: string;
   likes: number;
   isLiked: boolean;
+  isOwner: boolean;
   author: Pick<User, 'id' | 'name' | 'image'>;
 };
 
@@ -86,13 +103,13 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
     category: '몬스테라',
     description: '처음 키우는 몬스테라예요. 잎이 점점 커지고 있어서 뿌듯해요!',
     location: '거실 창가',
-    purchaseDate: new Date('2024-01-15'),
+    purchaseDate: '2024-01-15T00:00:00.000Z',
     wateringInterval: 7,
     nutrientInterval: 30,
-    lastWateredDate: new Date('2024-01-20'),
-    nextWateringDate: new Date('2024-01-27'),
-    lastNutrientDate: new Date('2024-01-15'),
-    nextNutrientDate: new Date('2024-02-15'),
+    lastWateredDate: '2024-01-20T00:00:00.000Z',
+    nextWateringDate: '2024-01-27T00:00:00.000Z',
+    lastNutrientDate: '2024-01-15T00:00:00.000Z',
+    nextNutrientDate: '2024-02-15T00:00:00.000Z',
     temperature: 22.0,
     humidity: 55.0,
     sunlight: 'bright',
@@ -102,12 +119,13 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
     needsNutrient: false,
     tags: ['몬스테라', '초보', '실내식물'],
     reportCount: 0,
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-20'),
+    createdAt: '2024-01-15T00:00:00.000Z',
+    updatedAt: '2024-01-20T00:00:00.000Z',
     authorId: 'demo-user',
     // 추가 필드
     likes: 5,
     isLiked: false,
+    isOwner: false,
     author: DEMO_USER
   },
   {
@@ -117,13 +135,13 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
     category: '스킨답서스',
     description: '물꽂이로 뿌리를 내린 후 화분에 옮겨 심었어요.',
     location: '침실',
-    purchaseDate: new Date('2024-01-10'),
+    purchaseDate: '2024-01-10T00:00:00.000Z',
     wateringInterval: 7,
     nutrientInterval: 15,
-    lastWateredDate: new Date('2024-01-22'),
-    nextWateringDate: new Date('2024-01-29'),
-    lastNutrientDate: new Date('2024-01-10'),
-    nextNutrientDate: new Date('2024-01-25'),
+    lastWateredDate: '2024-01-22T00:00:00.000Z',
+    nextWateringDate: '2024-01-29T00:00:00.000Z',
+    lastNutrientDate: '2024-01-10T00:00:00.000Z',
+    nextNutrientDate: '2024-01-25T00:00:00.000Z',
     temperature: 20.0,
     humidity: 60.0,
     sunlight: 'medium',
@@ -133,12 +151,13 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
     needsNutrient: true,
     tags: ['스킨답서스', '물꽂이', '뿌리'],
     reportCount: 0,
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-22'),
+    createdAt: '2024-01-10T00:00:00.000Z',
+    updatedAt: '2024-01-22T00:00:00.000Z',
     authorId: 'demo-user',
     // 추가 필드
     likes: 3,
     isLiked: false,
+    isOwner: false,
     author: DEMO_USER
   }
 ];
