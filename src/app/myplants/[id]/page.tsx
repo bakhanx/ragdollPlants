@@ -1,5 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import { formatDateForInput } from '@/app/_utils/dateUtils';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
@@ -54,9 +55,7 @@ export default async function MyPlantDetailPage({
               imageUrl={plant.image || '/images/plant-default.png'}
               plantType={plant.category}
               location={plant.location || ''}
-              acquiredDate={
-                plant.purchaseDate?.toISOString().split('T')[0] || ''
-              }
+              acquiredDate={formatDateForInput(plant.purchaseDate)}
             />
 
             <PlantCareSection plant={plant} />
