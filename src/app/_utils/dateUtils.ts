@@ -9,15 +9,15 @@
  */
 export function formatDateForInput(dateValue: string | Date | null): string {
   if (!dateValue) return '';
-  
+
   if (typeof dateValue === 'string') {
     return dateValue.split('T')[0];
   }
-  
+
   if (dateValue instanceof Date) {
     return dateValue.toISOString().split('T')[0];
   }
-  
+
   return '';
 }
 
@@ -28,7 +28,7 @@ export function formatDateForInput(dateValue: string | Date | null): string {
  */
 export function formatDateForDisplay(dateValue: string | Date | null): string {
   if (!dateValue) return '';
-  
+
   let dateStr: string;
   if (typeof dateValue === 'string') {
     dateStr = dateValue.split('T')[0];
@@ -37,7 +37,7 @@ export function formatDateForDisplay(dateValue: string | Date | null): string {
   } else {
     return '';
   }
-  
+
   return dateStr.replace(/-/g, '.');
 }
 
@@ -48,31 +48,43 @@ export function formatDateForDisplay(dateValue: string | Date | null): string {
  */
 export function safeDateString(dateValue: string | Date | null): string | null {
   if (!dateValue) return null;
-  
+
   if (typeof dateValue === 'string') {
     return dateValue;
   }
-  
+
   if (dateValue instanceof Date) {
     return dateValue.toISOString();
   }
-  
+
   return null;
 }
 
 /**
  * Plant 데이터를 캐시 안전한 형태로 변환
  */
-export function plantForCache<T extends { 
-  purchaseDate?: Date | null;
-  lastWateredDate?: Date | null;
-  nextWateringDate?: Date | null;
-  lastNutrientDate?: Date | null;
-  nextNutrientDate?: Date | null;
-  createdAt?: Date;
-  updatedAt?: Date;
-}>(plant: T): Omit<T, 'purchaseDate' | 'lastWateredDate' | 'nextWateringDate' | 
-  'lastNutrientDate' | 'nextNutrientDate' | 'createdAt' | 'updatedAt'> & {
+export function plantForCache<
+  T extends {
+    purchaseDate?: Date | null;
+    lastWateredDate?: Date | null;
+    nextWateringDate?: Date | null;
+    lastNutrientDate?: Date | null;
+    nextNutrientDate?: Date | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }
+>(
+  plant: T
+): Omit<
+  T,
+  | 'purchaseDate'
+  | 'lastWateredDate'
+  | 'nextWateringDate'
+  | 'lastNutrientDate'
+  | 'nextNutrientDate'
+  | 'createdAt'
+  | 'updatedAt'
+> & {
   purchaseDate: string | null;
   lastWateredDate: string | null;
   nextWateringDate: string | null;
@@ -142,20 +154,35 @@ export function formatDate(dateString: string): string {
 }
 
 /**
- * 진행률 계산 (케어 관련)
+ * 케어 게이지 진행률 계산 (역방향) - 물/영양제 케어용
+ * 마지막 케어 날짜부터 시작해서 시간이 지날수록 게이지가 감소
+ * @param lastCareDate - 마지막 케어 날짜 (YYYY-MM-DD)
+ * @param nextCareDate - 다음 케어 예정 날짜 (YYYY-MM-DD)
+ * @returns 0-100 사이의 퍼센티지 (100%: 방금 케어함, 0%: 케어 필요)
  */
-export function calculateProgressPercentage(
-  startDate: string,
-  endDate: string,
-  currentDate: string = new Date().toISOString().split('T')[0]
+export function calculateCareProgressPercentage(
+  lastCareDate: string,
+  nextCareDate: string
 ): number {
-  const start = new Date(startDate).getTime();
-  const end = new Date(endDate).getTime();
-  const current = new Date(currentDate).getTime();
-  
-  if (current <= start) return 0;
-  if (current >= end) return 100;
-  
-  const progress = ((current - start) / (end - start)) * 100;
-  return Math.round(progress);
+  if (!lastCareDate || !nextCareDate) return 0;
+
+  // T00:00:00 - 로컬 환경 기준 날짜
+  const lastDate = new Date(lastCareDate + 'T00:00:00');
+  const nextDate = new Date(nextCareDate + 'T00:00:00');
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+
+  const lastTime = lastDate.getTime();
+  const nextTime = nextDate.getTime();
+  const currentTime = currentDate.getTime();
+
+  if (currentDate < lastDate) return 100;
+
+  if (currentDate >= nextDate) return 0;
+
+  const totalInterval = nextTime - lastTime;
+  const remainingTime = nextTime - currentTime;
+  const progress = (remainingTime / totalInterval) * 100;
+
+  return Math.max(0, Math.min(100, Math.round(progress)));
 }
