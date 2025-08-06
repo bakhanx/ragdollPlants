@@ -58,6 +58,7 @@ export async function POST(request: Request) {
       adminUser = await prisma.user.create({
         data: {
           id: session.user.id,
+          loginId:session.user.loginId || "admin",
           email: session.user.email || 'admin@example.com',
           name: session.user.name || '관리자',
           role: 'ADMIN',
