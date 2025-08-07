@@ -1,89 +1,30 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GalleryImageModal } from './GalleryImageModal';
-import { getUserGalleries } from '@/app/actions/galleries';
+import { GalleriesResponse } from '@/types/cache/gallery';
 
-export interface GalleryItem {
-  id: string;
-  title: string;
-  image: string;
-  createdAt: Date | string;
-  likes: number;
-  description?: string | null;
-  displayOrder?: number; // 표시 순서
-  isFeatured?: boolean; // 대표 이미지
-  author?: {
-    id: string;
-    name: string | null;
-    image: string | null;
-  };
-  plant?: {
-    id: string;
-    name: string;
-  } | null;
+interface GalleryGridProps {
+  initialData: GalleriesResponse | null;
 }
 
-export const GalleryGrid = () => {
-  const [items, setItems] = useState<GalleryItem[]>([]);
-  const [isOwner, setIsOwner] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getUserGalleries();
-        setItems(result.galleries);
-        setIsOwner(result.isOwner);
-      } catch (error) {
-        console.error('갤러리 데이터 로딩 오류:', error);
-        setHasError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="mx-auto w-full max-w-md px-4 pb-20">
-        <div className="mb-6">
-          <div className="aspect-[4/3] animate-pulse rounded-2xl bg-white/10" />
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[...Array(9)].map((_, i) => (
-            <div
-              key={i}
-              className="aspect-square animate-pulse rounded-lg bg-white/10"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (hasError) {
+export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
+  if (!initialData) {
     return (
       <div className="mx-auto w-full max-w-md px-4 pb-20">
         <div className="mb-4 rounded-lg bg-red-50 p-4 text-center">
-          <p className="text-red-600">
-            갤러리 데이터를 불러오는 중 오류가 발생했습니다.
-          </p>
-          <p className="text-sm text-red-500">페이지를 새로고침해 주세요.</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-            새로고침
-          </button>
+          <p className="text-red-600">갤러리 데이터를 불러올 수 없습니다.</p>
         </div>
       </div>
     );
   }
+
+  const items = initialData.galleries;
+  const isOwner = initialData.isOwner || false;
+
+
   const photoCount = items.length;
 
   if (photoCount === 0) {
@@ -202,16 +143,12 @@ export const GalleryGrid = () => {
                   </h2>
                   <div className="flex items-center justify-between">
                     <span className="text-sm opacity-90">
-                      {featuredItem.createdAt instanceof Date
-                        ? featuredItem.createdAt.toLocaleDateString('ko-KR')
-                        : new Date(featuredItem.createdAt).toLocaleDateString(
-                            'ko-KR'
-                          )}
+                      {new Date(featuredItem.createdAt).toLocaleDateString('ko-KR')}
                     </span>
                     <div className="flex items-center space-x-1">
                       <span className="text-sm">❤️</span>
                       <span className="text-sm font-medium">
-                        {featuredItem.likes}
+                        {featuredItem.likes || 0}
                       </span>
                     </div>
                   </div>
@@ -272,7 +209,7 @@ export const GalleryGrid = () => {
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       <div className="text-center text-white">
                         <div className="mb-1 text-xs font-medium">
-                          ❤️ {item.likes}
+                          ❤️ {item.likes || 0}
                         </div>
                         <div className="text-xs opacity-80">
                           {new Date(item.createdAt).toLocaleDateString(
