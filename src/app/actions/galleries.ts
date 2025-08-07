@@ -1,7 +1,6 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
 import {
@@ -16,6 +15,17 @@ import {
 import type { Prisma } from '@prisma/client';
 import { populateLikeInfo } from './likes';
 import { DEMO_GALLERIES_RESPONSE } from '@/app/_constants/demoData';
+import { CacheTags } from '@/lib/cache/cacheTags';
+import {
+  revalidateUserCache,
+  revalidateGalleryUpdate
+} from '@/lib/cache/cacheInvalidation';
+import {
+  GalleriesResponse,
+  PublicGalleriesResponse
+} from '@/types/cache/gallery';
+import { galleryForCache } from '@/app/_utils/dateUtils';
+import { unstable_cache } from 'next/cache';
 
 // 갤러리 생성 유효성 검사 스키마
 const createGallerySchema = z.object({
@@ -29,60 +39,109 @@ const createGallerySchema = z.object({
   tags: z.array(z.string()).optional()
 });
 
-// 갤러리 목록 조회
-export async function getGalleries(userId?: string) {
-  try {
-    const currentUser = await getCurrentUser();
+// 갤러리 목록 조회 내부 구현
+async function getGalleriesInternal(
+  userId?: string
+): Promise<PublicGalleriesResponse> {
+  const currentUser = await getCurrentUser();
 
-    const where: Prisma.GalleryWhereInput = {
-      isActive: true
-    };
+  const where: Prisma.GalleryWhereInput = {
+    isActive: true
+  };
 
-    if (userId) {
-      where.authorId = userId;
-      // 다른 사람의 갤러리를 볼 때는 비공개 갤러리 제외
-      if (currentUser?.id !== userId) {
-        where.isPublic = true;
-      }
-    } else {
-      // 갤러리 메인 페이지에서는 공개된 것만
+  if (userId) {
+    where.authorId = userId;
+    // 다른 사람의 갤러리를 볼 때는 비공개 갤러리 제외
+    if (currentUser?.id !== userId) {
       where.isPublic = true;
     }
+  } else {
+    // 갤러리 메인 페이지에서는 공개된 것만
+    where.isPublic = true;
+  }
 
-    const galleries = await prisma.gallery.findMany({
-      where,
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true
-          }
+  const galleries = await prisma.gallery.findMany({
+    where,
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
         }
       },
-      orderBy: [
-        { isFeatured: 'desc' },
-        { displayOrder: 'asc' },
-        { createdAt: 'desc' }
-      ]
-    });
+      plant: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: [
+      { isFeatured: 'desc' },
+      { displayOrder: 'asc' },
+      { createdAt: 'desc' }
+    ]
+  });
 
-    const galleriesWithLikes = await populateLikeInfo(
-      galleries,
-      'gallery',
-      currentUser?.id
-    );
+  const galleriesWithLikes = await populateLikeInfo(
+    galleries,
+    'gallery',
+    currentUser?.id
+  );
 
-    const results = galleriesWithLikes.map(g => ({
-      ...g, // id, title, image, isLiked 등 모든 속성 포함
-      _count: { likes: g.likes }
-    }));
+  // 캐시용 데이터로 변환
+  return galleriesWithLikes.map(galleryForCache);
+}
 
-    return results;
+// 캐시된 갤러리 목록 조회
+function getCachedGalleries(userId?: string) {
+  const cacheKey = userId ? `galleries-${userId}` : 'galleries-public';
+  const tags = userId ? [CacheTags.galleries(userId)] : [CacheTags.allContent];
+
+  return unstable_cache(() => getGalleriesInternal(userId), [cacheKey], {
+    tags
+  })();
+}
+
+// 갤러리 목록 조회
+export async function getGalleries(
+  userId?: string
+): Promise<PublicGalleriesResponse> {
+  try {
+    return await getCachedGalleries(userId);
   } catch (error) {
     console.error('갤러리 조회 실패:', error);
     return [];
   }
+}
+
+// 갤러리 상세 조회
+async function getGalleryByIdInternal(id: string) {
+  const gallery = await prisma.gallery.findUnique({
+    where: { id },
+    include: {
+      author: { select: { id: true, name: true, image: true } },
+      plant: { select: { id: true, name: true } }
+    }
+  });
+
+  if (!gallery || !gallery.isActive) {
+    return null;
+  }
+
+  return galleryForCache(gallery);
+}
+
+// 캐시된 갤러리 상세 조회
+function getCachedGalleryById(galleryId: string) {
+  return unstable_cache(
+    () => getGalleryByIdInternal(galleryId),
+    [`gallery-detail-${galleryId}`],
+    {
+      tags: [CacheTags.gallery(galleryId)]
+    }
+  )();
 }
 
 // 특정 갤러리 상세 정보 조회
@@ -90,18 +149,14 @@ export async function getGalleryById(id: string) {
   try {
     const currentUser = await getCurrentUser().catch(() => null);
 
-    const gallery = await prisma.gallery.findUnique({
-      where: { id },
-      include: {
-        author: { select: { id: true, name: true, image: true } },
-        plant: { select: { id: true, name: true } }
-      }
-    });
+    // 캐시된 갤러리 기본 정보 조회
+    const cachedGallery = await getCachedGalleryById(id);
 
-    if (!gallery || !gallery.isActive) {
+    if (!cachedGallery) {
       throw new Error('갤러리를 찾을 수 없거나 비활성화된 게시물입니다.');
     }
 
+    // 좋아요 정보는 실시간으로 조회 (캐시x)
     const [likesCount, userLike] = await Promise.all([
       prisma.like.count({
         where: {
@@ -121,7 +176,7 @@ export async function getGalleryById(id: string) {
     ]);
 
     return {
-      ...gallery,
+      ...cachedGallery,
       likes: likesCount,
       isLiked: !!userLike
     };
@@ -132,7 +187,81 @@ export async function getGalleryById(id: string) {
 }
 
 // 사용자별 갤러리 조회
-export async function getUserGalleries(userId?: string) {
+async function getUserGalleriesInternal(
+  targetUserId: string,
+  isOwner: boolean
+): Promise<GalleriesResponse> {
+  const where: Prisma.GalleryWhereInput = {
+    authorId: targetUserId
+  };
+
+  if (!isOwner) {
+    where.isPublic = true;
+    where.isActive = true;
+  }
+
+  const galleries = await prisma.gallery.findMany({
+    where,
+    include: {
+      author: { select: { id: true, name: true, image: true } },
+      plant: { select: { id: true, name: true } }
+    },
+    orderBy: [
+      { isFeatured: 'desc' }, // 대표 이미지 우선
+      { displayOrder: 'asc' }, // 그 다음 순서대로
+      { createdAt: 'asc' } // 같은 순서면 오래된 순
+    ]
+  });
+
+  // 갤러리 ID 목록 추출
+  const galleryIds = galleries.map(g => g.id);
+
+  // 좋아요 수
+  const likeCounts = await prisma.like.groupBy({
+    by: ['targetId'],
+    where: {
+      type: 'gallery',
+      targetId: { in: galleryIds }
+    },
+    _count: { _all: true }
+  });
+
+  // 좋아요 수 맵 생성
+  const likeCountMap = new Map(
+    likeCounts.map(item => [item.targetId, item._count._all])
+  );
+
+  // 갤러리와 좋아요 수 결합 후 캐시용 데이터로 변환
+  const galleriesWithLikes = galleries.map(gallery =>
+    galleryForCache({
+      ...gallery,
+      likes: likeCountMap.get(gallery.id) || 0,
+      isLiked: false,
+      isOwner: isOwner
+    })
+  );
+
+  return {
+    galleries: galleriesWithLikes,
+    isOwner
+  };
+}
+
+// 캐시된 사용자별 갤러리 조회
+function getCachedUserGalleries(targetUserId: string, isOwner: boolean) {
+  return unstable_cache(
+    () => getUserGalleriesInternal(targetUserId, isOwner),
+    [`user-galleries-${targetUserId}`, isOwner.toString()],
+    {
+      tags: [CacheTags.galleries(targetUserId)]
+    }
+  )();
+}
+
+// 사용자별 갤러리 조회
+export async function getUserGalleries(
+  userId?: string
+): Promise<GalleriesResponse> {
   try {
     const session = await getCurrentUser();
     const currentUserId = session?.id;
@@ -145,65 +274,7 @@ export async function getUserGalleries(userId?: string) {
 
     const isOwner = currentUserId === targetUserId;
 
-    const where: Prisma.GalleryWhereInput = {
-      authorId: targetUserId
-    };
-
-    if (!isOwner) {
-      where.isPublic = true;
-      where.isActive = true;
-    }
-
-    const galleries = await prisma.gallery.findMany({
-      where,
-      select: {
-        id: true,
-        title: true,
-        image: true,
-        description: true,
-        createdAt: true,
-        plantId: true,
-        tags: true,
-        displayOrder: true,
-        isFeatured: true,
-        author: { select: { id: true, name: true, image: true } },
-        plant: { select: { id: true, name: true } }
-      },
-      orderBy: [
-        { isFeatured: 'desc' }, // 대표 이미지 우선
-        { displayOrder: 'asc' }, // 그 다음 순서대로
-        { createdAt: 'asc' } // 같은 순서면 오래된 순
-      ]
-    });
-
-    // 갤러리 ID 목록 추출
-    const galleryIds = galleries.map(g => g.id);
-
-    // 좋아요 수
-    const likeCounts = await prisma.like.groupBy({
-      by: ['targetId'],
-      where: {
-        type: 'gallery',
-        targetId: { in: galleryIds }
-      },
-      _count: { _all: true }
-    });
-
-    // 좋아요 수 맵 생성
-    const likeCountMap = new Map(
-      likeCounts.map(item => [item.targetId, item._count._all])
-    );
-
-    // 갤러리와 좋아요 수 결합
-    const galleriesWithLikes = galleries.map(gallery => ({
-      ...gallery,
-      likes: likeCountMap.get(gallery.id) || 0
-    }));
-
-    return {
-      galleries: galleriesWithLikes,
-      isOwner
-    };
+    return await getCachedUserGalleries(targetUserId, isOwner);
   } catch (error) {
     console.error('사용자 갤러리 조회 오류:', error);
     throw error;
@@ -298,8 +369,8 @@ export async function createGallery(formData: FormData) {
       }
     });
 
-    // 갤러리 페이지 재검증
-    revalidatePath('/galleries');
+    // 캐시 무효화
+    revalidateUserCache('galleryCreate', user.id);
 
     return {
       success: true,
@@ -404,8 +475,8 @@ export async function updateGallery(id: string, formData: FormData) {
       }
     });
 
-    // 갤러리 페이지 재검증
-    revalidatePath('/galleries');
+    // 캐시 무효화
+    revalidateGalleryUpdate(user.id, id);
 
     return {
       success: true,
@@ -459,8 +530,8 @@ export async function deleteGallery(id: string) {
       await deleteImageFromCloudflare(existingGallery.image);
     }
 
-    // 갤러리 페이지 재검증
-    revalidatePath('/galleries');
+    // 캐시 무효화
+    revalidateUserCache('galleryCreate', user.id);
 
     console.log('갤러리 삭제 완료:', { id, title: existingGallery.title });
 
@@ -527,8 +598,8 @@ export async function setFeaturedGallery(itemId: string) {
       );
     });
 
-    // 갤러리 페이지 재검증
-    revalidatePath('/galleries');
+    // 캐시 무효화
+    revalidateUserCache('galleryCreate', user.id);
 
     return {
       success: true,
@@ -567,8 +638,8 @@ export async function updateGalleriesOrder(
       );
     });
 
-    // 갤러리 페이지 재검증
-    revalidatePath('/galleries');
+    // 캐시 무효화
+    revalidateUserCache('galleryCreate', user.id);
 
     return {
       success: true,

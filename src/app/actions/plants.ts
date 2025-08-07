@@ -1,14 +1,14 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath, unstable_cache } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { CacheTags } from '@/lib/cache/cacheTags';
 import {
   revalidateUserCache,
   revalidatePlantUpdate
 } from '@/lib/cache/cacheInvalidation';
-import { CachedPlant, PlantsResponse } from '@/types/plant';
+import { CachedPlant, PlantsResponse } from '@/types/cache/plant';
 import { plantForCache } from '@/app/_utils/dateUtils';
 
 import { MAX_PLANTS } from '@/types/models/plant';
@@ -111,6 +111,17 @@ async function getMyPlantsInternal(
   };
 }
 
+// 캐시된 식물 목록 조회 함수
+function getCachedMyPlants(userId: string, page: number, limit: number) {
+  return unstable_cache(
+    () => getMyPlantsInternal(userId, { page, limit }),
+    [`my-plants-${userId}`, `${page}`, `${limit}`],
+    {
+      tags: [CacheTags.plants(userId)]
+    }
+  )();
+}
+
 // 내 식물 목록 조회
 export async function getMyPlants(params?: {
   page?: number;
@@ -125,27 +136,15 @@ export async function getMyPlants(params?: {
       return DEMO_PLANTS_RESPONSE;
     }
 
+    const page = params?.page || 1;
+    const limit = params?.limit || 4;
+
     // 검색이 있는 경우 캐시하지 않음
     if (params?.search?.trim()) {
       return await getMyPlantsInternal(user.id, params);
     }
 
-    // 캐시된 버전 사용
-    const getCachedMyPlants = unstable_cache(
-      async (userId: string, page: number, limit: number) => {
-        return await getMyPlantsInternal(userId, { page, limit });
-      },
-      ['my-plants'],
-      {
-        tags: [CacheTags.plants(user.id)]
-      }
-    );
-
-    return await getCachedMyPlants(
-      user.id,
-      params?.page || 1,
-      params?.limit || 4
-    );
+    return await getCachedMyPlants(user.id, page, limit);
   } catch (error) {
     console.error('내 식물 목록 조회 오류:', error);
     throw new Error('식물 목록을 불러오는 중 오류가 발생했습니다.');
@@ -209,23 +208,24 @@ async function getPlantByIdInternal(
   return plantForCache(plantWithExtras);
 }
 
+// 캐시된 식물 상세 조회 함수 (클로저 활용)
+function getCachedPlantById(plantId: string, userId?: string) {
+  return unstable_cache(
+    () => getPlantByIdInternal(plantId, userId),
+    [`plant-detail-${plantId}`, userId || 'anonymous'],
+    {
+      tags: [CacheTags.plant(plantId)]
+    }
+  )();
+}
+
 // 특정 식물 상세 조회
 export async function getPlantById(id: string): Promise<CachedPlant> {
   try {
     const currentUser = await getCurrentUser().catch(() => null);
 
-    // 캐시된 버전 사용 (좋아요 정보는 실시간으로 별도 조회)
-    const getCachedPlant = unstable_cache(
-      async (plantId: string, userId?: string) => {
-        return await getPlantByIdInternal(plantId, userId);
-      },
-      ['plant-detail'],
-      {
-        tags: [CacheTags.plant(id)]
-      }
-    );
-
-    return await getCachedPlant(id, currentUser?.id);
+    // 클로저를 활용한 캐시 함수 호출
+    return await getCachedPlantById(id, currentUser?.id);
   } catch (error) {
     console.error('식물 조회 오류:', error);
     throw error;

@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { DiaryMoodStatus } from '@/types/models/diary';
 import { getCurrentUser, validateDiaryOwnership } from '@/lib/auth-utils';
@@ -12,6 +12,13 @@ import {
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
 import { DEMO_DIARIES_RESPONSE } from '@/app/_constants/demoData';
+import { CacheTags } from '@/lib/cache/cacheTags';
+import {
+  revalidateUserCache,
+  revalidateDiaryUpdate
+} from '@/lib/cache/cacheInvalidation';
+import { DiariesResponse } from '@/types/cache/diary';
+import { diaryForCache } from '@/app/_utils/dateUtils';
 
 // 다이어리 생성 유효성 검사 스키마
 const createDiarySchema = z.object({
@@ -23,7 +30,96 @@ const createDiarySchema = z.object({
   tags: z.array(z.string()).optional()
 });
 
+// 다이어리 목록 조회 내부 구현
+async function getDiariesInternal(
+  userId: string,
+  params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }
+): Promise<DiariesResponse> {
+  const page = params?.page || 1;
+  const limit = params?.limit || 4;
+  const search = params?.search?.trim();
+  const skip = (page - 1) * limit;
 
+  // 검색 조건 설정
+  const searchCondition = search
+    ? {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' as const } },
+          { content: { contains: search, mode: 'insensitive' as const } }
+        ]
+      }
+    : {};
+
+  const whereCondition = {
+    authorId: userId,
+    isActive: true,
+    ...searchCondition
+  };
+
+  // 다이어리 목록, 총 개수 병렬 조회
+  const [diaries, totalCount] = await Promise.all([
+    prisma.diary.findMany({
+      where: whereCondition,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
+        plant: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      skip,
+      take: limit
+    }),
+    prisma.diary.count({
+      where: whereCondition
+    })
+  ]);
+
+  const diariesWithLikes = await populateLikeInfo(diaries, 'diary', userId);
+
+  const totalPages = Math.ceil(totalCount / limit);
+
+  // 캐시용 데이터 변환
+  const cachedDiaries = diariesWithLikes.map(diaryForCache);
+
+  return {
+    diaries: cachedDiaries,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalCount,
+      limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1
+    }
+  };
+}
+
+// 캐시된 다이어리 목록 조회 함수
+function getCachedDiaries(userId: string, page: number, limit: number) {
+  return unstable_cache(
+    () => getDiariesInternal(userId, { page, limit }),
+    [`my-diaries-${userId}`, `${page}`, `${limit}`],
+    {
+      tags: [CacheTags.diaries(userId)]
+    }
+  )();
+}
 
 // 모든 다이어리 조회 (현재 사용자의 다이어리만)
 export async function getDiaries(params?: {
@@ -33,77 +129,22 @@ export async function getDiaries(params?: {
 }) {
   try {
     const user = await getCurrentUser();
-    
+
     // 비로그인 데모 데이터
     if (!user) {
       return DEMO_DIARIES_RESPONSE;
     }
+
     const page = params?.page || 1;
     const limit = params?.limit || 4;
     const search = params?.search?.trim();
-    const skip = (page - 1) * limit;
 
-    // 검색 조건 설정
-    const searchCondition = search
-      ? {
-          OR: [
-            { title: { contains: search, mode: 'insensitive' as const } },
-            { content: { contains: search, mode: 'insensitive' as const } }
-          ]
-        }
-      : {};
+    // 검색이 있는 경우 캐시 사용하지 않음
+    if (search) {
+      return getDiariesInternal(user.id, { page, limit, search });
+    }
 
-    const whereCondition = {
-      authorId: user.id,
-      isActive: true,
-      ...searchCondition
-    };
-
-    // 다이어리 목록, 총 개수 병렬 조회
-    const [diaries, totalCount] = await Promise.all([
-      prisma.diary.findMany({
-        where: whereCondition,
-        include: {
-          author: {
-            select: {
-              id: true,
-              name: true,
-              image: true
-            }
-          },
-          plant: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        skip,
-        take: limit
-      }),
-      prisma.diary.count({
-        where: whereCondition
-      })
-    ]);
-
-    const diariesWithLikes = await populateLikeInfo(diaries, 'diary', user.id);
-
-    const totalPages = Math.ceil(totalCount / limit);
-
-    return {
-      diaries: diariesWithLikes,
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalCount,
-        limit,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
-      }
-    };
+    return getCachedDiaries(user.id, page, limit);
   } catch (error) {
     console.error('다이어리 목록 조회 오류:', error);
     throw new Error('다이어리 목록을 불러오는 중 오류가 발생했습니다.');
@@ -299,8 +340,8 @@ export async function createDiary(formData: FormData) {
 
     console.log('다이어리 생성 완료:', { id: diary.id, title: diary.title });
 
-    // 캐시 재검증
-    revalidatePath('/diaries');
+    // 캐시 무효화
+    revalidateUserCache('diaryCreate', user.id);
 
     // 성공 결과 반환
     return {
@@ -420,9 +461,8 @@ export async function updateDiary(id: string, formData: FormData) {
       title: updatedDiary.title
     });
 
-    // 캐시 재검증
-    revalidatePath('/diaries');
-    revalidatePath(`/diaries/${id}`);
+    // 캐시 무효화
+    revalidateDiaryUpdate(user.id, id);
 
     // 성공 결과 반환
     return {
@@ -474,8 +514,8 @@ export async function deleteDiary(id: string) {
 
     console.log('다이어리 삭제 완료:', { id, title: existingDiary.title });
 
-    // 캐시 재검증
-    revalidatePath('/diaries');
+    // 캐시 무효화
+    revalidateUserCache('diaryCreate', user.id);
 
     // 성공 결과 반환
     return {
@@ -492,50 +532,103 @@ export async function deleteDiary(id: string) {
   }
 }
 
+// 식물별 다이어리 조회 내부 구현
+async function getDiariesByPlantInternal(plantId: string) {
+  const diaries = await prisma.diary.findMany({
+    where: {
+      plantId: plantId,
+      isPublic: true,
+      isActive: true
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
+        }
+      },
+      plant: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    },
+    take: 3 // 최근 3개만 조회
+  });
+
+  return diaries.map(diaryForCache);
+}
+
+// 캐시된 식물별 다이어리 조회 함수
+function getCachedDiariesByPlant(plantId: string) {
+  return unstable_cache(
+    () => getDiariesByPlantInternal(plantId),
+    [`plant-diaries-${plantId}`],
+    {
+      tags: [CacheTags.plant(plantId)]
+    }
+  )();
+}
+
 // 식물별 다이어리 조회 (최근 3개로 제한)
 export async function getDiariesByPlant(plantId: string) {
   try {
-    const diaries = await prisma.diary.findMany({
-      where: {
-        plantId: plantId,
-        isPublic: true,
-        isActive: true
-      },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        image: true,
-        status: true,
-        date: true,
-        plantId: true,
-        tags: true,
-        createdAt: true,
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true
-          }
-        },
-        plant: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: 3 // 최근 3개만 조회
-    });
-
-    return diaries;
+    return getCachedDiariesByPlant(plantId);
   } catch (error) {
     console.error('식물별 다이어리 조회 오류:', error);
     throw error;
   }
+}
+
+// 내 식물 상세 페이지 다이어리 조회
+async function getDiariesByMyPlantDetailInternal(
+  plantId: string,
+  userId: string
+) {
+  const diaries = await prisma.diary.findMany({
+    where: {
+      plantId: plantId,
+      authorId: userId,
+      isActive: true
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
+        }
+      },
+      plant: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: {
+      date: 'desc'
+    },
+    take: 3 // 최근 3개만 조회
+  });
+
+  return diaries.map(diaryForCache);
+}
+
+// 캐시된 내 식물 상세 페이지 다이어리 조회
+function getCachedDiariesByMyPlantDetail(plantId: string, userId: string) {
+  return unstable_cache(
+    () => getDiariesByMyPlantDetailInternal(plantId, userId),
+    [`my-plant-diaries-${plantId}`, userId],
+    {
+      tags: [CacheTags.plant(plantId), CacheTags.diaries(userId)]
+    }
+  )();
 }
 
 // 식물 상세 페이지에서 사용하는 다이어리 조회
@@ -545,23 +638,51 @@ export async function getDiariesByMyPlantDetail(plantId: string) {
     if (!user) {
       return null;
     }
-    const diaries = await prisma.diary.findMany({
-      where: {
-        plantId: plantId,
-        authorId: user.id,
-        isActive: true
-      },
-      orderBy: {
-        date: 'desc'
-      },
-      take: 3 // 최근 3개만 조회
-    });
 
-    return diaries;
+    return getCachedDiariesByMyPlantDetail(plantId, user.id);
   } catch (error) {
     console.error('식물별 다이어리 최소 조회 오류:', error);
     throw error;
   }
+}
+
+// 다이어리 상세 조회
+async function getDiaryByIdInternal(id: string) {
+  const diary = await prisma.diary.findUnique({
+    where: { id },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
+        }
+      },
+      plant: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
+  });
+
+  if (!diary || !diary.isActive) {
+    return null;
+  }
+
+  return diaryForCache(diary);
+}
+
+// 캐시된 다이어리 상세 조회
+function getCachedDiaryById(diaryId: string) {
+  return unstable_cache(
+    () => getDiaryByIdInternal(diaryId),
+    [`diary-detail-${diaryId}`],
+    {
+      tags: [CacheTags.diary(diaryId)]
+    }
+  )();
 }
 
 // 특정 다이어리 조회
@@ -569,15 +690,13 @@ export async function getDiaryById(id: string) {
   try {
     const currentUser = await getCurrentUser().catch(() => null);
 
-    const diary = await prisma.diary.findUnique({
-      where: { id }
-    });
+    const cachedDiary = await getCachedDiaryById(id);
 
-    if (!diary || !diary.isActive) {
+    if (!cachedDiary) {
       return null;
     }
 
-    // 좋아요 정보 조회
+    // 좋아요 정보는 실시간으로 조회 (캐시x)
     const [likesCount, userLike] = await Promise.all([
       prisma.like.count({
         where: { type: 'diary', targetId: id }
@@ -593,7 +712,11 @@ export async function getDiaryById(id: string) {
         : Promise.resolve(null)
     ]);
 
-    return { ...diary, likes: likesCount, isLiked: !!userLike };
+    return {
+      ...cachedDiary,
+      likes: likesCount,
+      isLiked: !!userLike
+    };
   } catch (error) {
     console.error('다이어리 조회 오류:', error);
     return null;
