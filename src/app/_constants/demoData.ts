@@ -24,7 +24,10 @@ export type DemoPlant = Omit<
   author: Pick<User, 'id' | 'name' | 'image'>;
 };
 
-export type DemoDiary = Diary & {
+export type DemoDiary = Omit<Diary, 'date' | 'createdAt' | 'updatedAt'> & {
+  date: string;
+  createdAt: string;
+  updatedAt: string;
   likes: number;
   isLiked: boolean;
   author: Pick<User, 'id' | 'name' | 'image'>;
@@ -34,7 +37,9 @@ export type DemoDiary = Diary & {
   } | null;
 };
 
-export type DemoGallery = Gallery & {
+export type DemoGallery = Omit<Gallery, 'createdAt' | 'updatedAt'> & {
+  createdAt: string;
+  updatedAt: string;
   likes: number;
   author: Pick<User, 'id' | 'name' | 'image'>;
   plant: {
@@ -169,15 +174,15 @@ const DEMO_DIARIES_DATA: DemoDiary[] = [
     title: '몬스테라 새 잎이 나왔어요!',
     content:
       '오늘 몬스테라에서 새로운 잎이 나오는 걸 발견했어요. 정말 신기하고 뿌듯합니다. 처음에는 작은 새싹 같았는데 점점 커지고 있어요.',
-    date: new Date('2024-01-20'),
+    date: '2024-01-20T00:00:00.000Z',
     image: '/images/monstera02.webp',
     status: 'good',
     tags: ['새잎', '성장', '기쁨'],
     isPublic: true,
     isActive: true,
     reportCount: 0,
-    createdAt: new Date('2024-01-20'),
-    updatedAt: new Date('2024-01-20'),
+    createdAt: '2024-01-20T00:00:00.000Z',
+    updatedAt: '2024-01-20T00:00:00.000Z',
     plantId: 'demo-plant-1',
     authorId: 'demo-user',
     // 추가 필드
@@ -194,15 +199,15 @@ const DEMO_DIARIES_DATA: DemoDiary[] = [
     title: '스킨답서스 물꽂이 성공!',
     content:
       '스킨답서스 가지를 물에 꽂아둔 지 2주 만에 뿌리가 나왔어요. 이제 화분에 옮겨 심어야겠어요.',
-    date: new Date('2024-01-18'),
+    date: '2024-01-18T00:00:00.000Z',
     image: '/images/scindapsus02.webp',
     status: 'good',
     tags: ['물꽂이', '뿌리', '성공'],
     isPublic: true,
     isActive: true,
     reportCount: 0,
-    createdAt: new Date('2024-01-18'),
-    updatedAt: new Date('2024-01-18'),
+    createdAt: '2024-01-18T00:00:00.000Z',
+    updatedAt: '2024-01-18T00:00:00.000Z',
     plantId: 'demo-plant-2',
     authorId: 'demo-user',
     // 추가 필드
@@ -229,8 +234,8 @@ const DEMO_GALLERIES_DATA: DemoGallery[] = [
     displayOrder: 0,
     isFeatured: true,
     reportCount: 0,
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-15'),
+    createdAt: '2024-01-15T00:00:00.000Z',
+    updatedAt: '2024-01-15T00:00:00.000Z',
     plantId: 'demo-plant-1',
     authorId: 'demo-user',
     // 추가 필드
@@ -252,8 +257,8 @@ const DEMO_GALLERIES_DATA: DemoGallery[] = [
     displayOrder: 1,
     isFeatured: false,
     reportCount: 0,
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-10'),
+    createdAt: '2024-01-10T00:00:00.000Z',
+    updatedAt: '2024-01-10T00:00:00.000Z',
     plantId: 'demo-plant-2',
     authorId: 'demo-user',
     // 추가 필드
@@ -275,8 +280,8 @@ const DEMO_GALLERIES_DATA: DemoGallery[] = [
     displayOrder: 1,
     isFeatured: false,
     reportCount: 0,
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-10'),
+    createdAt: '2024-01-10T00:00:00.000Z',
+    updatedAt: '2024-01-10T00:00:00.000Z',
     plantId: 'demo-plant-3',
     authorId: 'demo-user',
     // 추가 필드
@@ -298,8 +303,8 @@ const DEMO_GALLERIES_DATA: DemoGallery[] = [
     displayOrder: 1,
     isFeatured: false,
     reportCount: 0,
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-10'),
+    createdAt: '2024-01-10T00:00:00.000Z',
+    updatedAt: '2024-01-10T00:00:00.000Z',
     plantId: 'demo-plant-2',
     authorId: 'demo-user',
     // 추가 필드
@@ -385,6 +390,7 @@ export const DEMO_GALLERIES = DEMO_GALLERIES_DATA;
 export const DEMO_CARE = DEMO_CARE_DATA;
 
 // Response 형태 export
+
 export const DEMO_PLANTS_RESPONSE = {
   plants: DEMO_PLANTS_DATA,
   pagination: DEMO_PAGINATION
