@@ -3,7 +3,7 @@
 import React from 'react';
 import { CareCard } from '@/app/care/_components/CareCard';
 import Link from 'next/link';
-import { CachedPlant } from '@/types/plant';
+import { CachedPlant } from '@/types/cache/plant';
 
 interface PlantCareSectionProps {
   plant: CachedPlant;

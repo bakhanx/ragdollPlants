@@ -9,14 +9,14 @@ import {
   deleteGallery,
   setFeaturedGallery
 } from '@/app/actions/galleries';
-import type { GalleryItem } from './GalleryGrid';
 import { formatDateTime } from '@/app/_utils/dateUtils';
+import type { CachedGallery } from '@/types/cache/gallery';
 
 interface GalleryImageModalProps {
-  item: GalleryItem;
+  item: CachedGallery;
   children: React.ReactNode;
   isOwner?: boolean;
-  onUpdate?: (updatedItem: GalleryItem) => void;
+  onUpdate?: (updatedItem: CachedGallery) => void;
   onDelete?: (deletedId: string) => void;
   onSetFeatured?: (itemId: string) => void;
 }
