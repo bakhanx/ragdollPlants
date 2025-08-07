@@ -10,6 +10,7 @@ import {
   setFeaturedGallery
 } from '@/app/actions/galleries';
 import type { GalleryItem } from './GalleryGrid';
+import { formatDateTime } from '@/app/_utils/dateUtils';
 
 interface GalleryImageModalProps {
   item: GalleryItem;
@@ -390,11 +391,7 @@ export const GalleryImageModal = ({
                       </h3>
                       <div className="flex items-center justify-between text-sm">
                         <span className="opacity-90">
-                          {item.createdAt instanceof Date
-                            ? item.createdAt.toLocaleDateString('ko-KR')
-                            : new Date(item.createdAt).toLocaleDateString(
-                                'ko-KR'
-                              )}
+                          {formatDateTime(item.createdAt)}
                         </span>
                         <div className="flex items-center space-x-1">
                           <span>❤️</span>

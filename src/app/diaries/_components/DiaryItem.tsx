@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Pin from './Pin';
 import Image from 'next/image';
 import { DiaryItemProps } from '@/types/components/diaries';
+import { formatDate } from '@/app/_utils/dateUtils';
 
 export default function DiaryItem({ post, index }: DiaryItemProps) {
   return (
@@ -25,7 +26,7 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
 
           {/* 날짜 스티커 */}
           <div className="absolute top-3 right-3 rotate-3 rounded-lg border border-amber-200 bg-white/90 px-2 py-1 text-xs font-medium text-amber-700 shadow-sm">
-            {new Date(post.date).toLocaleDateString('ko-KR')}
+            {formatDate(post.date)}
           </div>
         </div>
 

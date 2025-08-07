@@ -22,7 +22,7 @@ export default async function DiaryDetail(props: {
       id: diary.id,
       title: diary.title,
       content: diary.content,
-      date: formatDateTime(diary.date),
+      date: diary.date,
       status: diary.status as DiaryMoodStatus,
       authorName: diary.author?.name || '익명'
     };

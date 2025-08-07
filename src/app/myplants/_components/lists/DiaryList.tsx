@@ -43,7 +43,7 @@ export const DiaryList = ({ plantId, diaries }: DiaryListProps) => {
 
             <div className="ml-3 flex flex-col py-1 text-right text-xs text-gray-500">
               <div className="leading-none">
-                {formatDateKorean(formatDateForInput(diary.date))}
+                {formatDateKorean(diary.date)}
               </div>
               <div className="mt-1">{formatTimeOnly(diary.date)}</div>
             </div>

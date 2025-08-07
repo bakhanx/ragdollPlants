@@ -9,7 +9,7 @@ export interface DiaryDetailType {
   id: string;
   title: string;
   content: string;
-  date: string;
+  date: Date ;
   authorName: string;
   status: DiaryMoodStatus;
 }
@@ -30,7 +30,7 @@ export default function DiaryContent({ diary }: DiaryContentProps) {
       {/* 제목과 날짜/시간 */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
-        <time className="block mt-1 text-sm text-gray-500">
+        <time className="mt-1 block text-sm text-gray-500">
           {formatDateKorean(date)} {formatTimeOnly(date)}
         </time>
       </div>
