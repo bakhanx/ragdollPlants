@@ -21,48 +21,6 @@ export function formatDateForInput(dateValue: string | Date | null): string {
   return '';
 }
 
-/**
- * ISO 문자열 또는 Date 객체를 표시용 날짜 형식으로 변환
- * @param dateValue - ISO 문자열, Date 객체, 또는 null
- * @returns YYYY.MM.DD 형식의 문자열 또는 빈 문자열
- */
-export function formatDateForDisplay(dateValue: string | Date | null): string {
-  if (!dateValue) return '';
-
-  let dateStr: string;
-  if (typeof dateValue === 'string') {
-    dateStr = dateValue.split('T')[0];
-  } else if (dateValue instanceof Date) {
-    dateStr = dateValue.toISOString().split('T')[0];
-  } else {
-    return '';
-  }
-
-  return dateStr.replace(/-/g, '.');
-}
-
-/**
- * 캐시된 데이터에서 안전하게 날짜를 추출
- * @param dateValue - 캐시에서 온 날짜 값 (문자열 또는 Date)
- * @returns ISO 문자열 또는 null
- */
-export function safeDateString(dateValue: string | Date | null): string | null {
-  if (!dateValue) return null;
-
-  if (typeof dateValue === 'string') {
-    return dateValue;
-  }
-
-  if (dateValue instanceof Date) {
-    return dateValue.toISOString();
-  }
-
-  return null;
-}
-
-/**
- * Plant 데이터를 캐시 안전한 형태로 변환
- */
 export function plantForCache<
   T extends {
     purchaseDate?: Date | null;
@@ -105,15 +63,52 @@ export function plantForCache<
   };
 }
 
-// 기존 함수들 (호환성 유지)
+export function diaryForCache<
+  T extends {
+    date?: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }
+>(
+  diary: T
+): Omit<T, 'date' | 'createdAt' | 'updatedAt'> & {
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+} {
+  return {
+    ...diary,
+    date: diary.date?.toISOString() || '',
+    createdAt: diary.createdAt?.toISOString() || '',
+    updatedAt: diary.updatedAt?.toISOString() || ''
+  };
+}
+
+export function galleryForCache<
+  T extends {
+    createdAt?: Date;
+    updatedAt?: Date;
+  }
+>(
+  gallery: T
+): Omit<T, 'createdAt' | 'updatedAt'> & {
+  createdAt: string;
+  updatedAt: string;
+} {
+  return {
+    ...gallery,
+    createdAt: gallery.createdAt?.toISOString() || '',
+    updatedAt: gallery.updatedAt?.toISOString() || ''
+  };
+}
 
 /**
- * 날짜를 한국어 형식으로 포맷팅
+ * 한국어 형식으로 포맷팅
  */
-export function formatDateKorean(dateString: string): string {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ko-KR', {
+export function formatDateKorean(date: Date | string): string {
+  if (!date) return '';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -146,11 +141,19 @@ export function formatDateTime(date: Date | string): string {
 }
 
 /**
- * 간단한 날짜 포맷 (YYYY.MM.DD)
+ * 간단한 날짜 포맷 (YYYY.MM.DD) - 일반 표시용
  */
-export function formatDate(dateString: string): string {
-  if (!dateString) return '';
-  return dateString.replace(/-/g, '.');
+export function formatDate(dateValue: Date | string): string {
+  if (!dateValue) return '';
+
+  let dateStr: string;
+  if (typeof dateValue === 'string') {
+    dateStr = dateValue.split('T')[0];
+  } else {
+    dateStr = dateValue.toISOString().split('T')[0];
+  }
+
+  return dateStr.replace(/-/g, '.');
 }
 
 /**
@@ -160,7 +163,7 @@ export function formatDate(dateString: string): string {
  * @param nextCareDate - 다음 케어 예정 날짜 (YYYY-MM-DD)
  * @returns 0-100 사이의 퍼센티지 (100%: 방금 케어함, 0%: 케어 필요)
  */
-export function calculateCareProgressPercentage(
+export function calculateProgressPercentage(
   lastCareDate: string,
   nextCareDate: string
 ): number {
@@ -177,7 +180,6 @@ export function calculateCareProgressPercentage(
   const currentTime = currentDate.getTime();
 
   if (currentDate < lastDate) return 100;
-
   if (currentDate >= nextDate) return 0;
 
   const totalInterval = nextTime - lastTime;
