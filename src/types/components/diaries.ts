@@ -3,22 +3,13 @@
  */
 
 import { DiaryMoodStatus, Diary } from '../models/diary';
+import { CachedDiary, DiariesResponse } from '../cache/diary';
 
 /**
  * 일기 목록 컴포넌트 Props
  */
 export interface DiaryListProps {
-  diariesData: {
-    diaries: Diary[];
-    pagination: {
-      currentPage: number;
-      totalPages: number;
-      totalCount: number;
-      limit: number;
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-    };
-  } | null;
+  diariesData: DiariesResponse | null;
   currentPage: number;
   searchQuery: string;
 }
@@ -27,7 +18,7 @@ export interface DiaryListProps {
  * 일기 항목 컴포넌트 Props
  */
 export interface DiaryItemProps {
-  post: Diary;
+  post: CachedDiary;
   index: number;
 }
 
@@ -43,7 +34,7 @@ export interface DiaryStatusProps {
  * 일기 내용 컴포넌트 Props
  */
 export interface DiaryContentProps {
-  diary: Diary;
+  diary: CachedDiary;
 }
 
 /**
