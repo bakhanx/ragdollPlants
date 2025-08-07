@@ -4,7 +4,7 @@ export interface Diary {
   id: string;
   title: string;
   content: string;
-  date: Date;
+  date: Date | string;
   image: string | null;
   status: string;
   author?: {
@@ -18,8 +18,8 @@ export interface Diary {
   } | null;
   plantId?: string | null;
   tags?: string[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 /**
