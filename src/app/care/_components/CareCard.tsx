@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { Water2Icon, NutrientIcon } from '@/app/_components/icons/Icons';
 import ProgressBar from './ProgressBar';
 import {
+  calculateProgressPercentage,
   formatDate,
-  calculateCareProgressPercentage,
   formatDateForInput
 } from '@/app/_utils/dateUtils';
 import { useState, useEffect } from 'react';
@@ -51,11 +51,11 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
   const nutrientNextDate = calculateNextDate(lastNutrientStr, nutrientInterval);
 
   const waterProgress = lastWateredStr
-    ? calculateCareProgressPercentage(lastWateredStr, waterNextDate)
+    ? calculateProgressPercentage(lastWateredStr, waterNextDate)
     : 0;
 
   const nutrientProgress = lastNutrientStr
-    ? calculateCareProgressPercentage(lastNutrientStr, nutrientNextDate)
+    ? calculateProgressPercentage(lastNutrientStr, nutrientNextDate)
     : 0;
 
   // 남은 일수 계산 (정확한 D-day 값)
