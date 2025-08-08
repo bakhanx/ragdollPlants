@@ -1,13 +1,24 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
 import { z } from 'zod';
-import { requireAdmin, validateEventOwnership } from '@/lib/auth-utils';
+import {
+  requireAdmin,
+  validateEventOwnership,
+  getCurrentUser
+} from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
   deleteImageFromCloudflare
 } from '@/lib/cloudflare-images';
+import { CacheTags } from '@/lib/cache/cacheTags';
+import {
+  revalidateUserCache,
+  revalidateEventUpdate
+} from '@/lib/cache/cacheInvalidation';
+import { CachedEvent, EventsResponse } from '@/types/cache/event';
+import { eventForCache } from '@/app/_utils/dateUtils';
 
 // 이벤트 생성 유효성 검사 스키마
 const createEventSchema = z.object({
@@ -20,37 +31,67 @@ const createEventSchema = z.object({
   endDate: z.string().datetime('유효한 종료 날짜를 입력해주세요')
 });
 
-// 모든 이벤트 조회
-export async function getEvents() {
-  try {
-    const now = new Date();
+// 이벤트 목록 조회 내부 구현
+async function getEventsInternal(): Promise<EventsResponse> {
+  const now = new Date();
 
-    // 종료 날짜가 지난 이벤트들의 isEnded를 true로 업데이트
-    await prisma.event.updateMany({
-      where: {
-        endDate: { lt: now },
-        isEnded: false
-      },
-      data: { isEnded: true }
-    });
+  // 종료 날짜가 지난 이벤트들의 isEnded를 true로 업데이트
+  await prisma.event.updateMany({
+    where: {
+      endDate: { lt: now },
+      isEnded: false
+    },
+    data: { isEnded: true }
+  });
 
-    const events = await prisma.event.findMany({
-      where: { isActive: true },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true
-          }
+  const events = await prisma.event.findMany({
+    where: { isActive: true },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
       }
-    });
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
 
-    return events;
+  // 캐시용 데이터로 변환
+  const cachedEvents = events.map(eventForCache);
+
+  return {
+    events: cachedEvents,
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalCount: cachedEvents.length,
+      limit: cachedEvents.length,
+      hasNextPage: false,
+      hasPreviousPage: false
+    }
+  };
+}
+
+// 캐시된 이벤트 목록 조회 함수
+const getCachedEvents = unstable_cache(
+  () => getEventsInternal(),
+  ['events-all'],
+  {
+    tags: [CacheTags.allEvents]
+  }
+);
+
+// 모든 이벤트 조회 (캐시 적용)
+export async function getEvents(): Promise<EventsResponse> {
+  try {
+    const user = await getCurrentUser().catch(() => null);
+
+    // 비로그인 사용자도 이벤트 조회 가능 (공개 데이터)
+    return getCachedEvents();
   } catch (error) {
     console.error('이벤트 목록 조회 오류:', error);
     throw new Error('이벤트 목록을 불러오는 중 오류가 발생했습니다.');
@@ -151,35 +192,59 @@ export async function getActiveEventsForBanner(limit: number = 3) {
   }
 }
 
+// 이벤트 상세 조회 내부 구현
+async function getEventByIdInternal(id: number) {
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
+        }
+      }
+    }
+  });
+
+  if (!event || !event.isActive) {
+    return null;
+  }
+
+  return eventForCache(event);
+}
+
+// 캐시된 이벤트 상세 조회 함수 (클로저 활용)
+function getCachedEventById(eventId: number) {
+  return unstable_cache(
+    () => getEventByIdInternal(eventId),
+    [`event-detail-${eventId}`],
+    {
+      tags: [CacheTags.event(eventId.toString())]
+    }
+  )();
+}
+
 // 특정 이벤트 조회
 export async function getEventById(id: number) {
   try {
     const now = new Date();
 
-    const event = await prisma.event.findUnique({
-      where: { id },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true
-          }
-        }
-      }
-    });
+    // 캐시된 이벤트 기본 정보 조회
+    const cachedEvent = await getCachedEventById(id);
 
-    if (!event || !event.isActive) {
+    if (!cachedEvent) {
       throw new Error('이벤트를 찾을 수 없거나 비활성화된 이벤트입니다.');
     }
 
     // 종료 날짜가 지났고 아직 종료 처리가 안 된 경우 업데이트
-    if (event.endDate < now && !event.isEnded) {
+    const endDate = new Date(cachedEvent.endDate);
+    if (endDate < now && !cachedEvent.isEnded) {
       await prisma.event.update({
         where: { id },
         data: { isEnded: true }
       });
-      event.isEnded = true;
+      cachedEvent.isEnded = true;
     }
 
     // 조회수 증가
@@ -192,7 +257,7 @@ export async function getEventById(id: number) {
       }
     });
 
-    return event;
+    return cachedEvent;
   } catch (error) {
     console.error('이벤트 조회 오류:', error);
     throw error;
@@ -266,8 +331,8 @@ export async function createEvent(formData: FormData) {
 
     console.log('이벤트 생성 완료:', { id: event.id, title: event.title });
 
-    // 캐시 재검증
-    revalidatePath('/events');
+    // 캐시 무효화
+    revalidateUserCache('eventCreate', user.id);
 
     // 성공 결과 반환
     return {
@@ -367,9 +432,8 @@ export async function updateEvent(id: number, formData: FormData) {
       title: updatedEvent.title
     });
 
-    // 캐시 재검증
-    revalidatePath('/events');
-    revalidatePath(`/events/${id}`);
+    // 캐시 무효화
+    revalidateEventUpdate(user.id, id.toString());
 
     // 성공 결과 반환
     return {
@@ -417,8 +481,8 @@ export async function deleteEvent(id: number) {
 
     console.log('이벤트 삭제 완료:', { id });
 
-    // 캐시 재검증
-    revalidatePath('/events');
+    // 캐시 무효화
+    revalidateUserCache('eventCreate', user.id);
 
     // 성공 결과 반환
     return {
@@ -459,9 +523,8 @@ export async function toggleEventEndStatus(id: number) {
       newStatus: updatedEvent.isEnded ? '종료' : '진행중'
     });
 
-    // 캐시 재검증
-    revalidatePath('/events');
-    revalidatePath(`/events/${id}`);
+    // 캐시 무효화
+    revalidateEventUpdate(user.id, id.toString());
 
     return { success: true, isEnded: updatedEvent.isEnded };
   } catch (error) {
