@@ -2,19 +2,91 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
 import { requireAuth } from '@/lib/auth-utils';
 import { DEMO_CARE_RESPONSE } from '@/app/_constants/demoData';
+import { CacheTags } from '@/lib/cache/cacheTags';
+import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
+import { CareResponse } from '@/types/cache/care';
 
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
 
+// 사용자의 식물 케어 데이터 조회
+async function getUserPlantsForCareInternal(
+  targetUserId: string
+): Promise<CareResponse> {
+  // 사용자의 모든 활성 식물 조회
+  const plants = await prisma.plant.findMany({
+    where: {
+      authorId: targetUserId,
+      isActive: true
+    },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      category: true,
+      location: true,
+      wateringInterval: true,
+      nutrientInterval: true,
+      lastWateredDate: true,
+      nextWateringDate: true,
+      lastNutrientDate: true,
+      nextNutrientDate: true,
+      needsWater: true,
+      needsNutrient: true,
+      temperature: true,
+      humidity: true,
+      sunlight: true,
+      createdAt: true
+    },
+    orderBy: {
+      nextWateringDate: 'asc'
+    }
+  });
 
+  // 데이터 변환
+  const transformedPlants = plants.map(plant => ({
+    id: plant.id,
+    name: plant.name,
+    image: plant.image,
+    isNew: isNewPlant(plant.createdAt),
+    status: true,
+    waterStatus: plant.needsWater,
+    nutrientStatus: plant.needsNutrient,
+    waterAmount: 150, // 기본값
+    lastWateredDate: plant.lastWateredDate?.toISOString().split('T')[0] || '',
+    nextWateringDate: plant.nextWateringDate?.toISOString().split('T')[0] || '',
+    waterInterval: plant.wateringInterval,
+    lastNutrientDate: plant.lastNutrientDate?.toISOString().split('T')[0] || '',
+    nextNutrientDate: plant.nextNutrientDate?.toISOString().split('T')[0] || '',
+    nutrientInterval: plant.nutrientInterval,
+    temperature: plant.temperature || 22,
+    humidity: plant.humidity || 50,
+    sunlight: plant.sunlight || 'bright'
+  }));
+
+  return transformedPlants;
+}
+
+// 캐시된 사용자 식물 케어 데이터 조회
+function getCachedUserPlantsForCare(targetUserId: string) {
+  return unstable_cache(
+    () => getUserPlantsForCareInternal(targetUserId),
+    [`user-care-${targetUserId}`],
+    {
+      tags: [CacheTags.care(targetUserId)]
+    }
+  )();
+}
 
 /**
  * 사용자의 식물 케어 데이터 조회
  */
-export async function getUserPlantsForCare(userId?: string) {
+export async function getUserPlantsForCare(
+  userId?: string
+): Promise<CareResponse> {
   try {
     const session = await auth();
     const targetUserId = userId || session?.user?.id;
@@ -24,61 +96,8 @@ export async function getUserPlantsForCare(userId?: string) {
       return DEMO_CARE_RESPONSE;
     }
 
-    // 사용자의 모든 활성 식물 조회
-    const plants = await prisma.plant.findMany({
-      where: {
-        authorId: targetUserId,
-        isActive: true
-      },
-      select: {
-        id: true,
-        name: true,
-        image: true,
-        category: true,
-        location: true,
-        wateringInterval: true,
-        nutrientInterval: true,
-        lastWateredDate: true,
-        nextWateringDate: true,
-        lastNutrientDate: true,
-        nextNutrientDate: true,
-        needsWater: true,
-        needsNutrient: true,
-        temperature: true,
-        humidity: true,
-        sunlight: true,
-        createdAt: true
-      },
-      orderBy: {
-        nextWateringDate: 'asc'
-      }
-    });
-
-    // 데이터 변환 (기존 myPlants 구조와 호환)
-    const transformedPlants = plants.map(plant => ({
-      id: plant.id,
-      name: plant.name,
-      image: plant.image,
-      isNew: isNewPlant(plant.createdAt),
-      status: true,
-      waterStatus: plant.needsWater,
-      nutrientStatus: plant.needsNutrient,
-      waterAmount: 150, // 기본값, 추후 실제 데이터로 대체
-      lastWateredDate: plant.lastWateredDate?.toISOString().split('T')[0] || '',
-      nextWateringDate:
-        plant.nextWateringDate?.toISOString().split('T')[0] || '',
-      waterInterval: plant.wateringInterval,
-      lastNutrientDate:
-        plant.lastNutrientDate?.toISOString().split('T')[0] || '',
-      nextNutrientDate:
-        plant.nextNutrientDate?.toISOString().split('T')[0] || '',
-      nutrientInterval: plant.nutrientInterval,
-      temperature: plant.temperature || 22,
-      humidity: plant.humidity || 50,
-      sunlight: plant.sunlight || 'bright'
-    }));
-
-    return transformedPlants;
+    // 클로저를 활용한 캐시
+    return await getCachedUserPlantsForCare(targetUserId);
   } catch (error) {
     console.error('식물 케어 데이터 조회 오류:', error);
     throw error;
@@ -86,7 +105,7 @@ export async function getUserPlantsForCare(userId?: string) {
 }
 
 /**
- * 케어 기록 추가 (물주기, 영양제 등) - 간단 버전
+ * 케어 기록 추가 (물주기, 영양제 등)
  */
 export async function addCareRecord(
   plantId: string,
@@ -152,14 +171,14 @@ export async function addCareRecord(
     data: updateData
   });
 
-  // 캐시 재검증
-  revalidatePath('/care');
+  // 캐시 무효화
+  revalidateUserCache('plantCare', user.id);
 
   return { success: true };
 }
 
 /**
- * 식물 케어 일정 업데이트 - 간단 버전
+ * 식물 케어 일정 업데이트
  */
 export async function updateCareSchedule(
   plantId: string,
@@ -211,12 +230,13 @@ export async function updateCareSchedule(
     data: updateData
   });
 
-  revalidatePath('/care');
+  // 캐시 무효화
+  revalidateUserCache('plantCare', session.user.id);
   return { success: true };
 }
 
 /**
- * 케어 기록 히스토리 조회 - 간단 버전
+ * 케어 기록 히스토리 조회
  */
 export async function getCareHistory(plantId: string, limit: number = 10) {
   const session = await auth();
@@ -236,7 +256,7 @@ export async function getCareHistory(plantId: string, limit: number = 10) {
 }
 
 /**
- * 오늘 케어가 필요한 식물 조회 - 간단 버전
+ * 오늘 케어가 필요한 식물 조회
  */
 export async function getTodayCareNeeds() {
   const session = await auth();
@@ -271,7 +291,7 @@ export async function getTodayCareNeeds() {
 }
 
 /**
- * 식물의 케어 상태 토글 - 간단 버전
+ * 식물의 케어 상태 토글
  */
 export async function toggleCareStatus(
   plantId: string,
@@ -287,13 +307,14 @@ export async function toggleCareStatus(
   await prisma.plant.update({
     where: {
       id: plantId,
-      authorId: session.user.id // 소유권 확인을 update에서 처리
+      authorId: session.user.id
     },
     data:
       careType === 'water' ? { needsWater: status } : { needsNutrient: status }
   });
 
-  revalidatePath('/care');
+  // 캐시 무효화
+  revalidateUserCache('plantCare', session.user.id);
   return { success: true };
 }
 
