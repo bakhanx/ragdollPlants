@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { Water2Icon, NutrientIcon } from '@/app/_components/icons/Icons';
 import ProgressBar from './ProgressBar';
 import {
@@ -121,6 +122,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
     try {
       setIsWaterUpdating(true);
       setWaterStatus(false);
+
       await addCareRecord(plant.id, 'water');
       router.refresh(); // 페이지 새로고침으로 데이터 동기화
     } catch (error) {
@@ -146,6 +148,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
     try {
       setIsNutrientUpdating(true);
       setNutrientStatus(false);
+
       await addCareRecord(plant.id, 'nutrient');
       router.refresh(); // 페이지 새로고침으로 데이터 동기화
     } catch (error) {
@@ -159,17 +162,25 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
 
   return (
     <div className="rounded-xl bg-white/90 p-4 shadow-sm backdrop-blur-sm">
-      {!hideImage && <h3 className="pb-2 text-sm font-medium">{plant.name}</h3>}
+      {!hideImage && (
+        <Link href={`/myplants/${plant.id}`}>
+          <h3 className="cursor-pointer pb-2 text-sm font-medium transition-colors hover:text-green-600">
+            {plant.name}
+          </h3>
+        </Link>
+      )}
       <div className="flex items-center gap-4">
         {!hideImage && (
-          <div className="relative size-20 shrink-0 self-start">
-            <Image
-              src={plant.image}
-              alt={plant.name}
-              fill
-              className="rounded-lg object-cover"
-            />
-          </div>
+          <Link href={`/myplants/${plant.id}`}>
+            <div className="relative size-20 shrink-0 cursor-pointer self-start transition-opacity hover:opacity-80">
+              <Image
+                src={plant.image}
+                alt={plant.name}
+                fill
+                className="rounded-lg object-cover"
+              />
+            </div>
+          </Link>
         )}
 
         <div className="flex-1 space-y-4">
@@ -215,7 +226,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                 disabled={isWaterUpdating || !canWater}
                 className={`flex size-10 items-center justify-center rounded-full transition-all duration-300 ${
                   isWaterUpdating || !canWater
-                    ? 'cursor-not-allowed bg-blue-100'
+                    ? 'bg-gray-300'
                     : 'bg-blue-200 hover:bg-blue-300 active:scale-95'
                 }`}
                 aria-label="물주기 완료"
@@ -223,8 +234,8 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                 <Water2Icon
                   className={`size-5 transition-all duration-300 ${
                     waterStatus
-                      ? 'text-blue-600 [&>path]:fill-blue-600'
-                      : 'scale-110 text-blue-700 drop-shadow-sm [&>path]:fill-none'
+                      ? 'text-blue-600'
+                      : 'cursor-not-allowed text-transparent'
                   }`}
                 />
               </button>
@@ -272,7 +283,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                 disabled={isNutrientUpdating || !canNutrient}
                 className={`flex size-10 items-center justify-center rounded-full transition-all duration-300 ${
                   isNutrientUpdating || !canNutrient
-                    ? 'cursor-not-allowed bg-green-100'
+                    ? 'bg-gray-300'
                     : 'bg-green-200 hover:bg-green-300 active:scale-95'
                 }`}
                 aria-label="영양제 주기 완료"
@@ -282,10 +293,10 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                     : '영양제 주기'
                 }>
                 <NutrientIcon
-                  className={`size-5 transition-all duration-300 ${
+                  className={`size-6 transition-all duration-300 ${
                     nutrientStatus
-                      ? 'text-green-600 [&>path]:fill-green-600'
-                      : 'scale-110 text-green-700 drop-shadow-sm'
+                      ? 'text-white [&>path]:fill-green-500'
+                      : 'cursor-not-allowed text-white'
                   }`}
                 />
               </button>
