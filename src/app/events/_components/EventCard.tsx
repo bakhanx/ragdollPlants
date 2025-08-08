@@ -3,12 +3,16 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { EventCardProps } from '@/types/components/events';
+import { CachedEvent } from '@/types/cache/event';
+
+interface EventCardProps {
+  event: CachedEvent;
+}
 
 export default function EventCard({ event }: EventCardProps) {
   const now = new Date();
   const isEarlyTerminated = event.isEnded && new Date(event.endDate) > now;
-  
+
   return (
     <Link
       href={`/events/${event.id}`}
@@ -22,7 +26,7 @@ export default function EventCard({ event }: EventCardProps) {
           className="object-cover"
         />
 
-        {/* 오버레이 - 종료된 이벤트는 더 어두운 오버레이 적용 */}
+        {/* 오버레이 */}
         <div
           className={`absolute inset-0 bg-gradient-to-t ${event.isEnded ? 'from-black/80 to-black/40' : 'from-black/70 to-transparent'}`}
         />
