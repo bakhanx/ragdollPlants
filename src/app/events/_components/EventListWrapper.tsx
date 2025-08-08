@@ -1,37 +1,50 @@
 import { getEvents } from '@/app/actions/events';
 import { checkIsAdmin } from '@/lib/auth-utils';
 import EventList from './EventList';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default async function EventListWrapper() {
-  let events: Awaited<ReturnType<typeof getEvents>> = [];
+  let eventsData: Awaited<ReturnType<typeof getEvents>> | null = null;
   let isAdmin = false;
   let hasError = false;
 
   try {
-    [events, isAdmin] = await Promise.all([getEvents(), checkIsAdmin()]);
+    [eventsData, isAdmin] = await Promise.all([getEvents(), checkIsAdmin()]);
   } catch (error) {
     console.error('이벤트 목록 로딩 오류:', error);
     hasError = true;
+    eventsData = null;
   }
 
   if (hasError) {
     return (
-      <div className="mb-4 rounded-lg bg-red-50 p-4 text-center">
-        <p className="text-red-600">
-          이벤트 데이터를 불러오는 중 오류가 발생했습니다.
-        </p>
-        <p className="text-sm text-red-500">페이지를 새로고침해 주세요.</p>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="mb-4 text-red-400">
+          <svg
+            className="mx-auto mb-4 h-16 w-16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <h3 className="mb-2 text-lg font-medium text-gray-900">
+          데이터를 불러올 수 없어요
+        </h3>
+        <p className="mb-6 text-gray-500">페이지를 새로고침해 주세요.</p>
       </div>
     );
   }
 
-  const activeEvents = events.filter(event => !event.isEnded);
-  const endedEvents = events.filter(event => event.isEnded);
-
   return (
     <EventList
-      initialActiveEvents={activeEvents}
-      initialEndedEvents={endedEvents}
+      initialData={eventsData}
       isAdmin={isAdmin}
     />
   );
