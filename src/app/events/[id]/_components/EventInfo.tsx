@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toggleEventEndStatus } from '@/app/actions/events';
+import { formatDate } from '@/app/_utils/dateUtils';
 
 interface EventInfoProps {
   event: {
@@ -40,18 +41,17 @@ export const EventInfo = ({ event, isAdmin }: EventInfoProps) => {
     }
   };
 
-  const period = `${event.startDate.toLocaleDateString()} - ${event.endDate.toLocaleDateString()}`;
+  const period = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
 
   return (
-    <div className="rounded-lg bg-white/90 p-4 shadow-lg relative">
+    <div className="relative rounded-lg bg-white/90 p-4 shadow-lg">
       {/* 관리자용 조기 종료 버튼 */}
       {isAdmin && !event.isEnded && (
         <div className="absolute top-4 right-4 z-10">
           <button
             onClick={handleToggleEnd}
             disabled={isSubmitting}
-            className="w-18 rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+            className="w-18 rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
             {isSubmitting ? '처리 중...' : '조기 종료'}
           </button>
         </div>
@@ -64,12 +64,12 @@ export const EventInfo = ({ event, isAdmin }: EventInfoProps) => {
             <h1 className="mb-2 text-xl font-bold">{event.title}</h1>
           </div>
           {event.isEnded && (
-            <span className="rounded bg-gray-500 px-2 py-1 text-xs text-white whitespace-nowrap">
+            <span className="rounded bg-gray-500 px-2 py-1 text-xs whitespace-nowrap text-white">
               종료
             </span>
           )}
         </div>
-        
+
         <p className="mb-4 text-sm text-gray-600">기간: {period}</p>
         <div className="my-3 h-px bg-gray-200"></div>
         <p className="mb-4 text-gray-700">{event.description}</p>
@@ -80,8 +80,7 @@ export const EventInfo = ({ event, isAdmin }: EventInfoProps) => {
 
       <Link
         href="/events"
-        className="block w-full rounded-md bg-green-600 py-2 text-center text-white transition-colors hover:bg-green-700"
-      >
+        className="block w-full rounded-md bg-green-600 py-2 text-center text-white transition-colors hover:bg-green-700">
         다른 이벤트 보기
       </Link>
     </div>
