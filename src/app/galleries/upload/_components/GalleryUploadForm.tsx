@@ -33,7 +33,7 @@ export default function GalleryUploadForm() {
     const loadGalleryUsage = async () => {
       try {
         const userGalleries = await getUserGalleries();
-        const used = userGalleries.length;
+        const used = userGalleries.galleries.length;
 
         setGalleryUsage({
           used,
