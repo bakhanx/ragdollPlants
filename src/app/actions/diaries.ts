@@ -18,7 +18,7 @@ import {
   revalidateDiaryUpdate
 } from '@/lib/cache/cacheInvalidation';
 import { DiariesResponse } from '@/types/cache/diary';
-import { diaryForCache } from '@/app/_utils/dateUtils';
+import { diaryForCache } from '@/app/_utils/cacheUtils';
 
 // 다이어리 생성 유효성 검사 스키마
 const createDiarySchema = z.object({

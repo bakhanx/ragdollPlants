@@ -18,7 +18,7 @@ import {
   revalidateEventUpdate
 } from '@/lib/cache/cacheInvalidation';
 import { CachedEvent, EventsResponse } from '@/types/cache/event';
-import { eventForCache } from '@/app/_utils/dateUtils';
+import { eventForCache } from '@/app/_utils/cacheUtils';
 
 // 이벤트 생성 유효성 검사 스키마
 const createEventSchema = z.object({

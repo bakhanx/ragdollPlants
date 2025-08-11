@@ -24,7 +24,7 @@ import {
   GalleriesResponse,
   PublicGalleriesResponse
 } from '@/types/cache/gallery';
-import { galleryForCache } from '@/app/_utils/dateUtils';
+import { galleryForCache } from '@/app/_utils/cacheUtils';
 import { unstable_cache } from 'next/cache';
 
 // 갤러리 생성 유효성 검사 스키마
