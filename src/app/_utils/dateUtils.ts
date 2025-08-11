@@ -21,87 +21,6 @@ export function formatDateForInput(dateValue: string | Date | null): string {
   return '';
 }
 
-export function plantForCache<
-  T extends {
-    purchaseDate?: Date | null;
-    lastWateredDate?: Date | null;
-    nextWateringDate?: Date | null;
-    lastNutrientDate?: Date | null;
-    nextNutrientDate?: Date | null;
-    createdAt?: Date;
-    updatedAt?: Date;
-  }
->(
-  plant: T
-): Omit<
-  T,
-  | 'purchaseDate'
-  | 'lastWateredDate'
-  | 'nextWateringDate'
-  | 'lastNutrientDate'
-  | 'nextNutrientDate'
-  | 'createdAt'
-  | 'updatedAt'
-> & {
-  purchaseDate: string | null;
-  lastWateredDate: string | null;
-  nextWateringDate: string | null;
-  lastNutrientDate: string | null;
-  nextNutrientDate: string | null;
-  createdAt: string;
-  updatedAt: string;
-} {
-  return {
-    ...plant,
-    purchaseDate: plant.purchaseDate?.toISOString() || null,
-    lastWateredDate: plant.lastWateredDate?.toISOString() || null,
-    nextWateringDate: plant.nextWateringDate?.toISOString() || null,
-    lastNutrientDate: plant.lastNutrientDate?.toISOString() || null,
-    nextNutrientDate: plant.nextNutrientDate?.toISOString() || null,
-    createdAt: plant.createdAt?.toISOString() || '',
-    updatedAt: plant.updatedAt?.toISOString() || ''
-  };
-}
-
-export function diaryForCache<
-  T extends {
-    date?: Date;
-    createdAt?: Date;
-    updatedAt?: Date;
-  }
->(
-  diary: T
-): Omit<T, 'date' | 'createdAt' | 'updatedAt'> & {
-  date: string;
-  createdAt: string;
-  updatedAt: string;
-} {
-  return {
-    ...diary,
-    date: diary.date?.toISOString() || '',
-    createdAt: diary.createdAt?.toISOString() || '',
-    updatedAt: diary.updatedAt?.toISOString() || ''
-  };
-}
-
-export function galleryForCache<
-  T extends {
-    createdAt?: Date;
-    updatedAt?: Date;
-  }
->(
-  gallery: T
-): Omit<T, 'createdAt' | 'updatedAt'> & {
-  createdAt: string;
-  updatedAt: string;
-} {
-  return {
-    ...gallery,
-    createdAt: gallery.createdAt?.toISOString() || '',
-    updatedAt: gallery.updatedAt?.toISOString() || ''
-  };
-}
-
 /**
  * 한국어 형식으로 포맷팅
  */
@@ -169,18 +88,21 @@ export function calculateProgressPercentage(
 ): number {
   if (!lastCareDate || !nextCareDate) return 0;
 
-  // T00:00:00 - 로컬 환경 기준 날짜
+  // 자정 기준으로 날짜 계산
   const lastDate = new Date(lastCareDate + 'T00:00:00');
   const nextDate = new Date(nextCareDate + 'T00:00:00');
   const currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0);
+  currentDate.setHours(0, 0, 0, 0); // 오늘 자정
 
   const lastTime = lastDate.getTime();
   const nextTime = nextDate.getTime();
   const currentTime = currentDate.getTime();
 
-  if (currentDate < lastDate) return 100;
-  if (currentDate >= nextDate) return 0;
+  // 오늘 케어한 경우 100% 반환
+  if (currentTime === lastTime) return 100;
+  
+  if (currentTime < lastTime) return 100;
+  if (currentTime >= nextTime) return 0;
 
   const totalInterval = nextTime - lastTime;
   const remainingTime = nextTime - currentTime;
