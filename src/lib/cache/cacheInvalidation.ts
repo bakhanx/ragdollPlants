@@ -60,15 +60,29 @@ export const InvalidationMap = {
     CacheTags.garden(loginId) // garden 페이지 (갤러리 정보 변경 시)
   ],
 
-  // 아티클 작성/수정/삭제 시 (관리자만)
-  article: (): CacheTagType[] => [
+  // 아티클 작성/삭제 시 (관리자만)
+  articleCreate: (): CacheTagType[] => [
     CacheTags.allArticles, // 전체 아티클 목록
     CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
   ],
 
-  // 이벤트 작성/수정/삭제 시 (관리자만)
-  event: (): CacheTagType[] => [
+  // 특정 아티클 수정 시 (관리자만)
+  articleUpdate: (articleId: string): CacheTagType[] => [
+    CacheTags.allArticles, // 전체 아티클 목록
+    CacheTags.article(articleId), // 해당 아티클 상세 페이지
+    CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
+  ],
+
+  // 이벤트 작성/삭제 시 (관리자만)
+  eventCreate: (): CacheTagType[] => [
     CacheTags.allEvents, // 전체 이벤트 목록
+    CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
+  ],
+
+  // 특정 이벤트 수정 시 (관리자만)
+  eventUpdate: (eventId: string): CacheTagType[] => [
+    CacheTags.allEvents, // 전체 이벤트 목록
+    CacheTags.event(eventId), // 해당 이벤트 상세 페이지
     CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
   ],
 
@@ -108,7 +122,7 @@ export function revalidateUserCache(
 
   if (type === 'follow' && additionalParams?.followingLoginId) {
     tags = InvalidationMap[type](loginId, additionalParams.followingLoginId);
-  } else if (type === 'article' || type === 'event') {
+  } else if (type === 'articleCreate' || type === 'eventCreate') {
     tags = InvalidationMap[type]();
   } else {
     tags = (InvalidationMap[type] as (loginId: string) => CacheTagType[])(
@@ -155,6 +169,22 @@ export function revalidateDiaryUpdate(loginId: string, diaryId: string) {
  */
 export function revalidateGalleryUpdate(loginId: string, galleryId: string) {
   const tags = InvalidationMap.galleryUpdate(loginId, galleryId);
+  revalidateSpecificTags(tags);
+}
+
+/**
+ * 아티클 업데이트 시 캐시 무효화
+ */
+export function revalidateArticleUpdate(loginId: string, articleId: string) {
+  const tags = InvalidationMap.articleUpdate(articleId);
+  revalidateSpecificTags(tags);
+}
+
+/**
+ * 이벤트 업데이트 시 캐시 무효화
+ */
+export function revalidateEventUpdate(loginId: string, eventId: string) {
+  const tags = InvalidationMap.eventUpdate(eventId);
   revalidateSpecificTags(tags);
 }
 
