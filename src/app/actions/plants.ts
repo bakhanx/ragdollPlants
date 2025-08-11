@@ -9,7 +9,7 @@ import {
   revalidatePlantUpdate
 } from '@/lib/cache/cacheInvalidation';
 import { CachedPlant, PlantsResponse } from '@/types/cache/plant';
-import { plantForCache } from '@/app/_utils/dateUtils';
+import { plantForCache } from '@/app/_utils/cacheUtils';
 
 import { MAX_PLANTS } from '@/types/models/plant';
 import {
