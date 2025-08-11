@@ -17,6 +17,8 @@ export const CacheTags = {
   plant: (plantId: string): CacheTagType => `plant-${plantId}`,
   diary: (diaryId: string): CacheTagType => `diary-${diaryId}`,
   gallery: (galleryId: string): CacheTagType => `gallery-${galleryId}`,
+  article: (articleId: string): CacheTagType => `article-${articleId}`,
+  event: (eventId: string): CacheTagType => `event-${eventId}`,
 
   // 콘텐츠별 태그 (전역) - articles, events만 전체 목록 페이지 존재
   allArticles: 'articles-all' as CacheTagType,
@@ -38,6 +40,8 @@ export type CacheTagType =
   | `plant-${string}`
   | `diary-${string}`
   | `gallery-${string}`
+  | `article-${string}`
+  | `event-${string}`
   | 'articles-all'
   | 'events-all'
   | 'content-all';
