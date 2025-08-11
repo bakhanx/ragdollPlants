@@ -6,7 +6,6 @@
 // 권장 패턴:
 // 1. 객체 모델: interface 사용
 // 2. 유니온/리터럴 타입: type 사용
-// 3. 임시/변환 타입: type 사용 (접두사 Legacy 또는 접미사 Compat 추가)
 
 // 기본 Article 인터페이스
 export interface Article {
@@ -45,26 +44,9 @@ export interface ArticlePreview {
   likes?: number;
 }
 
-// 레거시 코드와의 호환성을 위한 타입 (ID가 number인 버전)
 export type ArticleCategory = 'tips' | 'news' | 'guide';
 
 export type ArticleTabType = 'all' | ArticleCategory;
-
-export interface ArticleWithNumberId {
-  id: number;
-  title: string;
-  content: string;
-  image: string;
-  date: string;
-  summary?: string;
-  author?: {
-    id: string;
-    name: string;
-  };
-  tags?: string[];
-  category: ArticleCategory;
-  likes?: number;
-}
 
 // Prisma에서 사용할 Article 생성 타입
 export interface ArticleCreateInput {
@@ -87,4 +69,4 @@ export interface ArticleUpdateInput {
   category?: string;
   tags?: string[];
   isPublished?: boolean;
-} 
+}
