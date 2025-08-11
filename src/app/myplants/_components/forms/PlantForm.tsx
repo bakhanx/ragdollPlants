@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,7 +28,7 @@ interface PlantData {
   category: string;
   description: string | null;
   location: string | null;
-  purchaseDate: Date | null;
+  purchaseDate: string | null;
   wateringInterval: number;
   nutrientInterval: number;
 }
@@ -61,7 +61,7 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
         plantType: initialData.category,
         location: initialData.location || '',
         acquiredDate: initialData.purchaseDate
-          ? initialData.purchaseDate.toISOString().split('T')[0]
+          ? initialData.purchaseDate.split('T')[0]
           : '',
         notes: initialData.description || '',
         wateringInterval: initialData.wateringInterval,

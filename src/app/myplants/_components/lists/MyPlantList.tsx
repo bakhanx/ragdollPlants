@@ -7,21 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons/Icons';
 import { getMyPlants } from '@/app/actions/plants';
-
-interface MyPlantFrom {
-  id: string;
-  name: string;
-  image: string;
-  category: string;
-  needsWater: boolean;
-  needsNutrient: boolean;
-  lastWateredDate: Date | null;
-  author: {
-    id: string;
-    name: string | null;
-    image: string | null;
-  };
-}
+import { CachedPlant } from '@/types/cache/plant';
 
 interface MyPlantListProps {
   plantsData: Awaited<ReturnType<typeof getMyPlants>> | null;
@@ -58,7 +44,7 @@ export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
       {plants.length > 0 ? (
         <div
           className={`grid grid-cols-2 gap-3 transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-          {plants.map((plant: MyPlantFrom) => (
+          {plants.map((plant: CachedPlant) => (
             <Link
               href={`/myplants/${plant.id}`}
               key={plant.id}

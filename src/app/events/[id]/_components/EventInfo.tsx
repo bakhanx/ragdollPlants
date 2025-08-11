@@ -13,8 +13,8 @@ interface EventInfoProps {
     subtitle: string;
     description: string;
     content: string;
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
     isEnded: boolean;
   };
   isAdmin: boolean;

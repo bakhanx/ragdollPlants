@@ -12,12 +12,12 @@ interface EventCardProps {
     description: string;
     content: string;
     image: string;
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
     isEnded: boolean;
     viewCount: number;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     author: {
       id: string;
       name: string | null;
@@ -30,7 +30,7 @@ interface EventCardProps {
 export const EventCard = ({ eventData, isAdmin }: EventCardProps) => {
   const isEnded = eventData.isEnded;
   const now = new Date();
-  const isEarlyTerminated = eventData.isEnded && eventData.endDate > now;
+  const isEarlyTerminated = eventData.isEnded && new Date(eventData.endDate) > now;
 
   return (
     <div className="mx-auto w-full max-w-md">

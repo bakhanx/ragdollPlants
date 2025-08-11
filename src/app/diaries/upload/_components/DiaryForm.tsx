@@ -20,7 +20,7 @@ interface DiaryFormProps {
     title: string;
     content: string;
     status: string;
-    date: Date;
+    date: string;
     plantId: string | null;
     image: string | null;
   };
@@ -98,9 +98,9 @@ export const DiaryForm = ({
       formData.append('status', mood);
       
       if (mode === 'edit' && initialData) {
-        formData.append('date', initialData.date.toISOString());
+        formData.append('date', initialData.date);
       } else {
-      formData.append('date', new Date().toISOString());
+        formData.append('date', new Date().toISOString());
       }
 
       // 선택된 식물이 있으면 추가

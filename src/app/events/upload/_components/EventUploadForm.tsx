@@ -18,8 +18,8 @@ export interface EventUploadFormProps {
     description: string;
     content: string;
     image: string | null;
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
   };
 }
 
@@ -33,10 +33,10 @@ export const EventUploadForm = ({
   const [title, setTitle] = useState(initialData?.title || '');
   const [subtitle, setSubtitle] = useState(initialData?.subtitle || '');
   const [startDate, setStartDate] = useState(
-    initialData?.startDate ? initialData.startDate.toISOString().split('T')[0] : ''
+    initialData?.startDate ? initialData.startDate.split('T')[0] : ''
   );
   const [endDate, setEndDate] = useState(
-    initialData?.endDate ? initialData.endDate.toISOString().split('T')[0] : ''
+    initialData?.endDate ? initialData.endDate.split('T')[0] : ''
   );
   const [description, setDescription] = useState(initialData?.description || '');
   const [content, setContent] = useState(initialData?.content || '');

@@ -1,12 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
-import { formatDateKorean, formatTimeOnly, formatDateForInput } from '@/app/_utils/dateUtils';
+import { formatDateKorean, formatTimeOnly } from '@/app/_utils/dateUtils';
 
 interface DiaryEntry {
   id: string;
   title: string;
   content: string;
-  date: Date;
+  date: string;
 }
 
 interface DiaryListProps {
