@@ -1,18 +1,20 @@
 import { inferArticleCategory } from '@/app/_utils/categoryUtils';
+import { formatDate } from '@/app/_utils/dateUtils';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import CategoryBadge from './CategoryBadge';
-import { ArticleWithNumberId } from '@/types/models/article';
+import { CachedArticle } from '@/types/cache/article';
 import Image from 'next/image';
 /**
  * 개별 기사 아이템 컴포넌트
  */
-export const ArticleItem = ({ post }: { post: ArticleWithNumberId }) => {
+export const ArticleItem = ({ post }: { post: CachedArticle }) => {
   const category = useMemo(() => {
     return (
-      post.category || inferArticleCategory(post.title, post.content, post.tags)
+      post.category?.name ||
+      inferArticleCategory(post.title, post.content, post.tags)
     );
-  }, [post.category, post.title, post.content, post.tags]);
+  }, [post.category?.name, post.title, post.content, post.tags]);
 
   // 이미지 소스 설정
   const imageSource = post.image || '';
@@ -48,7 +50,7 @@ export const ArticleItem = ({ post }: { post: ArticleWithNumberId }) => {
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div>{post.author?.name && `by ${post.author.name}`}</div>
-            <div>{post.date}</div>
+            <div>{formatDate(post.createdAt)}</div>
           </div>
         </div>
       </article>
