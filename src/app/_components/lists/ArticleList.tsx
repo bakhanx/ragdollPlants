@@ -1,14 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import { CachedArticle } from '@/types/cache/article';
+import { formatDate } from '@/app/_utils/dateUtils';
 
 type ArticleListProps = {
-  items: {
-    id: number;
-    title: string;
-    image: string;
-    date: string;
-  }[];
+  items: CachedArticle[];
 };
 
 export const ArticleList = ({ items }: ArticleListProps) => {
@@ -54,7 +51,9 @@ export const ArticleList = ({ items }: ArticleListProps) => {
                   <h2 className="cursor-pointer truncate py-2 font-semibold underline">
                     {article.title}
                   </h2>
-                  <div className="text-sm text-gray-600">{article.date}</div>
+                  <div className="text-sm text-gray-600">
+                    {formatDate(article.createdAt)}
+                  </div>
                 </div>
               </div>
             </Link>
