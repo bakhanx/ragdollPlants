@@ -2,38 +2,30 @@ import { getArticles } from '@/app/actions/articles';
 import ArticleList from './ArticleList';
 
 export default async function ArticleListWrapper() {
-  let articles: Awaited<ReturnType<typeof getArticles>> = [];
+  let articlesData: Awaited<ReturnType<typeof getArticles>> | null = null;
   let hasError = false;
 
   try {
-    articles = await getArticles();
+    articlesData = await getArticles();
   } catch (error) {
     console.error('아티클 목록 로딩 오류:', error);
     hasError = true;
+    articlesData = null;
   }
 
   if (hasError) {
     return (
-      <div className="mb-4 rounded-lg bg-red-50 p-4 text-center">
-        <p className="text-red-600">
-          아티클 데이터를 불러오는 중 오류가 발생했습니다.
-        </p>
-        <p className="text-sm text-red-500">페이지를 새로고침해 주세요.</p>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="text-red-400 mb-4">
+          <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">데이터를 불러올 수 없어요</h3>
+        <p className="text-gray-500 mb-6">페이지를 새로고침해 주세요.</p>
       </div>
     );
   }
 
-  const allArticles = articles;
-  const tipsArticles = articles.filter(a => a.category === 'tips');
-  const newsArticles = articles.filter(a => a.category === 'news');
-  const guideArticles = articles.filter(a => a.category === 'guide');
-
-  return (
-    <ArticleList
-      allArticles={allArticles}
-      tipsArticles={tipsArticles}
-      newsArticles={newsArticles}
-      guideArticles={guideArticles}
-    />
-  );
+  return <ArticleList initialData={articlesData} />;
 }
