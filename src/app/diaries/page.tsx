@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
-import { SearchInput } from '../_components/common/SearchInput';
+import { SearchInputWithNavigation } from '../_components/common/SearchInputWithNavigation';
 import { UploadButton } from '../_components/common/UploadButton';
 import DiaryListWrapper from './_components/DiaryListWrapper';
 import DiaryCardsSkeleton from './_components/DiaryCardsSkeleton';
@@ -30,12 +30,13 @@ export default async function DiariesPage({ searchParams }: DiariesPageProps) {
 
         <div className="w-full py-4">
           <div className="py-8">
-            {/* 검색 및 업로드 버튼 영역 - 즉시 렌더링 */}
+            {/* 검색 및 업로드 버튼*/}
             <div className="mt-4 mb-6 flex justify-between">
               <div className="w-full max-w-xs">
-                <SearchInput
+                <SearchInputWithNavigation
                   placeholder="일기 제목 검색"
                   defaultValue={searchQuery}
+                  basePath="/diaries"
                 />
               </div>
               <UploadButton
