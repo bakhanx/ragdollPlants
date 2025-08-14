@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTabItems } from '@/app/_hooks/useTabItems';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
+import { SearchInput } from '@/app/_components/common/SearchInput';
 import EventCard from './EventCard';
 import { EventsResponse, CachedEvent } from '@/types/cache/event';
 import { EventTabType } from '@/types/models/event';
@@ -53,6 +54,7 @@ export default function EventList({ initialData, isAdmin }: EventListProps) {
     setActiveTab,
     visibleItems,
     hasMore,
+    handleSearch,
     handleLoadMore,
     filteredItemsCount
   } = useTabItems<CachedEvent, EventTabType>({
@@ -132,6 +134,14 @@ export default function EventList({ initialData, isAdmin }: EventListProps) {
 
   return (
     <>
+      {/* 검색 입력 */}
+      <div className="mb-6">
+        <SearchInput
+          placeholder="이벤트 검색"
+          onSearch={handleSearch}
+        />
+      </div>
+
       <TabNavigation
         tabs={tabs}
         activeTab={activeTab}
