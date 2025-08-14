@@ -3,14 +3,13 @@ import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import { UploadButton } from '../_components/common/UploadButton';
-import GalleryListWrapper from './_components/GalleryListWrapper';
-import GalleryCardsSkeleton from './_components/GalleryCardsSkeleton';
+import { GalleryGridSkeleton } from './_components/GalleryGridSkeleton';
+import { GalleryGridWrapper } from './_components/GalleryGridWrapper';
 
 export default function GalleriesPage() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
-
       <ContentsLayout
         noPadding
         showFooter={false}>
@@ -45,8 +44,8 @@ export default function GalleriesPage() {
         </div>
 
         {/* 갤러리 그리드 */}
-        <Suspense fallback={<GalleryCardsSkeleton />}>
-          <GalleryListWrapper />
+        <Suspense fallback={<GalleryGridSkeleton />}>
+          <GalleryGridWrapper />
         </Suspense>
       </ContentsLayout>
     </>
