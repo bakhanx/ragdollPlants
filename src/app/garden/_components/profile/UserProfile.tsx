@@ -8,7 +8,10 @@ interface UserProfileComponentProps {
   isOwner: boolean;
 }
 
-export default function UserProfile({ user, isOwner }: UserProfileComponentProps) {
+export default function UserProfile({
+  user,
+  isOwner
+}: UserProfileComponentProps) {
   return (
     <section className="mx-auto w-full max-w-2xl space-y-6 py-4">
       {/* 프로필 카드 */}
@@ -16,9 +19,9 @@ export default function UserProfile({ user, isOwner }: UserProfileComponentProps
         nickname={user.name || '사용자'}
         level={user.level}
         stats={{
+          diaries: user._count.galleries,
           galleries: user._count.galleries,
-          visitors: user._count.followersList,
-          plants: user._count.plants,
+          careCount: user.waterCount + user.nutrientCount // 누적 관리횟수
         }}
         levelProgress={user.levelProgress}
         interests={user.interests}
@@ -28,8 +31,8 @@ export default function UserProfile({ user, isOwner }: UserProfileComponentProps
       {/* 식물 관리 상태 요약 (소유자에게만 보임) */}
       {isOwner && (
         <CareStatusSection
-          todayWaterCount={user.todayWaterCount}
-          todayNutrientCount={user.todayNutrientCount}
+          needsWaterCount={user.needsWaterCount}
+          needsNutrientCount={user.needsNutrientCount}
         />
       )}
     </section>
