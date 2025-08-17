@@ -378,37 +378,51 @@ export async function updateArticle(id: number, formData: FormData) {
   }
 }
 
+// 홈페이지용 최신 아티클 조회 내부 구현
+async function getLatestArticlesInternal(limit: number = 3): Promise<CachedArticle[]> {
+  const articles = await prisma.article.findMany({
+    where: { isPublished: true, isActive: true },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true
+        }
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
+          color: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    },
+    take: limit
+  });
+
+  // CachedArticle 형태로 변환
+  return articles.map(articleForCache);
+}
+
+// 캐시된 최신 아티클 조회
+const getCachedLatestArticles = unstable_cache(
+  getLatestArticlesInternal,
+  ['home-latest-articles'],
+  {
+    tags: [CacheTags.homeArticles, CacheTags.allArticles]
+  }
+);
+
 // 홈페이지용 최신 아티클 조회 (3개) - 공개용
 export async function getLatestArticles(
   limit: number = 3
 ): Promise<CachedArticle[]> {
   try {
-    const articles = await prisma.article.findMany({
-      where: { isPublished: true, isActive: true },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true
-          }
-        },
-        category: {
-          select: {
-            id: true,
-            name: true,
-            color: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: limit
-    });
-
-    // CachedArticle 형태로 변환
-    return articles.map(articleForCache);
+    return await getCachedLatestArticles(limit);
   } catch (error) {
     console.error('최신 아티클 조회 실패:', error);
     return [];
