@@ -171,6 +171,19 @@ export async function addCareRecord(
     data: updateData
   });
 
+  // 사용자 누적 카운트 업데이트
+  if (type === 'water') {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { waterCount: { increment: 1 } }
+    });
+  } else if (type === 'nutrient') {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { nutrientCount: { increment: 1 } }
+    });
+  }
+
   // 캐시 무효화
   revalidateUserCache('plantCare', user.id);
 
