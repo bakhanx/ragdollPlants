@@ -1,10 +1,12 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth-utils';
 import { DEMO_USER_PROFILE } from '@/app/_constants/demoData';
+import { CacheTags } from '@/lib/cache/cacheTags';
+import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
 
 // 사용자 프로필 데이터 타입
 export type UserProfileData = {
@@ -25,31 +27,35 @@ export type UserProfileData = {
     followersList: number;
     galleries: number;
   };
-  todayWaterCount: number;
-  todayNutrientCount: number;
+  needsWaterCount: number;
+  needsNutrientCount: number;
 };
 
 // UUID 판별 유틸리티 함수
 function isUUID(identifier: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    identifier
+  );
 }
 
-
-
 // 외부 통합 인터페이스
-export async function getUserProfile(identifier: string): Promise<UserProfileData | null> {
+export async function getUserProfile(
+  identifier: string
+): Promise<UserProfileData | null> {
   // 데모 사용자 처리
   if (identifier === 'demo-user') {
     return DEMO_USER_PROFILE;
   }
-  
+
   return isUUID(identifier)
     ? getUserProfileById(identifier)
     : getUserProfileByLoginId(identifier);
 }
 
 // 내부 구현: UUID로 조회
-async function getUserProfileById(id: string): Promise<UserProfileData | null> {
+async function getUserProfileByIdInternal(
+  id: string
+): Promise<UserProfileData | null> {
   const user = await prisma.user.findUnique({
     where: { id: id },
     select: {
@@ -77,34 +83,51 @@ async function getUserProfileById(id: string): Promise<UserProfileData | null> {
 
   if (!user) return null;
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const todayWaterCount = await prisma.careRecord.count({
+  // 물이 필요한 식물 개수
+  const needsWaterCount = await prisma.plant.count({
     where: {
       authorId: user.id,
-      type: 'water',
-      date: { gte: todayStart }
+      isActive: true,
+      needsWater: true
     }
   });
 
-  const todayNutrientCount = await prisma.careRecord.count({
+  // 영양제가 필요한 식물 개수
+  const needsNutrientCount = await prisma.plant.count({
     where: {
       authorId: user.id,
-      type: 'nutrient',
-      date: { gte: todayStart }
+      isActive: true,
+      needsNutrient: true
     }
   });
 
   return {
     ...user,
-    todayWaterCount,
-    todayNutrientCount
+    needsWaterCount,
+    needsNutrientCount
   };
 }
 
+// 캐시된 사용자 프로필 조회 (ID 기반)
+function getCachedUserProfileById(id: string) {
+  return unstable_cache(
+    () => getUserProfileByIdInternal(id),
+    [`user-profile-${id}`],
+    {
+      tags: [CacheTags.garden(id)]
+    }
+  )();
+}
+
+// 외부 인터페이스: UUID로 조회
+async function getUserProfileById(id: string): Promise<UserProfileData | null> {
+  return await getCachedUserProfileById(id);
+}
+
 // 내부 구현: loginId로 조회
-async function getUserProfileByLoginId(loginId: string): Promise<UserProfileData | null> {
+async function getUserProfileByLoginIdInternal(
+  loginId: string
+): Promise<UserProfileData | null> {
   const user = await prisma.user.findUnique({
     where: { loginId: loginId },
     select: {
@@ -132,34 +155,48 @@ async function getUserProfileByLoginId(loginId: string): Promise<UserProfileData
 
   if (!user) return null;
 
-  // 2. 오늘의 시작 시간 설정
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  // 3. 오늘의 물주기 카운트
-  const todayWaterCount = await prisma.careRecord.count({
+  // 물이 필요한 식물 개수
+  const needsWaterCount = await prisma.plant.count({
     where: {
       authorId: user.id,
-      type: 'water',
-      date: { gte: todayStart }
+      isActive: true,
+      needsWater: true
     }
   });
 
-  // 4. 오늘의 영양제 카운트
-  const todayNutrientCount = await prisma.careRecord.count({
+  // 영양제가 필요한 식물 개수
+  const needsNutrientCount = await prisma.plant.count({
     where: {
       authorId: user.id,
-      type: 'nutrient',
-      date: { gte: todayStart }
+      isActive: true,
+      needsNutrient: true
     }
   });
 
-  // 5. 결과 통합
+  // 결과 통합
   return {
     ...user,
-    todayWaterCount,
-    todayNutrientCount
+    needsWaterCount,
+    needsNutrientCount
   };
+}
+
+// 캐시된 사용자 프로필 조회 (loginId 기반)
+function getCachedUserProfileByLoginId(loginId: string) {
+  return unstable_cache(
+    () => getUserProfileByLoginIdInternal(loginId),
+    [`user-profile-loginId-${loginId}`],
+    {
+      tags: [CacheTags.garden(loginId)]
+    }
+  )();
+}
+
+// 외부 인터페이스: loginId로 조회
+async function getUserProfileByLoginId(
+  loginId: string
+): Promise<UserProfileData | null> {
+  return await getCachedUserProfileByLoginId(loginId);
 }
 
 // 프로필 업데이트
@@ -197,7 +234,10 @@ export async function updateUserProfile(formData: FormData) {
       }
     });
 
-    // 캐시 재검증
+    // 캐시 무효화
+    revalidateUserCache('gardenProfile', user.loginId);
+
+    // 페이지 재검증
     revalidatePath('/garden');
     revalidatePath('/garden/profile');
 
