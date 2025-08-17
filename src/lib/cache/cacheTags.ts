@@ -25,7 +25,11 @@ export const CacheTags = {
   allEvents: 'events-all' as CacheTagType,
 
   // 전역 태그
-  allContent: 'content-all' as CacheTagType
+  allContent: 'content-all' as CacheTagType,
+  
+  // 홈페이지 관련 태그
+  homeBanner: 'home-banner' as CacheTagType,
+  homeArticles: 'home-articles' as CacheTagType
 } as const;
 
 // 타입 안전성을 위한 태그 타입 정의 - 템플릿 리터럴 타입 사용
@@ -44,4 +48,6 @@ export type CacheTagType =
   | `event-${string}`
   | 'articles-all'
   | 'events-all'
-  | 'content-all';
+  | 'content-all'
+  | 'home-banner'
+  | 'home-articles';
