@@ -149,41 +149,55 @@ export async function getActiveEvents() {
   }
 }
 
+// 배너용 진행중인 이벤트 조회 내부 구현
+async function getActiveEventsForBannerInternal(limit: number = 3) {
+  const now = new Date();
+
+  // 종료 날짜가 지난 이벤트들의 isEnded를 true로 업데이트
+  await prisma.event.updateMany({
+    where: {
+      endDate: { lt: now },
+      isEnded: false
+    },
+    data: { isEnded: true }
+  });
+
+  const events = await prisma.event.findMany({
+    where: {
+      isEnded: false,
+      isActive: true
+    },
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+      image: true,
+      isEnded: true,
+      endDate: true,
+      createdAt: true
+    },
+    orderBy: {
+      createdAt: 'desc'
+    },
+    take: limit
+  });
+
+  return events;
+}
+
+// 캐시된 배너용 이벤트 조회
+const getCachedActiveEventsForBanner = unstable_cache(
+  getActiveEventsForBannerInternal,
+  ['home-banner-events'],
+  {
+    tags: [CacheTags.homeBanner, CacheTags.allEvents]
+  }
+);
+
 // 배너용 진행중인 이벤트 조회 (최신순으로 지정된 개수만)
 export async function getActiveEventsForBanner(limit: number = 3) {
   try {
-    const now = new Date();
-
-    // 종료 날짜가 지난 이벤트들의 isEnded를 true로 업데이트
-    await prisma.event.updateMany({
-      where: {
-        endDate: { lt: now },
-        isEnded: false
-      },
-      data: { isEnded: true }
-    });
-
-    const events = await prisma.event.findMany({
-      where: {
-        isEnded: false,
-        isActive: true
-      },
-      select: {
-        id: true,
-        title: true,
-        subtitle: true,
-        image: true,
-        isEnded: true,
-        endDate: true,
-        createdAt: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: limit
-    });
-
-    return events;
+    return await getCachedActiveEventsForBanner(limit);
   } catch (error) {
     console.error('배너용 진행중인 이벤트 조회 오류:', error);
     throw new Error(
