@@ -63,6 +63,7 @@ export const InvalidationMap = {
   // 아티클 작성/삭제 시 (관리자만)
   articleCreate: (): CacheTagType[] => [
     CacheTags.allArticles, // 전체 아티클 목록
+    CacheTags.homeArticles, // 홈페이지 최신 아티클
     CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
   ],
 
@@ -70,12 +71,14 @@ export const InvalidationMap = {
   articleUpdate: (articleId: string): CacheTagType[] => [
     CacheTags.allArticles, // 전체 아티클 목록
     CacheTags.article(articleId), // 해당 아티클 상세 페이지
+    CacheTags.homeArticles, // 홈페이지 최신 아티클 (최신 3개에 포함될 수 있음)
     CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
   ],
 
   // 이벤트 작성/삭제 시 (관리자만)
   eventCreate: (): CacheTagType[] => [
     CacheTags.allEvents, // 전체 이벤트 목록
+    CacheTags.homeBanner, // 홈페이지 배너
     CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
   ],
 
@@ -83,6 +86,7 @@ export const InvalidationMap = {
   eventUpdate: (eventId: string): CacheTagType[] => [
     CacheTags.allEvents, // 전체 이벤트 목록
     CacheTags.event(eventId), // 해당 이벤트 상세 페이지
+    CacheTags.homeBanner, // 홈페이지 배너 (진행중 이벤트에 포함될 수 있음)
     CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
   ],
 
