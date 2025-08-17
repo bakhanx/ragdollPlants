@@ -10,9 +10,9 @@ interface ProfileCardProps {
   nickname: string;
   level: number;
   stats: {
-    visitors: number;
+    diaries: number;
     galleries: number;
-    plants: number;
+    careCount: number;
   };
   levelProgress: number;
   interests: string[];
