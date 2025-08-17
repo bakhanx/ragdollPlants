@@ -5,9 +5,9 @@ interface UserInfoSectionProps {
   nickname: string;
   level: number;
   stats: {
-    visitors: number;
+    diaries: number;
     galleries: number;
-    plants: number;
+    careCount: number;
   };
 }
 
@@ -27,7 +27,7 @@ export default function UserInfoSection({ nickname, level, stats }: UserInfoSect
       {/* 통계 그리드 */}
       <div className="grid grid-cols-3 gap-3">
         <CountStatCard
-          value={stats.visitors}
+          value={stats.diaries}
           label="다이어리"
           href="/diaries"
         />
@@ -37,7 +37,7 @@ export default function UserInfoSection({ nickname, level, stats }: UserInfoSect
           href="/galleries"
         />
         <CountStatCard
-          value={stats.plants}
+          value={stats.careCount}
           label="관리횟수"
           href="/care"
         />
