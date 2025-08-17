@@ -379,8 +379,8 @@ export const DEMO_USER_PROFILE: DemoUserProfile = {
     followersList: 12,
     galleries: 2
   },
-  todayWaterCount: 1,
-  todayNutrientCount: 0
+  needsWaterCount: 2,
+  needsNutrientCount: 1
 };
 
 // Export 데이터
