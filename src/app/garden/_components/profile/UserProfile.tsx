@@ -23,7 +23,7 @@ export default function UserProfile({
           galleries: user._count.galleries,
           careCount: user.waterCount + user.nutrientCount // 누적 관리횟수
         }}
-        levelProgress={user.levelProgress}
+        progress={user.experience / 100}
         interests={user.interests}
         profileImage={user.image}
       />

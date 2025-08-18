@@ -18,7 +18,7 @@ export type UserProfileData = {
   bio: string | null;
   isProfilePublic: boolean;
   level: number;
-  levelProgress: number;
+  experience: number;
   waterCount: number;
   nutrientCount: number;
   interests: string[];
@@ -67,7 +67,7 @@ async function getUserProfileByIdInternal(
       bio: true,
       isProfilePublic: true,
       level: true,
-      levelProgress: true,
+      experience: true,
       waterCount: true,
       nutrientCount: true,
       interests: true,
@@ -139,7 +139,7 @@ async function getUserProfileByLoginIdInternal(
       bio: true,
       isProfilePublic: true,
       level: true,
-      levelProgress: true,
+      experience: true,
       waterCount: true, // 누적 물주기
       nutrientCount: true, // 누적 영양제
       interests: true,

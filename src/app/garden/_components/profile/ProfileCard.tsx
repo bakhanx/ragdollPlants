@@ -14,7 +14,7 @@ interface ProfileCardProps {
     galleries: number;
     careCount: number;
   };
-  levelProgress: number;
+  progress: number;
   interests: string[];
   profileImage?: string | null;
 }
@@ -23,7 +23,7 @@ export default function ProfileCard({
   nickname,
   level,
   stats,
-  levelProgress,
+  progress,
   interests,
   profileImage
 }: ProfileCardProps) {
@@ -47,7 +47,7 @@ export default function ProfileCard({
         />
       </div>
 
-      <LevelProgress progress={levelProgress} />
+      <LevelProgress progress={progress} />
 
       {/* 관심사 태그 */}
       <div className="mt-4">
