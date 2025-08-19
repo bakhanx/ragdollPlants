@@ -9,6 +9,7 @@ import PlantTitle from '../PlantTitle';
 interface ProfileCardProps {
   nickname: string;
   level: number;
+  levelTitle: string;
   stats: {
     diaries: number;
     galleries: number;
@@ -22,6 +23,7 @@ interface ProfileCardProps {
 export default function ProfileCard({
   nickname,
   level,
+  levelTitle,
   stats,
   progress,
   interests,
@@ -43,6 +45,7 @@ export default function ProfileCard({
         <UserInfoSection 
           nickname={nickname}
           level={level}
+          levelTitle={levelTitle}
           stats={stats}
         />
       </div>
