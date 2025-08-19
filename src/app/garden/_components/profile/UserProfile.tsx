@@ -18,12 +18,13 @@ export default function UserProfile({
       <ProfileCard
         nickname={user.name || '사용자'}
         level={user.level}
+        levelTitle={user.levelTitle}
         stats={{
           diaries: user._count.galleries,
           galleries: user._count.galleries,
           careCount: user.waterCount + user.nutrientCount // 누적 관리횟수
         }}
-        progress={user.experience / 100}
+        progress={user.levelProgress}
         interests={user.interests}
         profileImage={user.image}
       />
