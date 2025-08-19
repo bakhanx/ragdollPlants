@@ -10,15 +10,15 @@ export default function LevelProgress({ progress }: LevelProgressProps) {
           다음 레벨까지
         </span>
         <span className="text-xs font-medium text-green-700 sm:text-sm">
-          {progress}%
+          {Math.round(progress)}%
         </span>
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
         <div
           className="h-full bg-gradient-to-r from-green-500 to-green-400 transition-all duration-300"
-          style={{ width: `${progress}%` }}
+          style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
         />
       </div>
     </div>
   );
-} 
+}
