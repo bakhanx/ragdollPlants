@@ -8,6 +8,7 @@ import { DEMO_CARE_RESPONSE } from '@/app/_constants/demoData';
 import { CacheTags } from '@/lib/cache/cacheTags';
 import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
 import { CareResponse } from '@/types/cache/care';
+import { grantExperience } from '@/lib/gamification';
 
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
@@ -171,17 +172,25 @@ export async function addCareRecord(
     data: updateData
   });
 
-  // 사용자 누적 카운트 업데이트
+  // 사용자 누적 카운트 업데이트 및 경험치 부여
   if (type === 'water') {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { waterCount: { increment: 1 } }
-    });
+    await Promise.all([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { waterCount: { increment: 1 } }
+      }),
+      // 물주기 경험치 부여 (+10)
+      grantExperience(user.id, 'WATER_PLANT', '식물에 물 주기')
+    ]);
   } else if (type === 'nutrient') {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { nutrientCount: { increment: 1 } }
-    });
+    await Promise.all([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { nutrientCount: { increment: 1 } }
+      }),
+      // 영양제 경험치 부여 (+15)
+      grantExperience(user.id, 'ADD_NUTRIENT', '식물에 영양제 주기')
+    ]);
   }
 
   // 캐시 무효화

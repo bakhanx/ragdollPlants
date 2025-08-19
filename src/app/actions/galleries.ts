@@ -26,6 +26,7 @@ import {
 } from '@/types/cache/gallery';
 import { galleryForCache } from '@/app/_utils/cacheUtils';
 import { unstable_cache } from 'next/cache';
+import { grantExperience } from '@/lib/gamification';
 
 // 갤러리 생성 유효성 검사 스키마
 const createGallerySchema = z.object({
@@ -368,6 +369,9 @@ export async function createGallery(formData: FormData) {
         }
       }
     });
+
+    // 갤러리 업로드 경험치 부여 (+20)
+    await grantExperience(user.id, 'UPLOAD_GALLERY', '갤러리 사진 업로드');
 
     // 캐시 무효화
     revalidateUserCache('galleryCreate', user.id);

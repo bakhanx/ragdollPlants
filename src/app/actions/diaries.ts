@@ -19,6 +19,7 @@ import {
 } from '@/lib/cache/cacheInvalidation';
 import { DiariesResponse } from '@/types/cache/diary';
 import { diaryForCache } from '@/app/_utils/cacheUtils';
+import { grantExperience } from '@/lib/gamification';
 
 // 다이어리 생성 유효성 검사 스키마
 const createDiarySchema = z.object({
@@ -339,6 +340,9 @@ export async function createDiary(formData: FormData) {
     });
 
     console.log('다이어리 생성 완료:', { id: diary.id, title: diary.title });
+
+    // 다이어리 작성 경험치 부여 (+25)
+    await grantExperience(user.id, 'CREATE_DIARY', '다이어리 작성');
 
     // 캐시 무효화
     revalidateUserCache('diaryCreate', user.id);

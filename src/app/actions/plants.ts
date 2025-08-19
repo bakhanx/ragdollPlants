@@ -23,6 +23,7 @@ import {
 } from '@/lib/cloudflare-images';
 import { populateLikeInfo } from './likes';
 import { DEMO_PLANTS_RESPONSE } from '@/app/_constants/demoData';
+import { grantExperience } from '@/lib/gamification';
 
 // 식물 생성 유효성 검사 스키마
 const createPlantSchema = z.object({
@@ -330,6 +331,9 @@ export async function createPlant(formData: FormData) {
         }
       }
     });
+
+    // 식물 등록 경험치 부여 (+30)
+    await grantExperience(user.id, 'ADD_PLANT', '새로운 식물 등록');
 
     // 캐시 무효화
     revalidateUserCache('plantCreate', user.id);
