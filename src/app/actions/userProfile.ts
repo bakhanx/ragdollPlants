@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/lib/auth-utils';
 import { DEMO_USER_PROFILE } from '@/app/_constants/demoData';
 import { CacheTags } from '@/lib/cache/cacheTags';
 import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
+import { getLevelInfo } from '@/lib/gamification';
 
 // 사용자 프로필 데이터 타입
 export type UserProfileData = {
@@ -19,6 +20,10 @@ export type UserProfileData = {
   isProfilePublic: boolean;
   level: number;
   experience: number;
+  levelTitle: string;
+  levelProgress: number;
+  nextLevelExp: number;
+  currentLevelExp: number;
   waterCount: number;
   nutrientCount: number;
   interests: string[];
@@ -101,8 +106,15 @@ async function getUserProfileByIdInternal(
     }
   });
 
+  // 레벨 정보 계산
+  const levelInfo = getLevelInfo(user.experience);
+
   return {
     ...user,
+    levelTitle: levelInfo.title,
+    levelProgress: levelInfo.progress,
+    nextLevelExp: levelInfo.nextLevelExp,
+    currentLevelExp: levelInfo.requiredExp,
     needsWaterCount,
     needsNutrientCount
   };
@@ -173,9 +185,16 @@ async function getUserProfileByLoginIdInternal(
     }
   });
 
+  // 레벨 정보 계산
+  const levelInfo = getLevelInfo(user.experience);
+
   // 결과 통합
   return {
     ...user,
+    levelTitle: levelInfo.title,
+    levelProgress: levelInfo.progress,
+    nextLevelExp: levelInfo.nextLevelExp,
+    currentLevelExp: levelInfo.requiredExp,
     needsWaterCount,
     needsNutrientCount
   };
