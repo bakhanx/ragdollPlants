@@ -8,42 +8,43 @@ datasource db {
 }
 
 model User {
-  id              String         @id @default(uuid())
-  loginId         String         @unique @map("login_id")
-  name            String         @unique
-  email           String         @unique
-  emailVerified   DateTime?      @map("email_verified")
-  image           String?        @map("profile_image")
-  coverImage      String?        @map("cover_image")
-  bio             String?
-  password        String?
-  role            String         @default("USER")
-  isProfilePublic Boolean        @default(true) @map("is_profile_public")
-  isActive        Boolean        @default(true) @map("is_active")
-  level           Int            @default(1)
-  levelProgress   Int            @default(0) @map("level_progress")
-  waterCount      Int            @default(0) @map("water_count")
-  nutrientCount   Int            @default(0) @map("nutrient_count")
-  interests       String[]
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @updatedAt @map("updated_at")
-  phone           String?        @map("phone")
-  accounts        Account[]
-  articles        Article[]
-  careRecords     CareRecord[]
-  careReminders   CareReminder[]
-  comments        Comment[]
-  diaries         Diary[]
-  events          Event[]
-  followersList   Follow[]       @relation("UserFollows")
-  followingList   Follow[]       @relation("UserFollowing")
-  galleries       Gallery[]
-  likes           Like[]
-  notifications   Notification[]
-  plants          Plant[]
-  sessions        Session[]
-  reports         Report[]       @relation("UserReports")
-  reviewedReports Report[]       @relation("UserReviews")
+  id               String         @id @default(uuid())
+  loginId          String         @unique @map("login_id")
+  name             String         @unique
+  email            String         @unique
+  emailVerified    DateTime?      @map("email_verified")
+  image            String?        @map("profile_image")
+  coverImage       String?        @map("cover_image")
+  bio              String?
+  password         String?
+  role             String         @default("USER")
+  isProfilePublic  Boolean        @default(true) @map("is_profile_public")
+  isActive         Boolean        @default(true) @map("is_active")
+  level            Int            @default(1)
+  experience       Int            @default(0)
+  lastActivityDate DateTime?      @map("last_activity_date")
+  waterCount       Int            @default(0) @map("water_count")
+  nutrientCount    Int            @default(0) @map("nutrient_count")
+  interests        String[]
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  phone            String?        @map("phone")
+  accounts         Account[]
+  articles         Article[]
+  careRecords      CareRecord[]
+  careReminders    CareReminder[]
+  comments         Comment[]
+  diaries          Diary[]
+  events           Event[]
+  followersList    Follow[]       @relation("UserFollows")
+  followingList    Follow[]       @relation("UserFollowing")
+  galleries        Gallery[]
+  likes            Like[]
+  notifications    Notification[]
+  plants           Plant[]
+  sessions         Session[]
+  reports          Report[]       @relation("UserReports")
+  reviewedReports  Report[]       @relation("UserReviews")
 
   @@map("users")
 }
