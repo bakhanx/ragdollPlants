@@ -370,7 +370,11 @@ export const DEMO_USER_PROFILE: DemoUserProfile = {
   bio: '식물을 처음 키우기 시작한 초보입니다. 몬스테라와 스킨답서스를 키우고 있어요!',
   isProfilePublic: true,
   level: 2,
-  levelProgress: 45,
+  experience: 150,
+  levelTitle: '초보 정원사',
+  levelProgress: 50, 
+  nextLevelExp: 300, // 레벨 3에 필요한 경험치
+  currentLevelExp: 200, // 레벨 2에 필요한 경험치
   waterCount: 15,
   nutrientCount: 8,
   interests: ['실내식물', '초보가이드', '몬스테라'],
