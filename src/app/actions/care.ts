@@ -9,6 +9,7 @@ import { CacheTags } from '@/lib/cache/cacheTags';
 import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
 import { CareResponse } from '@/types/cache/care';
 import { grantExperience } from '@/lib/gamification';
+import { DemoService } from '@/services/demoService';
 
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
@@ -94,10 +95,10 @@ export async function getUserPlantsForCare(
 
     // 비로그인 데모 데이터
     if (!targetUserId) {
-      return DEMO_CARE_RESPONSE;
+      return DemoService.getDemoCareData();
     }
 
-    // 클로저를 활용한 캐시
+    // 실제 데이터 처리
     return await getCachedUserPlantsForCare(targetUserId);
   } catch (error) {
     console.error('식물 케어 데이터 조회 오류:', error);

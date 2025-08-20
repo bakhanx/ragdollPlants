@@ -20,6 +20,7 @@ import {
 import { DiariesResponse } from '@/types/cache/diary';
 import { diaryForCache } from '@/app/_utils/cacheUtils';
 import { grantExperience } from '@/lib/gamification';
+import { DemoService } from '@/services/demoService';
 
 // 다이어리 생성 유효성 검사 스키마
 const createDiarySchema = z.object({
@@ -133,7 +134,7 @@ export async function getDiaries(params?: {
 
     // 비로그인 데모 데이터
     if (!user) {
-      return DEMO_DIARIES_RESPONSE;
+      return DemoService.getDemoDiariesList();
     }
 
     const page = params?.page || 1;
@@ -155,6 +156,15 @@ export async function getDiaries(params?: {
 // 다이어리 조회 및 작성자 확인
 export async function getDiaryWithOwnership(id: string) {
   try {
+    // 데모 데이터 처리
+    if (DemoService.isDemoId(id)) {
+      const demoDiary = DemoService.getDemoDiaryDetail(id);
+      if (!demoDiary) {
+        throw new Error('다이어리를 찾을 수 없습니다.');
+      }
+      return { diary: demoDiary, isOwner: false };
+    }
+
     const currentUser = await getCurrentUser().catch(() => null);
 
     const diary = await prisma.diary.findUnique({
@@ -638,6 +648,12 @@ function getCachedDiariesByMyPlantDetail(plantId: string, userId: string) {
 // 식물 상세 페이지에서 사용하는 다이어리 조회
 export async function getDiariesByMyPlantDetail(plantId: string) {
   try {
+    // 데모 데이터 처리
+    if (DemoService.isDemoId(plantId)) {
+      return DemoService.getDemoDiariesByPlant(plantId);
+    }
+
+    // 실제 데이터 처리
     const user = await getCurrentUser();
     if (!user) {
       return null;
@@ -692,8 +708,13 @@ function getCachedDiaryById(diaryId: string) {
 // 특정 다이어리 조회
 export async function getDiaryById(id: string) {
   try {
-    const currentUser = await getCurrentUser().catch(() => null);
+    // 데모 데이터 처리
+    if (DemoService.isDemoId(id)) {
+      return DemoService.getDemoDiaryDetail(id);
+    }
 
+    // 실제 데이터 처리
+    const currentUser = await getCurrentUser().catch(() => null);
     const cachedDiary = await getCachedDiaryById(id);
 
     if (!cachedDiary) {

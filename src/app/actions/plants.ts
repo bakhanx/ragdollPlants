@@ -24,6 +24,7 @@ import {
 import { populateLikeInfo } from './likes';
 import { DEMO_PLANTS_RESPONSE } from '@/app/_constants/demoData';
 import { grantExperience } from '@/lib/gamification';
+import { DemoService } from '@/services/demoService';
 
 // 식물 생성 유효성 검사 스키마
 const createPlantSchema = z.object({
@@ -223,9 +224,15 @@ function getCachedPlantById(plantId: string, userId?: string) {
 // 특정 식물 상세 조회
 export async function getPlantById(id: string): Promise<CachedPlant> {
   try {
-    const currentUser = await getCurrentUser().catch(() => null);
+    // 데모 데이터 처리
+    if (DemoService.isDemoId(id)) {
+      const demoPlant = DemoService.getDemoPlantDetail(id);
+      if (!demoPlant) throw new Error('식물을 찾을 수 없습니다.');
+      return demoPlant;
+    }
 
-    // 클로저를 활용한 캐시 함수 호출
+    // 실제 데이터 처리
+    const currentUser = await getCurrentUser().catch(() => null);
     return await getCachedPlantById(id, currentUser?.id);
   } catch (error) {
     console.error('식물 조회 오류:', error);
