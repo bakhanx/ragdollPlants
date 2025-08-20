@@ -126,6 +126,11 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
       await addCareRecord(plant.id, 'water');
       router.refresh(); // 페이지 새로고침으로 데이터 동기화
     } catch (error) {
+      if (error instanceof Error && error?.message === 'AUTH_REQUIRED') {
+        alert('로그인이 필요합니다.');
+        router.push('/login');
+        return;
+      }
       console.error('물주기 기록 실패:', error);
       alert('물주기 기록에 실패했습니다. 다시 시도해주세요.');
       setWaterStatus(true); // 실패시 원래 상태로 복구
@@ -152,6 +157,12 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
       await addCareRecord(plant.id, 'nutrient');
       router.refresh(); // 페이지 새로고침으로 데이터 동기화
     } catch (error) {
+      // 인증 에러일 때 로그인 페이지로 리다이렉트
+      if (error instanceof Error && error?.message === 'AUTH_REQUIRED') {
+        alert('로그인이 필요합니다.');
+        router.push('/login');
+        return;
+      }
       console.error('영양제 기록 실패:', error);
       alert('영양제 기록에 실패했습니다. 다시 시도해주세요.');
       setNutrientStatus(true); // 실패시 원래 상태로 복구
