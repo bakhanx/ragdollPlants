@@ -2,15 +2,15 @@ import { getUserPlantsForCare } from '@/app/actions/care';
 import { CareCardList } from './CareCardList';
 
 export async function CareCardListWrapper() {
-  let careData: Awaited<ReturnType<typeof getUserPlantsForCare>> | null = null;
+  let careResult: Awaited<ReturnType<typeof getUserPlantsForCare>> | null = null;
   let hasError = false;
 
   try {
-    careData = await getUserPlantsForCare();
+    careResult = await getUserPlantsForCare();
   } catch (error) {
     console.error('케어 데이터 로딩 오류:', error);
     hasError = true;
-    careData = null;
+    careResult = null;
   }
 
   if (hasError) {
@@ -27,5 +27,10 @@ export async function CareCardListWrapper() {
     );
   }
 
-  return <CareCardList initialData={careData} />;
+  return (
+    <CareCardList 
+      initialData={careResult?.plants || null} 
+      isLoggedIn={careResult?.isLoggedIn || false} 
+    />
+  );
 }
