@@ -88,18 +88,25 @@ function getCachedUserPlantsForCare(targetUserId: string) {
  */
 export async function getUserPlantsForCare(
   userId?: string
-): Promise<CareResponse> {
+): Promise<{ plants: CareResponse; isLoggedIn: boolean }> {
   try {
     const session = await auth();
     const targetUserId = userId || session?.user?.id;
 
     // 비로그인 데모 데이터
     if (!targetUserId) {
-      return DemoService.getDemoCareData();
+      return {
+        plants: DemoService.getDemoCareData(),
+        isLoggedIn: false
+      };
     }
 
     // 실제 데이터 처리
-    return await getCachedUserPlantsForCare(targetUserId);
+    const plants = await getCachedUserPlantsForCare(targetUserId);
+    return {
+      plants,
+      isLoggedIn: true
+    };
   } catch (error) {
     console.error('식물 케어 데이터 조회 오류:', error);
     throw error;

@@ -129,24 +129,34 @@ export async function getMyPlants(params?: {
   page?: number;
   limit?: number;
   search?: string;
-}): Promise<PlantsResponse> {
+}): Promise<PlantsResponse & { isLoggedIn: boolean }> {
   try {
     const user = await getCurrentUser();
 
     // 비로그인 데모 데이터
     if (!user) {
-      return DEMO_PLANTS_RESPONSE;
+      return {
+        ...DEMO_PLANTS_RESPONSE,
+        isLoggedIn: false
+      };
     }
 
     const page = params?.page || 1;
     const limit = params?.limit || 4;
 
+    let plantsResponse: PlantsResponse;
+    
     // 검색이 있는 경우 캐시하지 않음
     if (params?.search?.trim()) {
-      return await getMyPlantsInternal(user.id, params);
+      plantsResponse = await getMyPlantsInternal(user.id, params);
+    } else {
+      plantsResponse = await getCachedMyPlants(user.id, page, limit);
     }
 
-    return await getCachedMyPlants(user.id, page, limit);
+    return {
+      ...plantsResponse,
+      isLoggedIn: true
+    };
   } catch (error) {
     console.error('내 식물 목록 조회 오류:', error);
     throw new Error('식물 목록을 불러오는 중 오류가 발생했습니다.');

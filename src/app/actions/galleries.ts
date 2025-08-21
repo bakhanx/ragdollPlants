@@ -262,7 +262,7 @@ function getCachedUserGalleries(targetUserId: string, isOwner: boolean) {
 // 사용자별 갤러리 조회
 export async function getUserGalleries(
   userId?: string
-): Promise<GalleriesResponse> {
+): Promise<GalleriesResponse & { isLoggedIn: boolean }> {
   try {
     const session = await getCurrentUser();
     const currentUserId = session?.id;
@@ -270,12 +270,20 @@ export async function getUserGalleries(
 
     // 비로그인 데모 데이터
     if (!targetUserId) {
-      return DEMO_GALLERIES_RESPONSE;
+      return {
+        ...DEMO_GALLERIES_RESPONSE,
+        isOwner: true,
+        isLoggedIn: false
+      };
     }
 
     const isOwner = currentUserId === targetUserId;
-
-    return await getCachedUserGalleries(targetUserId, isOwner);
+    const galleryData = await getCachedUserGalleries(targetUserId, isOwner);
+    
+    return {
+      ...galleryData,
+      isLoggedIn: true
+    };
   } catch (error) {
     console.error('사용자 갤러리 조회 오류:', error);
     throw error;

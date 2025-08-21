@@ -128,13 +128,16 @@ export async function getDiaries(params?: {
   page?: number;
   limit?: number;
   search?: string;
-}) {
+}): Promise<{ diaries: DiariesResponse; isLoggedIn: boolean }> {
   try {
     const user = await getCurrentUser();
 
     // 비로그인 데모 데이터
     if (!user) {
-      return DemoService.getDemoDiariesList();
+      return {
+        diaries: DemoService.getDemoDiariesList(),
+        isLoggedIn: false
+      };
     }
 
     const page = params?.page || 1;
@@ -142,11 +145,14 @@ export async function getDiaries(params?: {
     const search = params?.search?.trim();
 
     // 검색이 있는 경우 캐시 사용하지 않음
-    if (search) {
-      return getDiariesInternal(user.id, { page, limit, search });
-    }
+    const diaries = search 
+      ? await getDiariesInternal(user.id, { page, limit, search })
+      : await getCachedDiaries(user.id, page, limit);
 
-    return getCachedDiaries(user.id, page, limit);
+    return {
+      diaries,
+      isLoggedIn: true
+    };
   } catch (error) {
     console.error('다이어리 목록 조회 오류:', error);
     throw new Error('다이어리 목록을 불러오는 중 오류가 발생했습니다.');
