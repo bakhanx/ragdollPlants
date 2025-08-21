@@ -17,21 +17,23 @@ export default function ProfileImage({
   return (
     <div className="shrink-0">
       <div
-        className={`relative size-20 overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg sm:size-24 ${className} group`}
-      >
+        className={`relative overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg size-28 ${className} group mt-1`}>
         <Image
           src={src}
           alt={alt}
           fill
-          sizes="(max-width: 768px) 80px, 96px"
+          sizes="(max-width: 768px) 96px, 112px"
           className="object-cover"
           priority
         />
-        
+
         {showEditHint && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
             <div className="flex flex-col items-center gap-1 text-white">
-              <EditIcon size={24} className="[&_path]:stroke-white" />
+              <EditIcon
+                size={24}
+                className="[&_path]:stroke-white"
+              />
               <span className="text-xs font-medium">프로필 편집</span>
             </div>
           </div>
@@ -39,4 +41,4 @@ export default function ProfileImage({
       </div>
     </div>
   );
-} 
+}
