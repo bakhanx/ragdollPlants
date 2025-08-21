@@ -3,14 +3,20 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { GalleryImageModal } from './GalleryImageModal';
 import { GalleriesResponse } from '@/types/cache/gallery';
 
 interface GalleryGridProps {
   initialData: GalleriesResponse | null;
+  isLoggedIn?: boolean;
 }
 
-export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
+export const GalleryGrid = ({
+  initialData,
+  isLoggedIn = false
+}: GalleryGridProps) => {
+  const router = useRouter();
   if (!initialData) {
     return (
       <div className="mx-auto w-full max-w-md px-4 pb-20">
@@ -24,6 +30,15 @@ export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
   const items = initialData.galleries;
   const isOwner = initialData.isOwner || false;
 
+  // 업로드 버튼 클릭 핸들러
+  const handleUploadClick = () => {
+    if (!isLoggedIn) {
+      confirm('로그인 페이지로 이동하시겠습니까?');
+      router.push('/login');
+      return;
+    }
+    router.push('/galleries/upload');
+  };
 
   const photoCount = items.length;
 
@@ -53,23 +68,25 @@ export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
                 <p className="mb-3 text-sm opacity-70">
                   첫 번째 사진이 여기에 표시됩니다
                 </p>
-                <Link
-                  href="/galleries/upload"
-                  className="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm text-black transition-colors hover:bg-gray-100">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  첫 갤러리 등록하기
-                </Link>
+                {isOwner && (
+                  <button
+                    onClick={handleUploadClick}
+                    className="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm text-black transition-colors hover:bg-gray-100">
+                    <svg
+                      className="mr-2 h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    첫 갤러리 등록하기
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -143,7 +160,9 @@ export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
                   </h2>
                   <div className="flex items-center justify-between">
                     <span className="text-sm opacity-90">
-                      {new Date(featuredItem.createdAt).toLocaleDateString('ko-KR')}
+                      {new Date(featuredItem.createdAt).toLocaleDateString(
+                        'ko-KR'
+                      )}
                     </span>
                     <div className="flex items-center space-x-1">
                       <span className="text-sm">❤️</span>
@@ -198,7 +217,7 @@ export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
                   <Image
                     src={item.image}
                     alt={item.title}
-                    sizes='224px'
+                    sizes="224px"
                     quality={75}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -229,9 +248,9 @@ export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
           ))}
 
           {/* 추가 버튼 - 9개를 다 채우지 않았을 때만 */}
-          {gridItems.length < 9 && (
-            <Link
-              href="/galleries/upload"
+          {isOwner && gridItems.length < 9 && (
+            <button
+              onClick={handleUploadClick}
               className="group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-white/20 bg-black/30 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
               <div className="relative flex aspect-square items-center justify-center">
                 <div className="text-center text-white">
@@ -250,14 +269,14 @@ export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
                   <div className="text-xs font-medium">추가</div>
                 </div>
               </div>
-            </Link>
+            </button>
           )}
 
           {/* 나머지 빈 칸들 (9개 중 남은 칸들) */}
           {Array.from({
             length: Math.max(
               0,
-              9 - gridItems.length - (gridItems.length < 9 ? 1 : 0)
+              9 - gridItems.length - (isOwner && gridItems.length < 9 ? 1 : 0)
             )
           }).map((_, index) => (
             <div
@@ -278,7 +297,7 @@ export const GalleryGrid = ({ initialData }: GalleryGridProps) => {
                 </svg>
                 <div className="text-xs">
                   {gridItems.length +
-                    (gridItems.length < 9 ? 1 : 0) +
+                    (isOwner && gridItems.length < 9 ? 1 : 0) +
                     index +
                     1}
                   번째

@@ -1,6 +1,7 @@
 import { getMyPlants } from '@/app/actions/plants';
 import { PAGINATION } from '@/app/_constants/pagination';
 import { MyPlantList } from './lists/MyPlantList';
+import { UploadButton } from '@/app/_components/common/UploadButton';
 
 interface MyPlantListWrapperProps {
   currentPage: number;
@@ -11,11 +12,11 @@ export default async function MyPlantListWrapper({
   currentPage,
   searchQuery
 }: MyPlantListWrapperProps) {
-  let plantsData: Awaited<ReturnType<typeof getMyPlants>> | null = null;
+  let plantsResult: Awaited<ReturnType<typeof getMyPlants>> | null = null;
   let hasError = false;
 
   try {
-    plantsData = await getMyPlants({
+    plantsResult = await getMyPlants({
       page: currentPage,
       limit: PAGINATION.ITEMS_PER_PAGE,
       search: searchQuery
@@ -23,7 +24,7 @@ export default async function MyPlantListWrapper({
   } catch (error) {
     console.error('식물 목록 로딩 오류:', error);
     hasError = true;
-    plantsData = null;
+    plantsResult = null;
   }
 
   if (hasError) {
@@ -37,10 +38,24 @@ export default async function MyPlantListWrapper({
     );
   }
 
+  const isLoggedIn = plantsResult?.isLoggedIn || false;
+  const plantsData = plantsResult || null;
+
   return (
-    <MyPlantList
-      plantsData={plantsData}
-      searchQuery={searchQuery}
-    />
+    <div>
+      {/* 업로드 버튼 */}
+      <div className="absolute top-22 right-4 z-10">
+        <UploadButton 
+          type="myplants" 
+          isLoggedIn={isLoggedIn} 
+        />
+      </div>
+      
+      {/* 식물 목록 */}
+      <MyPlantList
+        plantsData={plantsData}
+        searchQuery={searchQuery}
+      />
+    </div>
   );
 }

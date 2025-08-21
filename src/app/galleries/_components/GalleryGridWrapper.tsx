@@ -1,16 +1,18 @@
 import { getUserGalleries } from '@/app/actions/galleries';
 import { GalleryGrid } from './GalleryGrid';
+import { UploadButton } from '@/app/_components/common/UploadButton';
 
 export async function GalleryGridWrapper() {
-  let galleriesData: Awaited<ReturnType<typeof getUserGalleries>> | null = null;
+  let galleriesResult: Awaited<ReturnType<typeof getUserGalleries>> | null =
+    null;
   let hasError = false;
 
   try {
-    galleriesData = await getUserGalleries();
+    galleriesResult = await getUserGalleries();
   } catch (error) {
     console.error('갤러리 데이터 로딩 오류:', error);
     hasError = true;
-    galleriesData = null;
+    galleriesResult = null;
   }
 
   if (hasError) {
@@ -26,5 +28,30 @@ export async function GalleryGridWrapper() {
     );
   }
 
-  return <GalleryGrid initialData={galleriesData} />;
+  const galleryData = galleriesResult
+    ? {
+        galleries: galleriesResult.galleries,
+        isOwner: galleriesResult.isOwner
+      }
+    : null;
+
+  const isLoggedIn = galleriesResult?.isLoggedIn || false;
+
+  return (
+    <div>
+      {/* 업로드 버튼  */}
+      <div className="absolute top-22 right-4 z-10">
+        <UploadButton
+          type="galleries"
+          isLoggedIn={isLoggedIn}
+        />
+      </div>
+
+      {/* 갤러리 그리드 */}
+      <GalleryGrid
+        initialData={galleryData}
+        isLoggedIn={isLoggedIn}
+      />
+    </div>
+  );
 }
