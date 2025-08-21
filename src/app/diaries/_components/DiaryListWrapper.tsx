@@ -2,6 +2,7 @@ import { getDiaries } from '@/app/actions/diaries';
 import { PAGINATION } from '@/app/_constants/pagination';
 import DiaryList from './DiaryList';
 import DiaryCardsSkeleton from './DiaryCardsSkeleton';
+import { UploadButton } from '@/app/_components/common/UploadButton';
 
 interface DiaryListWrapperProps {
   currentPage: number;
@@ -12,11 +13,11 @@ export default async function DiaryListWrapper({
   currentPage,
   searchQuery
 }: DiaryListWrapperProps) {
-  let diariesData: Awaited<ReturnType<typeof getDiaries>> | null = null;
+  let diariesResult: Awaited<ReturnType<typeof getDiaries>> | null = null;
   let hasError = false;
 
   try {
-    diariesData = await getDiaries({
+    diariesResult = await getDiaries({
       page: currentPage,
       limit: PAGINATION.ITEMS_PER_PAGE,
       search: searchQuery
@@ -24,7 +25,7 @@ export default async function DiaryListWrapper({
   } catch (error) {
     console.error('다이어리 목록 로딩 오류:', error);
     hasError = true;
-    diariesData = null;
+    diariesResult = null;
   }
 
   if (hasError) {
@@ -38,8 +39,20 @@ export default async function DiaryListWrapper({
     );
   }
 
+  const isLoggedIn = diariesResult?.isLoggedIn || false;
+  const diariesData = diariesResult?.diaries || null;
+
   return (
-    <>
+    <div>
+      {/* 업로드 버튼 */}
+      <div className="absolute top-22 right-4 z-10">
+        <UploadButton
+          type="diaries"
+          isLoggedIn={isLoggedIn}
+        />
+      </div>
+
+      {/* 다이어리 목록 */}
       {!diariesData ? (
         <DiaryCardsSkeleton />
       ) : (
@@ -49,6 +62,6 @@ export default async function DiaryListWrapper({
           searchQuery={searchQuery}
         />
       )}
-    </>
+    </div>
   );
 }
