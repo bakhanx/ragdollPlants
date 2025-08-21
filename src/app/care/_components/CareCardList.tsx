@@ -8,9 +8,10 @@ import { CareResponse } from '@/types/cache/care';
 
 interface CareCardListProps {
   initialData: CareResponse | null;
+  isLoggedIn: boolean;
 }
 
-export const CareCardList = ({ initialData }: CareCardListProps) => {
+export const CareCardList = ({ initialData, isLoggedIn }: CareCardListProps) => {
   const router = useRouter();
 
   // 페이지 방문 시 날짜 변경 체크
@@ -101,6 +102,7 @@ export const CareCardList = ({ initialData }: CareCardListProps) => {
             lastNutrientDate: plant.lastNutrientDate,
             nutrientInterval: plant.nutrientInterval
           }}
+          isLoggedIn={isLoggedIn}
         />
       ))}
     </div>
