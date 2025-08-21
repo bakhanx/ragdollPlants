@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
-import { UploadButton } from '../_components/common/UploadButton';
 import { GalleryGridSkeleton } from './_components/GalleryGridSkeleton';
 import { GalleryGridWrapper } from './_components/GalleryGridWrapper';
 
@@ -31,14 +30,6 @@ export default function GalleriesPage() {
                 내 소중한 식물들의 아름다운 순간들
               </p>
               <div className="mx-auto mb-8 h-px w-16 bg-white opacity-30"></div>
-            </div>
-
-            {/* 업로드 버튼 */}
-            <div className="absolute top-0 right-0">
-              <UploadButton
-                link="/galleries/upload"
-                title="사진 추가"
-              />
             </div>
           </div>
         </div>

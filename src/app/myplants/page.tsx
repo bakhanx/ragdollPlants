@@ -2,11 +2,9 @@ import { Suspense } from 'react';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
-import { UploadButton } from '../_components/common/UploadButton';
 import { SearchInputWithNavigation } from '../_components/common/SearchInputWithNavigation';
 import MyPlantListWrapper from './_components/MyPlantListWrapper';
 import MyPlantCardsSkeleton from './_components/MyPlantCardsSkeleton';
-import { MAX_PLANTS } from '@/types/models/plant';
 
 interface MyPlantsPageProps {
   searchParams: Promise<{
@@ -32,9 +30,9 @@ export default async function MyPlantsPage({
         />
 
         <div className="w-full py-4">
-          <div className="py-8">
-            {/* 검색 및 업로드 버튼 */}
-            <div className="mt-4 mb-6 flex justify-between">
+          <div className="py-2">
+            {/* 검색 */}
+            <div className="mt-3 mb-6">
               <div className="w-full max-w-xs">
                 <SearchInputWithNavigation
                   placeholder="식물 이름 또는 종류 검색"
@@ -42,11 +40,6 @@ export default async function MyPlantsPage({
                   basePath="/myplants"
                 />
               </div>
-              <UploadButton
-                link="/myplants/upload"
-                title="식물 등록"
-                maxCount={MAX_PLANTS}
-              />
             </div>
 
             {/* 식물 목록 */}
