@@ -45,6 +45,7 @@ export default function EventList({ initialData, isAdmin }: EventListProps) {
       active: activeEvents,
       ended: endedEvents
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeEvents.length, endedEvents.length]
   );
 
