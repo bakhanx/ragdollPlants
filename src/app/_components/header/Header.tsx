@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { Suspense } from 'react';
 import { HeaderLeft } from './HeaderLeft';
 import { HeaderCenter } from './HeaderCenter';
 import { HeaderRight } from './HeaderRight';
@@ -49,12 +51,17 @@ export const Header = ({
         />
 
         {/* 오른쪽: 알림, 메뉴 버튼 */}
-        <HeaderRight
-          showNotification={showNotification}
-          showContentMenu={showContentMenu}
-          contentType={contentType}
-          contentId={id}
-        />
+        <Suspense
+          fallback={
+            <div className="h-9 w-9 animate-pulse rounded-xl bg-white/30" />
+          }>
+          <HeaderRight
+            showNotification={showNotification}
+            showContentMenu={showContentMenu}
+            contentType={contentType}
+            contentId={id}
+          />
+        </Suspense>
       </div>
     </>
   );
