@@ -1,9 +1,8 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
 import { revalidatePath, unstable_cache } from 'next/cache';
-import { requireAuth } from '@/lib/auth-utils';
+import { requireAuth, getCurrentUser } from '@/lib/auth-utils';
 import { DEMO_CARE_RESPONSE } from '@/app/_constants/demoData';
 import { CacheTags } from '@/lib/cache/cacheTags';
 import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
@@ -90,8 +89,8 @@ export async function getUserPlantsForCare(
   userId?: string
 ): Promise<{ plants: CareResponse; isLoggedIn: boolean }> {
   try {
-    const session = await auth();
-    const targetUserId = userId || session?.user?.id;
+    const currentUser = await getCurrentUser();
+    const targetUserId = userId || currentUser?.id;
 
     // 비로그인 데모 데이터
     if (!targetUserId) {
@@ -215,14 +214,10 @@ export async function updateCareSchedule(
   waterInterval?: number,
   nutrientInterval?: number
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error('인증이 필요합니다');
-  }
+  const user = await requireAuth();
 
   const plant = await prisma.plant.findFirst({
-    where: { id: plantId, authorId: session.user.id }
+    where: { id: plantId, authorId: user.id }
   });
 
   if (!plant) {
@@ -261,7 +256,7 @@ export async function updateCareSchedule(
   });
 
   // 캐시 무효화
-  revalidateUserCache('plantCare', session.user.id);
+  revalidateUserCache('plantCare', user.id);
   return { success: true };
 }
 
@@ -269,16 +264,12 @@ export async function updateCareSchedule(
  * 케어 기록 히스토리 조회
  */
 export async function getCareHistory(plantId: string, limit: number = 10) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error('인증이 필요합니다');
-  }
+  const user = await requireAuth();
 
   return await prisma.careRecord.findMany({
     where: {
       plantId,
-      authorId: session.user.id
+      authorId: user.id
     },
     orderBy: { date: 'desc' },
     take: limit
@@ -289,18 +280,14 @@ export async function getCareHistory(plantId: string, limit: number = 10) {
  * 오늘 케어가 필요한 식물 조회
  */
 export async function getTodayCareNeeds() {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error('인증이 필요합니다');
-  }
+  const user = await requireAuth();
 
   const today = new Date();
   today.setHours(23, 59, 59, 999);
 
   return await prisma.plant.findMany({
     where: {
-      authorId: session.user.id,
+      authorId: user.id,
       isActive: true,
       OR: [
         { nextWateringDate: { lte: today } },
@@ -328,23 +315,19 @@ export async function toggleCareStatus(
   careType: 'water' | 'nutrient',
   status: boolean
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error('인증이 필요합니다');
-  }
+  const user = await requireAuth();
 
   await prisma.plant.update({
     where: {
       id: plantId,
-      authorId: session.user.id
+      authorId: user.id
     },
     data:
       careType === 'water' ? { needsWater: status } : { needsNutrient: status }
   });
 
   // 캐시 무효화
-  revalidateUserCache('plantCare', session.user.id);
+  revalidateUserCache('plantCare', user.id);
   return { success: true };
 }
 

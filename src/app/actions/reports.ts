@@ -1,7 +1,7 @@
 'use server';
 
-import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { requireAuth, requireAdmin } from '@/lib/auth-utils';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
@@ -27,18 +27,14 @@ interface CreateReportData {
 // 신고 제출
 export async function createReport(data: CreateReportData) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.id) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const user = await requireAuth();
 
     // 이미 신고한 적이 있는지 확인
     const existingReport = await prisma.report.findFirst({
       where: {
         contentType: data.contentType,
         contentId: data.contentId,
-        reporterId: session.user.id
+        reporterId: user.id
       }
     });
 
@@ -55,7 +51,7 @@ export async function createReport(data: CreateReportData) {
           contentId: data.contentId,
           reason: data.reason,
           description: data.description,
-          reporterId: session.user.id
+          reporterId: user.id
         }
       });
 
@@ -109,11 +105,7 @@ export async function createReport(data: CreateReportData) {
 // 관리자 - 신고 목록 조회
 export async function getReports(status?: string) {
   try {
-    const session = await auth();
-    
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      throw new Error('관리자 권한이 필요합니다.');
-    }
+    const admin = await requireAdmin();
 
     const where = status ? { status } : {};
 
@@ -153,17 +145,13 @@ export async function updateReportStatus(
   status: 'reviewed' | 'resolved' | 'dismissed'
 ) {
   try {
-    const session = await auth();
-    
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      throw new Error('관리자 권한이 필요합니다.');
-    }
+    const admin = await requireAdmin();
 
     await prisma.report.update({
       where: { id: reportId },
       data: {
         status,
-        reviewerId: session.user.id,
+        reviewerId: admin.id,
         updatedAt: new Date()
       }
     });
@@ -185,11 +173,7 @@ export async function handleReportedContent(
   action: 'delete' | 'disable'
 ) {
   try {
-    const session = await auth();
-    
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      throw new Error('관리자 권한이 필요합니다.');
-    }
+    const admin = await requireAdmin();
 
     const report = await prisma.report.findUnique({
       where: { id: reportId }
@@ -205,7 +189,7 @@ export async function handleReportedContent(
         where: { id: reportId },
         data: {
           status: 'resolved',
-          reviewerId: session.user.id
+          reviewerId: admin.id
         }
       });
 

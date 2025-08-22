@@ -1,9 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth-utils';
+import { getCurrentUser, requireAuth } from '@/lib/auth-utils';
 
 /**
  * 현재 로그인된 사용자의 알림 목록
@@ -58,16 +57,13 @@ export async function getNotifications(limit: number = 10, cursor?: string) {
  * @param notificationId 읽음 처리할 알림의 ID
  */
 export async function markNotificationAsRead(notificationId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error('인증되지 않은 사용자입니다.');
-  }
+  const user = await requireAuth();
 
   const notification = await prisma.notification.findUnique({
     where: { id: notificationId }
   });
 
-  if (!notification || notification.recipientId !== session.user.id) {
+  if (!notification || notification.recipientId !== user.id) {
     throw new Error('알림을 찾을 수 없거나 권한이 없습니다.');
   }
 
@@ -90,14 +86,11 @@ export async function markNotificationAsRead(notificationId: string) {
  * 현재 사용자의 모든 알림을 읽음 상태로 변경
  */
 export async function markAllNotificationsAsRead() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error('인증되지 않은 사용자입니다.');
-  }
+  const user = await requireAuth();
 
   await prisma.notification.updateMany({
     where: {
-      recipientId: session.user.id,
+      recipientId: user.id,
       isRead: false
     },
     data: {

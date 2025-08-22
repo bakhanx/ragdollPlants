@@ -1,6 +1,6 @@
-import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { requireAdmin } from '@/lib/auth-utils';
 import DataBackup from './_components/DataBackup';
 import DatabaseReset from './_components/DatabaseReset';
 import DataRestore from './_components/DataRestore';
@@ -9,9 +9,9 @@ import EventManagement from './_components/EventManagement';
 import { ReportManagement } from './_components/ReportManagement';
 
 export default async function AdminPage() {
-  const session = await auth();
-
-  if (!session?.user || session.user.role !== 'ADMIN') {
+  try {
+    await requireAdmin();
+  } catch {
     redirect('/');
   }
 
