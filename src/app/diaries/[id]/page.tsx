@@ -7,7 +7,6 @@ import DiaryImage from '@/app/diaries/_components/DiaryImage';
 import DiaryContent from '@/app/diaries/_components/DiaryContent';
 import { getDiaryWithOwnership } from '@/app/actions/diaries';
 import { DiaryMoodStatus } from '@/types/models/diary';
-import { formatDateTime } from '@/app/_utils/dateUtils';
 
 export default async function DiaryDetail(props: {
   params: Promise<{ id: string }>;

@@ -3,8 +3,6 @@ import React from 'react';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
-import { auth } from '@/auth';
-import { USER_ROLES } from '@/lib/auth-utils';
 import { checkIsAdmin } from '@/lib/auth-utils';
 
 import { ArticleCategory } from '@/types/models/article';

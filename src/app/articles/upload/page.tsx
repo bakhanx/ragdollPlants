@@ -3,8 +3,6 @@ import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
 import ArticleUploadForm from './_components/ArticleUploadForm';
-import LoadingState from './_components/LoadingState';
-import AdminAccessCheck from './_components/AdminAccessCheck';
 
 export const metadata: Metadata = {
   title: '식물 뉴스 작성 - 라그돌플랜츠',
@@ -14,7 +12,7 @@ export const metadata: Metadata = {
 export default function UploadArticlePage() {
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-04.webp" />
+      <BackgroundImage src="/images/welcome-bg-07.webp" />
       <ContentsLayout showFooter={false}>
         <Header
           title="식물 뉴스 작성"
