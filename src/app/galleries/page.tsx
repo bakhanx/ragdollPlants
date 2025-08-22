@@ -5,7 +5,10 @@ import { Header } from '../_components/header/Header';
 import { GalleryGridSkeleton } from './_components/GalleryGridSkeleton';
 import { GalleryGridWrapper } from './_components/GalleryGridWrapper';
 
-export default function GalleriesPage() {
+// NextAuth v5 호환성 의심
+export const dynamic = 'force-dynamic';
+
+export default async function GalleriesPage() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />

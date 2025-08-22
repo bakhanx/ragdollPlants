@@ -5,7 +5,10 @@ import BackgroundImage from '../_components/layout/BackgroundImage';
 import { CareCardListWrapper } from './_components/CareCardListWrapper';
 import { CareCardListSkeleton } from './_components/CareCardListSkeleton';
 
-export default async function Page() {
+// NextAuth v5 호환성 의심
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
   return (
     <>
       <BackgroundImage src="/images/welcome-bg-03.webp" />
