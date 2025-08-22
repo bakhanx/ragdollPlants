@@ -9,7 +9,7 @@ export interface DiaryDetailType {
   id: string;
   title: string;
   content: string;
-  date: Date ;
+  date: Date | string;
   authorName: string;
   status: DiaryMoodStatus;
 }
