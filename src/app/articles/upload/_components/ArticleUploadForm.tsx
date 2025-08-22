@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ARTICLE_CATEGORIES, ArticleCategory } from '@/app/_constants/categories';
-import { useImageUpload } from '@/app/_hooks/useImageUpload';
 import {
-  Input,
-  Textarea,
-  LoadingOverlay
-} from '@/app/_components/common';
+  ARTICLE_CATEGORIES,
+  ArticleCategory
+} from '@/app/_constants/categories';
+import { useImageUpload } from '@/app/_hooks/useImageUpload';
+import { Input, Textarea, LoadingOverlay } from '@/app/_components/common';
 import { ImageUploader } from '@/app/_components/common/ImageUploader';
 import ArticleEditor from './ArticleEditor';
 import KeywordsField from './KeywordsField';
@@ -204,99 +203,111 @@ export default function ArticleUploadForm({
     <>
       <LoadingOverlay
         isVisible={isSubmitting}
-        message={mode === 'edit' ? '기사를 수정하고 있어요...' : '기사를 작성하고 있어요...'}
-        description={mode === 'edit' ? '변경사항을 저장하고 있습니다.' : '새로운 기사를 발행하고 있어요!'}
+        message={
+          mode === 'edit'
+            ? '기사를 수정하고 있어요...'
+            : '기사를 작성하고 있어요...'
+        }
+        description={
+          mode === 'edit'
+            ? '변경사항을 저장하고 있습니다.'
+            : '새로운 기사를 발행하고 있어요!'
+        }
       />
-      
+
       <div className="mx-auto w-full max-w-4xl py-4">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 text-gray-50">
-        {/* 썸네일 이미지 업로드 */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-lg font-medium text-gray-50">
-            대표 이미지 (썸네일)
-          </h2>
-          <ImageUploader
-            imagePreview={imagePreview}
-            onImageChange={handleSingleImageChange}
-            label="대표 이미지"
-            required={true}
-            aspectRatio="landscape"
-            placeholder="클릭하여 대표 이미지 업로드"
-            infoText="JPG, PNG, WebP 형식 (최대 5MB)"
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 text-gray-50">
+          {/* 썸네일 이미지 업로드 */}
+          <div className="mb-8">
+            <h2 className="mb-4 text-lg font-medium text-gray-50">
+              대표 이미지 (썸네일)
+            </h2>
+            <ImageUploader
+              imagePreview={imagePreview}
+              onImageChange={handleSingleImageChange}
+              label="대표 이미지"
+              required={true}
+              aspectRatio="landscape"
+              placeholder="클릭하여 대표 이미지 업로드"
+              infoText="JPG, PNG, WebP 형식 (최대 5MB)"
+            />
+          </div>
+
+          {/* 제목 */}
+          <Input
+            id="title"
+            type="text"
+            label="제목"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="제목을 입력하세요"
+            required
+            className="p-3 text-lg"
           />
-        </div>
 
-        {/* 제목 */}
-        <Input
-          id="title"
-          type="text"
-          label="제목"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="제목을 입력하세요"
-          required
-          className="p-3 text-lg"
-        />
+          {/* 요약 */}
+          <Textarea
+            id="summary"
+            label="요약 (선택사항)"
+            value={summary}
+            onChange={e => setSummary(e.target.value)}
+            placeholder="기사 요약을 입력하세요"
+            rows={3}
+          />
 
-        {/* 요약 */}
-        <Textarea
-          id="summary"
-          label="요약 (선택사항)"
-          value={summary}
-          onChange={e => setSummary(e.target.value)}
-          placeholder="기사 요약을 입력하세요"
-          rows={3}
-        />
-
-        {/* 카테고리 선택 */}
-        <div className="space-y-2">
-          <label
-            htmlFor="category"
-            className="block text-sm font-medium text-gray-50">
-            카테고리 <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="category"
-            value={selectedCategoryId}
-            onChange={e => setSelectedCategoryId(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none text-gray-50"
-            required>
-            <option value="" className='text-gray-800' >카테고리를 선택하세요</option>
-            {ARTICLE_CATEGORIES.map((category: ArticleCategory) => (
+          {/* 카테고리 선택 */}
+          <div className="space-y-2">
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-gray-50">
+              카테고리 <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="category"
+              value={selectedCategoryId}
+              onChange={e => setSelectedCategoryId(e.target.value)}
+              className="w-full rounded-md border border-gray-300 p-2 text-gray-50 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+              required>
               <option
-                key={category.id}
-                value={category.id}
-                className='text-black'>
-                {category.name}
+                value=""
+                className="text-gray-800">
+                카테고리를 선택하세요
               </option>
-            ))}
-          </select>
-        </div>
+              {ARTICLE_CATEGORIES.map((category: ArticleCategory) => (
+                <option
+                  key={category.id}
+                  value={category.id}
+                  className="text-black">
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* 키워드 */}
-        <KeywordsField
-          keywords={keywords}
-          onChange={handleKeywordsChange}
-          keywordsArray={getKeywordsArray()}
-        />
+          {/* 키워드 */}
+          <KeywordsField
+            keywords={keywords}
+            onChange={handleKeywordsChange}
+            keywordsArray={getKeywordsArray()}
+          />
 
-        {/* 리치 텍스트 에디터 */}
-        <ArticleEditor
-          key={initialData?.id || 'new'}
-          onChange={handleEditorChange}
-          initialContent={editorContent}
-          showError={editorContent === ''}
-        />
+          {/* 리치 텍스트 에디터 */}
+          <ArticleEditor
+            key={initialData?.id || 'new'}
+            onChange={handleEditorChange}
+            initialContent={editorContent}
+            showError={editorContent === ''}
+          />
 
-        {/* 제출 버튼 */}
-        <SubmitButtons
-          onCancel={() => router.back()}
-          isLoading={isSubmitting}
-        />
-      </form>
-    </div>
+          {/* 제출 버튼 */}
+          <SubmitButtons
+            onCancel={() => router.back()}
+            isLoading={isSubmitting}
+          />
+        </form>
+      </div>
     </>
   );
 }
