@@ -64,13 +64,14 @@ export const config = {
   matcher: [
     '/login',
     // 관리자 페이지
-    ...ADMIN_PATHS.map(path => {
-      if (path.includes('[id]')) {
-        return path.replace(/\[id\]/g, '*');
-      }
-      return `${path}/:path*`;
-    }),
+    '/admin/:path*',
+    '/articles/upload/:path*',
+    '/articles/:id/edit',
+    '/events/upload/:path*',
+    '/events/:id/edit',
     // 로그인이 필요한 사용자 페이지
-    ...PROTECTED_PATHS.map(path => `${path}/:path*`)
+    '/garden/profile/:path*',
+    '/diaries/upload/:path*',
+    '/galleries/upload/:path*'
   ]
 };
