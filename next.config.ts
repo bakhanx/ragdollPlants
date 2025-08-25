@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384] // 작은 이미지 크기들
   },
 
-  webpack: config => {
+  webpack(config) {
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
@@ -26,19 +26,10 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
-
   experimental: {
     // Server Actions 설정 - 이미지 업로드 크기 제한 증가 (default : 1mb)
     serverActions: {
       bodySizeLimit: '10mb'
-    },
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js'
-        }
-      }
     }
   }
 };
