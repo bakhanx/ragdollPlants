@@ -1,5 +1,6 @@
 import { getUserPlantsForCare } from '@/app/actions/care';
 import { CareCardList } from './CareCardList';
+import { AuthMismatchHandler } from '@/app/_components/auth/AuthMismatchHandler';
 
 export async function CareCardListWrapper() {
   let careResult: Awaited<ReturnType<typeof getUserPlantsForCare>> | null = null;
@@ -25,6 +26,11 @@ export async function CareCardListWrapper() {
         <p className="text-gray-500 mb-6">페이지를 새로고침해 주세요.</p>
       </div>
     );
+  }
+  
+  // 세션-DB 불일치 감지
+  if (careResult?.authMismatch) {
+    return <AuthMismatchHandler />;
   }
 
   return (

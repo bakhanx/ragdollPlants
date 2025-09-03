@@ -1,6 +1,7 @@
 import { getUserGalleries } from '@/app/actions/galleries';
 import { GalleryGrid } from './GalleryGrid';
 import { UploadButton } from '@/app/_components/common/UploadButton';
+import { AuthMismatchHandler } from '@/app/_components/auth/AuthMismatchHandler';
 
 export async function GalleryGridWrapper() {
   let galleriesResult: Awaited<ReturnType<typeof getUserGalleries>> | null =
@@ -36,6 +37,11 @@ export async function GalleryGridWrapper() {
     : null;
 
   const isLoggedIn = galleriesResult?.isLoggedIn || false;
+  
+  // 세션-DB 불일치 감지
+  if (galleriesResult?.authMismatch) {
+    return <AuthMismatchHandler />;
+  }
 
   return (
     <div>

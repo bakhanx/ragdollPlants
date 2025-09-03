@@ -2,6 +2,7 @@ import { getMyPlants } from '@/app/actions/plants';
 import { PAGINATION } from '@/app/_constants/pagination';
 import { MyPlantList } from './lists/MyPlantList';
 import { UploadButton } from '@/app/_components/common/UploadButton';
+import { AuthMismatchHandler } from '@/app/_components/auth/AuthMismatchHandler';
 
 interface MyPlantListWrapperProps {
   currentPage: number;
@@ -40,6 +41,11 @@ export default async function MyPlantListWrapper({
 
   const isLoggedIn = plantsResult?.isLoggedIn || false;
   const plantsData = plantsResult || null;
+  
+  // 세션-DB 불일치 감지
+  if (plantsResult?.authMismatch) {
+    return <AuthMismatchHandler />;
+  }
 
   return (
     <div>

@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth-utils';
 import { getUserProfile } from '@/app/actions/userProfile';
+import { AuthMismatchHandler } from '@/app/_components/auth/AuthMismatchHandler';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
@@ -46,6 +47,11 @@ export default async function GardenPage({ searchParams }: PageProps) {
 
   // 사용자를 찾을 수 없는 경우
   if (!user) {
+    // 세션이 있지만 DB에 사용자가 없는 경우
+    if (currentUser) {
+      return <AuthMismatchHandler />;
+    }
+
     return (
       <>
         <BackgroundImage src="/images/welcome-bg-03.webp" />

@@ -3,6 +3,7 @@ import { PAGINATION } from '@/app/_constants/pagination';
 import DiaryList from './DiaryList';
 import DiaryCardsSkeleton from './DiaryCardsSkeleton';
 import { UploadButton } from '@/app/_components/common/UploadButton';
+import { AuthMismatchHandler } from '@/app/_components/auth/AuthMismatchHandler';
 
 interface DiaryListWrapperProps {
   currentPage: number;
@@ -41,6 +42,11 @@ export default async function DiaryListWrapper({
 
   const isLoggedIn = diariesResult?.isLoggedIn || false;
   const diariesData = diariesResult?.diaries || null;
+  
+  // 세션-DB 불일치 감지
+  if (diariesResult?.authMismatch) {
+    return <AuthMismatchHandler />;
+  }
 
   return (
     <div>
