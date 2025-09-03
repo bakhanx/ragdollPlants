@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { DiaryMoodStatus } from '@/types/models/diary';
-import { getCurrentUser, validateDiaryOwnership } from '@/lib/auth-utils';
+import { getCurrentUser, validateDiaryOwnership, checkUserExists } from '@/lib/auth-utils';
 import { Prisma } from '@prisma/client';
 import { populateLikeInfo } from './likes';
 import {
@@ -128,7 +128,7 @@ export async function getDiaries(params?: {
   page?: number;
   limit?: number;
   search?: string;
-}): Promise<{ diaries: DiariesResponse; isLoggedIn: boolean }> {
+}): Promise<{ diaries: DiariesResponse; isLoggedIn: boolean; authMismatch?: boolean }> {
   try {
     const user = await getCurrentUser();
 
@@ -137,6 +137,18 @@ export async function getDiaries(params?: {
       return {
         diaries: DemoService.getDemoDiariesList(),
         isLoggedIn: false
+      };
+    }
+    
+    // 세션이 있을 때 DB에서 사용자 존재 여부 확인
+    const userExists = await checkUserExists(user.id);
+    
+    // 세션은 있지만 DB에 사용자가 없는 경우
+    if (!userExists) {
+      return {
+        diaries: DemoService.getDemoDiariesList(),
+        isLoggedIn: false,
+        authMismatch: true
       };
     }
 

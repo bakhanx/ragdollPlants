@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath, unstable_cache } from 'next/cache';
-import { requireAuth, getCurrentUser } from '@/lib/auth-utils';
+import { requireAuth, getCurrentUser, checkUserExists } from '@/lib/auth-utils';
 import { DEMO_CARE_RESPONSE } from '@/app/_constants/demoData';
 import { CacheTags } from '@/lib/cache/cacheTags';
 import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
@@ -87,7 +87,7 @@ function getCachedUserPlantsForCare(targetUserId: string) {
  */
 export async function getUserPlantsForCare(
   userId?: string
-): Promise<{ plants: CareResponse; isLoggedIn: boolean }> {
+): Promise<{ plants: CareResponse; isLoggedIn: boolean; authMismatch?: boolean }> {
   try {
     const currentUser = await getCurrentUser();
     const targetUserId = userId || currentUser?.id;
@@ -98,6 +98,20 @@ export async function getUserPlantsForCare(
         plants: DemoService.getDemoCareData(),
         isLoggedIn: false
       };
+    }
+    
+    // 세션이 있지만 타겟 사용자가 세션 사용자와 같을 때 DB 검증
+    if (currentUser && !userId && targetUserId === currentUser.id) {
+      const userExists = await checkUserExists(targetUserId);
+      
+      // 세션은 있지만 DB에 사용자가 없는 경우
+      if (!userExists) {
+        return {
+          plants: DemoService.getDemoCareData(),
+          isLoggedIn: false,
+          authMismatch: true
+        };
+      }
     }
 
     // 실제 데이터 처리

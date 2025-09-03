@@ -15,7 +15,8 @@ import { MAX_PLANTS } from '@/types/models/plant';
 import {
   getCurrentUser,
   requireAuth,
-  validatePlantOwnership
+  validatePlantOwnership,
+  checkUserExists
 } from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
@@ -129,7 +130,7 @@ export async function getMyPlants(params?: {
   page?: number;
   limit?: number;
   search?: string;
-}): Promise<PlantsResponse & { isLoggedIn: boolean }> {
+}): Promise<PlantsResponse & { isLoggedIn: boolean; authMismatch?: boolean }> {
   try {
     const user = await getCurrentUser();
 
@@ -138,6 +139,18 @@ export async function getMyPlants(params?: {
       return {
         ...DEMO_PLANTS_RESPONSE,
         isLoggedIn: false
+      };
+    }
+    
+    // 세션이 있을 때 DB에서 사용자 존재 여부 확인
+    const userExists = await checkUserExists(user.id);
+    
+    // 세션은 있지만 DB에 사용자가 없는 경우
+    if (!userExists) {
+      return {
+        ...DEMO_PLANTS_RESPONSE,
+        isLoggedIn: false,
+        authMismatch: true
       };
     }
 

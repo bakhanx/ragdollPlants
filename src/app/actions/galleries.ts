@@ -6,7 +6,8 @@ import { MAX_GALLERY_PHOTOS } from '@/types/models/gallery';
 import {
   getCurrentUser,
   requireAuth,
-  validateGalleryOwnership
+  validateGalleryOwnership,
+  checkUserExists
 } from '@/lib/auth-utils';
 import {
   uploadImageToCloudflare,
@@ -262,7 +263,7 @@ function getCachedUserGalleries(targetUserId: string, isOwner: boolean) {
 // 사용자별 갤러리 조회
 export async function getUserGalleries(
   userId?: string
-): Promise<GalleriesResponse & { isLoggedIn: boolean }> {
+): Promise<GalleriesResponse & { isLoggedIn: boolean; authMismatch?: boolean }> {
   try {
     const session = await getCurrentUser();
     const currentUserId = session?.id;
@@ -275,6 +276,21 @@ export async function getUserGalleries(
         isOwner: true,
         isLoggedIn: false
       };
+    }
+    
+    // 세션이 있지만 타겟 사용자가 세션 사용자와 같을 때 DB 검증
+    if (session && !userId && targetUserId === currentUserId) {
+      const userExists = await checkUserExists(targetUserId);
+      
+      // 세션은 있지만 DB에 사용자가 없는 경우
+      if (!userExists) {
+        return {
+          ...DEMO_GALLERIES_RESPONSE,
+          isOwner: true,
+          isLoggedIn: false,
+          authMismatch: true
+        };
+      }
     }
 
     const isOwner = currentUserId === targetUserId;
