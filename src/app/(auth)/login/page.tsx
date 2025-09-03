@@ -185,6 +185,13 @@ export default function Page() {
               }}
               disabled={isSubmitting}
             />
+            
+            {/* 게스트 로그인 버튼 */}
+            <Button
+              text="게스트로 둘러보기"
+              buttonType="normal"
+              onClick={() => router.push('/')}
+            />
           </div>
 
           {/* 회원가입 링크 */}
