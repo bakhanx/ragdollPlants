@@ -12,6 +12,17 @@ export const USER_ROLES = {
 export type UserRole = keyof typeof USER_ROLES;
 
 /**
+ * DB에서 사용자 존재 여부 확인
+ */
+export async function checkUserExists(userId: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true }
+  });
+  return !!user;
+}
+
+/**
  * 현재 로그인한 사용자 정보 조회 (nullable)
  * 모든 페이지에서 사용 - 로그인 여부에 관계없이 안전
  */
@@ -41,6 +52,13 @@ export async function requireAuth() {
 
   if (!session?.user?.id) {
     throw new Error('AUTH_REQUIRED');
+  }
+  
+  // 세션이 있을 때 DB에서 사용자 존재 여부 확인
+  const userExists = await checkUserExists(session.user.id);
+  
+  if (!userExists) {
+    throw new Error('AUTH_MISMATCH');
   }
 
   return {
@@ -188,6 +206,15 @@ export function handleAuthError(error: Error): ServerActionResult {
       needsAuth: true,
       message: '로그인이 필요합니다.',
       error: '로그인이 필요합니다.'
+    };
+  }
+  
+  if (error.message === 'AUTH_MISMATCH') {
+    return {
+      success: false,
+      needsAuth: true,
+      message: '인증 정보 불일치로 인하여 다시 로그인이 필요합니다.',
+      error: '인증 정보 불일치'
     };
   }
 
