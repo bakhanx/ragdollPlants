@@ -4,18 +4,12 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOutAction } from '@/app/actions/auth';
 
-interface AuthMismatchHandlerProps {
-  message?: string;
-}
-
-export function AuthMismatchHandler({
-  message = '인증 정보 불일치로 인하여 로그인 페이지로 이동합니다.'
-}: AuthMismatchHandlerProps) {
+export function AuthMismatchHandler() {
   const router = useRouter();
 
   useEffect(() => {
     const handleAuthMismatch = async () => {
-      alert(message);
+      alert('인증 정보 불일치로 인하여 로그인 페이지로 이동합니다.');
 
       try {
         await signOutAction();
@@ -27,7 +21,7 @@ export function AuthMismatchHandler({
     };
 
     handleAuthMismatch();
-  }, [message, router]);
+  }, [router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
