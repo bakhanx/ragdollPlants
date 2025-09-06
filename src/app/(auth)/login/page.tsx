@@ -13,12 +13,15 @@ import Link from 'next/link';
 import { Button } from '../_components/Button';
 import { signInSchema, type SignInData } from '@/lib/validations/auth';
 import { signInAction } from '@/app/actions/auth';
+import { getCurrentUserAction } from '@/app/actions/auth-client';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function Page() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState<string>('');
   const [rememberMe, setRememberMe] = useState(false);
+  const { setUser } = useAuthStore();
 
   const {
     register,
@@ -44,7 +47,15 @@ export default function Page() {
       const result = await signInAction(formData);
 
       if (result.success) {
-        // 성공 시 클라이언트에서 리다이렉트
+        try {
+          const userResult = await getCurrentUserAction();
+          if (userResult.success) {
+            setUser(userResult.user);
+          }
+        } catch (error) {
+          console.error('로그인 후 사용자 정보 로드 오류:', error);
+        }
+
         setServerMessage(result.message || '로그인이 완료되었습니다.');
         router.push('/');
       } else {
@@ -169,7 +180,21 @@ export default function Page() {
                   const result = await signInAction(formData);
 
                   if (result.success) {
-                    setServerMessage(result.message || 'Admin 로그인이 완료되었습니다.');
+                    try {
+                      const userResult = await getCurrentUserAction();
+                      if (userResult.success) {
+                        setUser(userResult.user);
+                      }
+                    } catch (error) {
+                      console.error(
+                        'Admin 로그인 후 사용자 정보 로드 오류:',
+                        error
+                      );
+                    }
+
+                    setServerMessage(
+                      result.message || 'Admin 로그인이 완료되었습니다.'
+                    );
                     router.push('/');
                   } else {
                     setServerMessage(
@@ -185,7 +210,7 @@ export default function Page() {
               }}
               disabled={isSubmitting}
             />
-            
+
             {/* 게스트 로그인 버튼 */}
             <Button
               text="게스트로 둘러보기"
