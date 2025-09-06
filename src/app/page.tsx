@@ -17,7 +17,7 @@ export default async function Page() {
 
       <ContentsLayout>
         {/* 헤더 */}
-        <Header showNotification />
+        <Header />
 
         {/* 메뉴 리스트 */}
         <MenuList />

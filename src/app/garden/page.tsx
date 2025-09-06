@@ -96,7 +96,6 @@ export default async function GardenPage({ searchParams }: PageProps) {
       <ContentsLayout>
         <Header
           title={`${user.name || '사용자'}님의 정원`}
-          showNotification={isOwner}
           showBack={!isOwner}
         />
 

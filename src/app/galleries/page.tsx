@@ -18,7 +18,6 @@ export default async function GalleriesPage() {
         {/* 헤더 */}
         <Header
           title="갤러리"
-          showNotification
           variant="glass"
         />
 

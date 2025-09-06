@@ -45,7 +45,6 @@ export default async function ArticleDetailPage({
             id={id}
             showBack
             showContentMenu={isAdmin} // 관리자에게만 메뉴 표시
-            showNotification
             variant="glass"
             contentType="article"
           />

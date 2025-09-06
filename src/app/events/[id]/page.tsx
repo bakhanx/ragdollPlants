@@ -32,7 +32,6 @@ export default async function EventDetailPage(props: {
             id={id}
             showBack
             showContentMenu={isAdmin}
-            showNotification
             variant="glass"
             contentType="event"
           />

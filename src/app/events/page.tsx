@@ -14,10 +14,7 @@ export default async function EventsPage() {
     <>
       <BackgroundImage src="/images/welcome-bg-05.webp" />
       <ContentsLayout>
-        <Header
-          title="이벤트"
-          showNotification
-        />
+        <Header title="이벤트" />
 
         <div className="w-full py-4">
           {/* 업로드 버튼 영역 */}

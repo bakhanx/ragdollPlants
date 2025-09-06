@@ -24,10 +24,7 @@ export default async function MyPlantsPage({
     <>
       <BackgroundImage src="/images/welcome-bg-05.webp" />
       <ContentsLayout>
-        <Header
-          title="내 식물"
-          showNotification
-        />
+        <Header title="내 식물" />
 
         <div className="w-full py-4">
           <div className="py-2">

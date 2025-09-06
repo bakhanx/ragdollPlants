@@ -22,10 +22,7 @@ export default async function DiariesPage({ searchParams }: DiariesPageProps) {
     <>
       <BackgroundImage src="/images/welcome-bg-06.webp" />
       <ContentsLayout>
-        <Header
-          title="식물 일기"
-          showNotification
-        />
+        <Header title="식물 일기" />
 
         <div className="w-full py-4">
           <div className="py-2">

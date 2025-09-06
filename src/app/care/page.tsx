@@ -13,10 +13,7 @@ export default function Page() {
     <>
       <BackgroundImage src="/images/welcome-bg-03.webp" />
       <ContentsLayout>
-        <Header
-          title="식물 케어"
-          showNotification
-        />
+        <Header title="식물 케어" />
 
         <Suspense fallback={<CareCardListSkeleton />}>
           <CareCardListWrapper />
