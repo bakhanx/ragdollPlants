@@ -45,6 +45,7 @@ export default async function MyPlantDetailPage({
             title={plant.name}
             showBack
             contentType="plant"
+            contentAuthorId={plant.authorId}
             showContentMenu={true}
           />
 
