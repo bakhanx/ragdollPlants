@@ -16,7 +16,7 @@ interface HeaderProps {
   title?: string;
   variant?: HeaderVariant;
   contentType?: ContentType;
-  showNotification?: boolean;
+  contentAuthorId?: string;
   showMenuButton?: boolean;
   showContentMenu?: boolean;
 }
@@ -35,7 +35,7 @@ export const Header = ({
   title = '랙돌플랜츠',
   variant = 'default',
   contentType,
-  showNotification = false,
+  contentAuthorId,
   showContentMenu = false
 }: HeaderProps) => {
   return (
@@ -44,7 +44,7 @@ export const Header = ({
         {/* 왼쪽: 메뉴 버튼 또는 뒤로가기 */}
         <HeaderLeft showBack={showBack} />
 
-        {/* 중앙: 타이틀 - 절대 위치로 중앙 배치 */}
+        {/* 중앙: 타이틀 */}
         <HeaderCenter
           title={title}
           logoSrc={'/images/Profile.webp'}
@@ -56,10 +56,10 @@ export const Header = ({
             <div className="h-9 w-9 animate-pulse rounded-xl bg-white/30" />
           }>
           <HeaderRight
-            showNotification={showNotification}
             showContentMenu={showContentMenu}
             contentType={contentType}
             contentId={id}
+            contentAuthorId={contentAuthorId}
           />
         </Suspense>
       </div>
