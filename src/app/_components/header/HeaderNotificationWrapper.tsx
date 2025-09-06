@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getNotifications } from '@/app/actions/notifications';
 import { HeaderNotifications } from './HeaderNotifications';
+import { BellIcon } from '../icons';
 
 export const HeaderNotificationsWrapper = () => {
   const [notifications, setNotifications] = useState<Awaited<
@@ -32,12 +33,16 @@ export const HeaderNotificationsWrapper = () => {
   }, []);
 
   if (isLoading) {
-    return <div className="h-9 w-9 animate-pulse rounded-xl bg-white/30" />;
-  }
-
-  // 알림이 없거나 로그인하지 않은 경우 렌더링하지 않음
-  if (!notifications || notifications.notifications.length === 0) {
-    return null;
+    return (
+      <div
+        className="absolute flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all cursor-wait"
+        aria-label="알림">
+        <BellIcon
+          size={20}
+          className="[&>path]:stroke-gray-700"
+        />
+      </div>
+    );
   }
 
   return <HeaderNotifications notifications={notifications} />;
