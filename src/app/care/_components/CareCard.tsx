@@ -12,6 +12,7 @@ import {
 import { useState, useEffect } from 'react';
 import { addCareRecord } from '@/app/actions/care';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
 
 interface Plant {
   id: string;
@@ -26,11 +27,11 @@ interface Plant {
 interface CareCardProps {
   plant: Plant;
   hideImage?: boolean;
-  isLoggedIn?: boolean;
 }
 
-export const CareCard = ({ plant, hideImage = false, isLoggedIn = false }: CareCardProps) => {
+export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [isWaterUpdating, setIsWaterUpdating] = useState(false);
   const [isNutrientUpdating, setIsNutrientUpdating] = useState(false);
 
@@ -117,7 +118,7 @@ export const CareCard = ({ plant, hideImage = false, isLoggedIn = false }: CareC
     if (isWaterUpdating || !canWater) return;
 
     // 로그인 상태 확인
-    if (!isLoggedIn) {
+    if (!user) {
       alert('로그인이 필요합니다.');
       router.push('/login');
       return;
@@ -147,7 +148,7 @@ export const CareCard = ({ plant, hideImage = false, isLoggedIn = false }: CareC
     if (isNutrientUpdating || !canNutrient) return;
 
     // 로그인 상태 확인
-    if (!isLoggedIn) {
+    if (!user) {
       alert('로그인이 필요합니다.');
       router.push('/login');
       return;
