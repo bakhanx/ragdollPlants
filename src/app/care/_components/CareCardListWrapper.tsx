@@ -36,7 +36,6 @@ export async function CareCardListWrapper() {
   return (
     <CareCardList 
       initialData={careResult?.plants || null} 
-      isLoggedIn={careResult?.isLoggedIn || false} 
     />
   );
 }
