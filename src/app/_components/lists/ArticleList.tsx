@@ -42,11 +42,11 @@ export const ArticleList = ({ items }: ArticleListProps) => {
 
       <div className="w-full">
         <div className="flex w-full max-w-md flex-col gap-4">
-          {items.slice(0, 3).map(article => (
+          {items.map(article => (
             <Link
               href={`/articles/${article.id}`}
               key={article.id}>
-              <div className="relative flex gap-x-2 rounded-md bg-[#ffffffa5] shadow-xl hover:text-green-600">
+              <div className="relative flex gap-x-2 rounded-md bg-[#ffffffa5] shadow-xl hover:text-green-600 ">
                 <div className="flex w-full items-center justify-between px-3">
                   <h2 className="cursor-pointer truncate py-2 font-semibold underline">
                     {article.title}
