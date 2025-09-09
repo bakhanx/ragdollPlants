@@ -27,12 +27,6 @@ export const InvalidationMap = {
     CacheTags.care(loginId) // care 페이지 (식물 이름 등 표시)
   ],
 
-  // 식물 관리 (물주기/영양제) 시
-  plantCare: (loginId: string): CacheTagType[] => [
-    CacheTags.garden(loginId), // garden 페이지 (관리 횟수 통계)
-    CacheTags.care(loginId), // care 페이지
-    CacheTags.plants(loginId) // 식물 목록 (마지막 관리일 업데이트)
-  ],
 
   // 다이어리 작성/삭제 시
   diaryCreate: (loginId: string): CacheTagType[] => [
@@ -115,7 +109,7 @@ export const InvalidationMap = {
  * 캐시 무효화 헬퍼 함수
  * @param type 무효화 타입
  * @param loginId 사용자 loginId
- * @param additionalParams 추가 파라미터 (follow 등에서 사용)
+ * @param additionalParams 추가 파라미터 (follow에서 followingLoginId 사용)
  */
 export function revalidateUserCache(
   type: keyof typeof InvalidationMap,
