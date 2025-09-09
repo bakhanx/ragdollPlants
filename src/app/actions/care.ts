@@ -1,11 +1,10 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath, unstable_cache } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 import { requireAuth, getCurrentUser, checkUserExists } from '@/lib/auth-utils';
-import { DEMO_CARE_RESPONSE } from '@/app/_constants/demoData';
 import { CacheTags } from '@/lib/cache/cacheTags';
-import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
+import { revalidatePlantUpdate } from '@/lib/cache/cacheInvalidation';
 import { CareResponse } from '@/types/cache/care';
 import { grantExperience } from '@/lib/gamification';
 import { DemoService } from '@/services/demoService';
@@ -85,9 +84,11 @@ function getCachedUserPlantsForCare(targetUserId: string) {
 /**
  * 사용자의 식물 케어 데이터 조회
  */
-export async function getUserPlantsForCare(
-  userId?: string
-): Promise<{ plants: CareResponse; isLoggedIn: boolean; authMismatch?: boolean }> {
+export async function getUserPlantsForCare(userId?: string): Promise<{
+  plants: CareResponse;
+  isLoggedIn: boolean;
+  authMismatch?: boolean;
+}> {
   try {
     const currentUser = await getCurrentUser();
     const targetUserId = userId || currentUser?.id;
@@ -99,11 +100,11 @@ export async function getUserPlantsForCare(
         isLoggedIn: false
       };
     }
-    
+
     // 세션이 있지만 타겟 사용자가 세션 사용자와 같을 때 DB 검증
     if (currentUser && !userId && targetUserId === currentUser.id) {
       const userExists = await checkUserExists(targetUserId);
-      
+
       // 세션은 있지만 DB에 사용자가 없는 경우
       if (!userExists) {
         return {
@@ -215,8 +216,7 @@ export async function addCareRecord(
   }
 
   // 캐시 무효화
-  revalidateUserCache('plantCare', user.id);
-
+  revalidatePlantUpdate(user.loginId, plantId);
   return { success: true };
 }
 
@@ -270,7 +270,7 @@ export async function updateCareSchedule(
   });
 
   // 캐시 무효화
-  revalidateUserCache('plantCare', user.id);
+  revalidatePlantUpdate(user.loginId, plantId);
   return { success: true };
 }
 
@@ -341,7 +341,7 @@ export async function toggleCareStatus(
   });
 
   // 캐시 무효화
-  revalidateUserCache('plantCare', user.id);
+  revalidatePlantUpdate(user.loginId, plantId);
   return { success: true };
 }
 
