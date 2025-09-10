@@ -1,3 +1,4 @@
+import { UserRole } from '@/lib/auth-utils';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -5,9 +6,9 @@ export interface AuthUser {
   id: string;
   loginId: string;
   name: string;
-  email: string;
-  image: string;
-  role: 'USER' | 'ADMIN';
+  email: string | undefined | null;
+  image: string | undefined | null;
+  role: UserRole
 }
 
 interface AuthState {
