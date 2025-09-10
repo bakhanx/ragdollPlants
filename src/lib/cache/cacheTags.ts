@@ -20,13 +20,10 @@ export const CacheTags = {
   article: (articleId: string): CacheTagType => `article-${articleId}`,
   event: (eventId: string): CacheTagType => `event-${eventId}`,
 
-  // 콘텐츠별 태그 (전역) - articles, events만 전체 목록 페이지 존재
+  // 콘텐츠별 태그 (전역) - 공개 콘텐츠 목록 페이지들
   allArticles: 'articles-all' as CacheTagType,
   allEvents: 'events-all' as CacheTagType,
 
-  // 전역 태그
-  allContent: 'content-all' as CacheTagType,
-  
   // 홈페이지 관련 태그
   homeBanner: 'home-banner' as CacheTagType,
   homeArticles: 'home-articles' as CacheTagType
