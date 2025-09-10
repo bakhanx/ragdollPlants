@@ -8,7 +8,7 @@ declare module 'next-auth' {
       name: string;
       email?: string | null;
       image?: string | null;
-      role: string;
+      role: 'USER' | 'ADMIN';
     };
   }
 
@@ -18,7 +18,7 @@ declare module 'next-auth' {
     name: string;
     email: string;
     image?: string | null;
-    role: string;
+    role: 'USER' | 'ADMIN';
     isActive: boolean;
   }
 }
@@ -27,14 +27,14 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     loginId: string;
-    role: string;
+    role: 'USER' | 'ADMIN';
   }
 }
 
 declare module '@auth/core/adapters' {
   interface AdapterUser {
     loginId: string;
-    role: string;
+    role: 'USER' | 'ADMIN';
     isActive: boolean;
   }
 }
