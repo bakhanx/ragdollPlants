@@ -8,8 +8,7 @@ export const InvalidationMap = {
   // 사용자 프로필 변경 시 (이름, 프로필 사진, 소개 등)
   gardenProfile: (loginId: string): CacheTagType[] => [
     CacheTags.garden(loginId), // 해당 사용자의 garden 페이지
-    CacheTags.userContent(loginId), // 해당 사용자가 작성한 모든 콘텐츠
-    CacheTags.allContent // 작성자명이 표시되는 모든 콘텐츠
+    CacheTags.userContent(loginId) // 해당 사용자가 작성한 모든 콘텐츠
   ],
 
   // 식물 추가/삭제 시
@@ -26,7 +25,6 @@ export const InvalidationMap = {
     CacheTags.garden(loginId), // garden 페이지 (관리 필요한 식물 개수 변경 가능)
     CacheTags.care(loginId) // care 페이지 (식물 이름 등 표시)
   ],
-
 
   // 다이어리 작성/삭제 시
   diaryCreate: (loginId: string): CacheTagType[] => [
@@ -57,31 +55,27 @@ export const InvalidationMap = {
   // 아티클 작성/삭제 시 (관리자만)
   articleCreate: (): CacheTagType[] => [
     CacheTags.allArticles, // 전체 아티클 목록
-    CacheTags.homeArticles, // 홈페이지 최신 아티클
-    CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
+    CacheTags.homeArticles // 홈페이지 최신 아티클
   ],
 
   // 특정 아티클 수정 시 (관리자만)
   articleUpdate: (articleId: string): CacheTagType[] => [
     CacheTags.allArticles, // 전체 아티클 목록
     CacheTags.article(articleId), // 해당 아티클 상세 페이지
-    CacheTags.homeArticles, // 홈페이지 최신 아티클 (최신 3개에 포함될 수 있음)
-    CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
+    CacheTags.homeArticles // 홈페이지 최신 아티클 (최신 3개에 포함될 수 있음)
   ],
 
   // 이벤트 작성/삭제 시 (관리자만)
   eventCreate: (): CacheTagType[] => [
     CacheTags.allEvents, // 전체 이벤트 목록
-    CacheTags.homeBanner, // 홈페이지 배너
-    CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
+    CacheTags.homeBanner // 홈페이지 배너
   ],
 
   // 특정 이벤트 수정 시 (관리자만)
   eventUpdate: (eventId: string): CacheTagType[] => [
     CacheTags.allEvents, // 전체 이벤트 목록
     CacheTags.event(eventId), // 해당 이벤트 상세 페이지
-    CacheTags.homeBanner, // 홈페이지 배너 (진행중 이벤트에 포함될 수 있음)
-    CacheTags.allContent // 전체 콘텐츠 (홈페이지 등)
+    CacheTags.homeBanner // 홈페이지 배너 (진행중 이벤트에 포함될 수 있음)
   ],
 
   // 팔로우/언팔로우 시
