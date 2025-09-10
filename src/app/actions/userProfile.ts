@@ -256,10 +256,6 @@ export async function updateUserProfile(formData: FormData) {
     // 캐시 무효화
     revalidateUserCache('gardenProfile', user.loginId);
 
-    // 페이지 재검증
-    revalidatePath('/garden');
-    revalidatePath('/garden/profile');
-
     // 성공 시 정원으로 리다이렉트
     redirect('/garden');
   } catch (error) {

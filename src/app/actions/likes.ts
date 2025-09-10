@@ -2,7 +2,6 @@
 
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-utils';
-import { revalidatePath } from 'next/cache';
 
 type ContentType = 'diary' | 'plant' | 'gallery';
 
@@ -82,12 +81,10 @@ export async function toggleLike(contentType: ContentType, contentId: string) {
       }
     }
 
-    // 4. 새로운 좋아요 수 조회 및 재검증
+    // 4. 새로운 좋아요 수 조회
     const newLikesCount = await prisma.like.count({
       where: { targetId: contentId }
     });
-    revalidatePath(path);
-    revalidatePath(`${path}/${contentId}`);
 
     return {
       success: true,

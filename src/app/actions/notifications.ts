@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, requireAuth } from '@/lib/auth-utils';
 
@@ -76,9 +75,6 @@ export async function markNotificationAsRead(notificationId: string) {
     }
   });
 
-  revalidatePath('/garden');
-  revalidatePath('/articles');
-
   return updatedNotification;
 }
 
@@ -97,7 +93,4 @@ export async function markAllNotificationsAsRead() {
       isRead: true
     }
   });
-
-  revalidatePath('/garden');
-  revalidatePath('/articles');
 }

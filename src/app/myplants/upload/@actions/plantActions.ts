@@ -25,7 +25,7 @@ export async function uploadPlant(formData: FormData) {
     // 이미지 처리
     let imageUrl: string;
     const image = formData.get('image') as File | null;
-    
+
     if (image && image.size > 0) {
       // 실제 이미지가 있는 경우 Cloudflare에 업로드
       // 여기에 Cloudflare 이미지 업로드 로직 구현
@@ -52,9 +52,6 @@ export async function uploadPlant(formData: FormData) {
         authorId: '1'
       }
     });
-
-    // 경로 재검증 (캐시 갱신)
-    revalidatePath('/myplants');
 
     return {
       success: true,
