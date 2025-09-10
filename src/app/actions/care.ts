@@ -74,7 +74,7 @@ async function getUserPlantsForCareInternal(
 function getCachedUserPlantsForCare(targetUserId: string) {
   return unstable_cache(
     () => getUserPlantsForCareInternal(targetUserId),
-    [`user-care-${targetUserId}`],
+    [`care-${targetUserId}`],
     {
       tags: [CacheTags.care(targetUserId)]
     }
