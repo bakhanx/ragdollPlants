@@ -141,10 +141,10 @@ export async function getMyPlants(params?: {
         isLoggedIn: false
       };
     }
-    
+
     // 세션이 있을 때 DB에서 사용자 존재 여부 확인
     const userExists = await checkUserExists(user.id);
-    
+
     // 세션은 있지만 DB에 사용자가 없는 경우
     if (!userExists) {
       return {
@@ -158,7 +158,7 @@ export async function getMyPlants(params?: {
     const limit = params?.limit || 4;
 
     let plantsResponse: PlantsResponse;
-    
+
     // 검색이 있는 경우 캐시하지 않음
     if (params?.search?.trim()) {
       plantsResponse = await getMyPlantsInternal(user.id, params);
@@ -600,8 +600,8 @@ export async function updateWatering(id: string) {
       }
     });
 
-    // 캐시 무효화 - 식물 관리 기록
-    revalidateUserCache('plantCare', user.id);
+    // 캐시 무효화
+    revalidatePlantUpdate(user.id, id);
 
     return {
       success: true,
@@ -653,8 +653,8 @@ export async function updateNutrient(id: string) {
       }
     });
 
-    // 캐시 무효화 - 식물 관리 기록
-    revalidateUserCache('plantCare', user.id);
+    // 캐시 무효화
+    revalidatePlantUpdate(user.id, id);
 
     return {
       success: true,

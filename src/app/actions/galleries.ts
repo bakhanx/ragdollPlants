@@ -96,14 +96,8 @@ async function getGalleriesInternal(
   return galleriesWithLikes.map(galleryForCache);
 }
 
-// 캐시된 갤러리 목록 조회
 function getCachedGalleries(userId?: string) {
-  const cacheKey = userId ? `galleries-${userId}` : 'galleries-public';
-  const tags = userId ? [CacheTags.galleries(userId)] : [CacheTags.allContent];
-
-  return unstable_cache(() => getGalleriesInternal(userId), [cacheKey], {
-    tags
-  })();
+  return getGalleriesInternal(userId);
 }
 
 // 갤러리 목록 조회
@@ -263,7 +257,9 @@ function getCachedUserGalleries(targetUserId: string, isOwner: boolean) {
 // 사용자별 갤러리 조회
 export async function getUserGalleries(
   userId?: string
-): Promise<GalleriesResponse & { isLoggedIn: boolean; authMismatch?: boolean }> {
+): Promise<
+  GalleriesResponse & { isLoggedIn: boolean; authMismatch?: boolean }
+> {
   try {
     const session = await getCurrentUser();
     const currentUserId = session?.id;
@@ -277,11 +273,11 @@ export async function getUserGalleries(
         isLoggedIn: false
       };
     }
-    
+
     // 세션이 있지만 타겟 사용자가 세션 사용자와 같을 때 DB 검증
     if (session && !userId && targetUserId === currentUserId) {
       const userExists = await checkUserExists(targetUserId);
-      
+
       // 세션은 있지만 DB에 사용자가 없는 경우
       if (!userExists) {
         return {
@@ -295,7 +291,7 @@ export async function getUserGalleries(
 
     const isOwner = currentUserId === targetUserId;
     const galleryData = await getCachedUserGalleries(targetUserId, isOwner);
-    
+
     return {
       ...galleryData,
       isLoggedIn: true
