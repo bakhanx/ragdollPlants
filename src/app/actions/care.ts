@@ -8,6 +8,7 @@ import { revalidatePlantUpdate } from '@/lib/cache/cacheInvalidation';
 import { CareResponse } from '@/types/cache/care';
 import { grantExperience } from '@/lib/gamification';
 import { DemoService } from '@/services/demoService';
+import { createCareCompletionNotification } from '@/lib/notifications/utils';
 
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
@@ -195,6 +196,8 @@ export async function addCareRecord(
   });
 
   // 사용자 누적 카운트 업데이트 및 경험치 부여
+  const experiencePoints = type === 'water' ? 10 : 15;
+  
   if (type === 'water') {
     await Promise.all([
       prisma.user.update({
@@ -202,7 +205,15 @@ export async function addCareRecord(
         data: { waterCount: { increment: 1 } }
       }),
       // 물주기 경험치 부여 (+10)
-      grantExperience(user.id, 'WATER_PLANT', '식물에 물 주기')
+      grantExperience(user.id, 'WATER_PLANT', '식물에 물 주기'),
+      // 케어 완료 알림 생성
+      createCareCompletionNotification(
+        user.id,
+        plant.id,
+        plant.name,
+        'water',
+        experiencePoints
+      )
     ]);
   } else if (type === 'nutrient') {
     await Promise.all([
@@ -211,7 +222,15 @@ export async function addCareRecord(
         data: { nutrientCount: { increment: 1 } }
       }),
       // 영양제 경험치 부여 (+15)
-      grantExperience(user.id, 'ADD_NUTRIENT', '식물에 영양제 주기')
+      grantExperience(user.id, 'ADD_NUTRIENT', '식물에 영양제 주기'),
+      // 케어 완료 알림 생성
+      createCareCompletionNotification(
+        user.id,
+        plant.id,
+        plant.name,
+        'nutrient',
+        experiencePoints
+      )
     ]);
   }
 
