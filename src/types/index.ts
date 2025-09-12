@@ -9,4 +9,7 @@ export * from './models/article';
 export * from './components/articles';
 
 // 서비스 타입 내보내기
-export * from './services/articleService'; 
+export * from './services/articleService';
+
+// 알림 타입 내보내기
+export * from './notifications';
