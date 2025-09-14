@@ -6,7 +6,8 @@ import {
   getNotifications,
   getUnreadCount,
   markNotificationAsRead,
-  markAllNotificationsAsRead
+  markAllNotificationsAsRead,
+  deleteNotification
 } from '@/app/actions/notifications';
 import type { Notification } from '@prisma/client';
 
@@ -153,6 +154,62 @@ export const useNotifications = () => {
 
   const isMarkingAllAsRead = !!actionLoadingStates['markAllAsRead'];
 
+  // Optimistic 알림 삭제
+  const deleteNotif = useCallback(
+    async (notificationId: string) => {
+      // 중복 요청 방지
+      if (actionLoadingStates[`delete-${notificationId}`]) return;
+
+      const targetNotification = notifications.find(
+        n => n.id === notificationId
+      );
+      if (!targetNotification) return;
+
+      try {
+        // 로딩 상태 시작
+        setActionLoadingStates(prev => ({
+          ...prev,
+          [`delete-${notificationId}`]: true
+        }));
+
+        // 읽지 않은 상태였다면 카운트 감소 (Optimistic)
+        if (!targetNotification.isRead) {
+          decrementUnreadCount();
+        }
+
+        // 로컬에서 알림 제거 (Optimistic)
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+
+        // 서버 동기화
+        await deleteNotification(notificationId);
+      } catch (err) {
+        console.error('Failed to delete notification:', err);
+
+        // 롤백
+        await fetchNotifications();
+      } finally {
+        setActionLoadingStates(prev => ({
+          ...prev,
+          [`delete-${notificationId}`]: false
+        }));
+      }
+    },
+    [
+      actionLoadingStates,
+      notifications,
+      decrementUnreadCount,
+      fetchNotifications
+    ]
+  );
+
+  // 개별 삭제 로딩 상태 확인
+  const isDeletingNotification = useCallback(
+    (notificationId: string) => {
+      return !!actionLoadingStates[`delete-${notificationId}`];
+    },
+    [actionLoadingStates]
+  );
+
   return {
     // 데이터
     notifications,
@@ -163,11 +220,13 @@ export const useNotifications = () => {
     error,
     isMarkingAsRead,
     isMarkingAllAsRead,
+    isDeletingNotification,
 
     // 액션
     fetchNotifications,
     fetchUnreadCount,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
+    deleteNotification: deleteNotif
   };
 };
