@@ -1,42 +1,35 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getNotifications } from '@/app/actions/notifications';
+import { useNotifications } from '@/hooks/useNotifications';
 import { HeaderNotifications } from './HeaderNotifications';
 import { BellIcon } from '../icons';
 
 export const HeaderNotificationsWrapper = () => {
-  const [notifications, setNotifications] = useState<Awaited<
-    ReturnType<typeof getNotifications>
-  > | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { unreadCount, fetchUnreadCount } = useNotifications();
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // 초기 마운트 시 카운트만
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const loadInitialCount = async () => {
       try {
-        const data = await getNotifications();
-        setNotifications(data);
+        await fetchUnreadCount();
       } catch (error) {
-        console.error('알림 가져오기 오류:', error);
-        // 에러 발생 시 빈 결과로 설정
-        setNotifications({
-          notifications: [],
-          unreadCount: 0,
-          nextCursor: undefined
-        });
+        console.error('알림 카운트 로딩 오류:', error);
       } finally {
-        setIsLoading(false);
+        setIsInitialLoading(false);
       }
     };
 
-    fetchNotifications();
-  }, []);
+    loadInitialCount();
+  }, [fetchUnreadCount]);
 
-  if (isLoading) {
+  // 초기 로딩 중에는 스켈레톤 표시
+  if (isInitialLoading) {
     return (
       <div
-        className="absolute flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all cursor-wait"
-        aria-label="알림">
+        className="flex size-9 cursor-wait items-center justify-center rounded-xl bg-white/50 transition-all"
+        aria-label="알림 로딩 중">
         <BellIcon
           size={20}
           className="[&>path]:stroke-gray-700"
@@ -45,5 +38,5 @@ export const HeaderNotificationsWrapper = () => {
     );
   }
 
-  return <HeaderNotifications notifications={notifications} />;
+  return <HeaderNotifications unreadCount={unreadCount} />;
 };
