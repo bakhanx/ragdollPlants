@@ -235,7 +235,7 @@ export async function addCareRecord(
   }
 
   // 캐시 무효화
-  revalidatePlantUpdate(user.loginId, plantId);
+  revalidatePlantUpdate(user.id, plantId);
   return { success: true };
 }
 
@@ -289,7 +289,7 @@ export async function updateCareSchedule(
   });
 
   // 캐시 무효화
-  revalidatePlantUpdate(user.loginId, plantId);
+  revalidatePlantUpdate(user.id, plantId);
   return { success: true };
 }
 
@@ -360,7 +360,7 @@ export async function toggleCareStatus(
   });
 
   // 캐시 무효화
-  revalidatePlantUpdate(user.loginId, plantId);
+  revalidatePlantUpdate(user.id, plantId);
   return { success: true };
 }
 
