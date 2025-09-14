@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, USER_ROLES } from '@/lib/auth-utils';
+import { getToken } from 'next-auth/jwt';
+
+// 사용자 역할 정의
+const USER_ROLES = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+} as const;
 
 // 관리자 전용 경로 정의
 const ADMIN_PATHS = [
@@ -18,7 +24,25 @@ const PROTECTED_PATHS = [
 ];
 
 export default async function middleware(request: NextRequest) {
-  const session = await auth();
+  // JWT 토큰 검증
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET
+  });
+
+  // NextAuth 세션 형태로 변환
+  const session = token
+    ? {
+        user: {
+          id: token.id as string,
+          loginId: token.loginId as string,
+          role: token.role as 'USER' | 'ADMIN',
+          name: token.name as string,
+          email: token.email as string
+        }
+      }
+    : null;
+
   const { pathname } = request.nextUrl;
 
   // 이미 로그인한 사용자가 /login에 접근하면 메인으로 리다이렉트
