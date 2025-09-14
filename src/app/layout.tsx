@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { NavigationScrollManager } from './_components/utils/navigationScrollManager';
 import { ScrollToTopButton } from './_components/common/ScrollToTopButton';
+import { AuthProvider } from './_components/AuthProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,11 +30,12 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="">
-        <main className="relative flex min-h-screen items-center justify-center">
-          {children}
-        </main>
-        <ScrollToTopButton />
-        {/* <NavigationScrollManager /> */}
+        <AuthProvider>
+          <main className="relative flex min-h-screen items-center justify-center">
+            {children}
+          </main>
+          <ScrollToTopButton />
+        </AuthProvider>
       </body>
     </html>
   );
