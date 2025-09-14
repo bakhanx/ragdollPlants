@@ -2,10 +2,9 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useNotificationStore } from '@/stores/notificationStore';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Icons } from '@/app/_components/icons';
 import type { Notification as NotificationType } from '@prisma/client';
-import { getNotifications } from '@/app/actions/notifications';
 
 interface NotificationProps {
   isOpen: boolean;
@@ -51,27 +50,42 @@ export const Notification = ({ isOpen, onClose }: NotificationProps) => {
     notifications,
     unreadCount,
     isLoading,
-
+    fetchNotifications,
     markAsRead,
-    markAllAsRead
-  } = useNotificationStore();
+    markAllAsRead,
+    isMarkingAsRead,
+    isMarkingAllAsRead,
+    deleteNotification,
+    isDeletingNotification
+  } = useNotifications();
 
+  // 알림창이 열릴 때마다 새로운 데이터 페치
   useEffect(() => {
     if (isOpen) {
-      getNotifications();
+      fetchNotifications();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchNotifications]);
 
   if (!isOpen) return null;
 
+  // 알림 클릭 핸들러
   const handleNotificationClick = (notif: NotificationType) => {
     if (!notif.isRead) {
-      markAsRead(notif.id);
+      markAsRead(notif.id); // Optimistic UI 적용
     }
     if (notif.link) {
       router.push(notif.link);
     }
     onClose();
+  };
+
+  // 알림 삭제 핸들러
+  const handleDeleteNotification = (
+    e: React.MouseEvent,
+    notificationId: string
+  ) => {
+    e.stopPropagation(); // 알림 클릭 이벤트 방지
+    deleteNotification(notificationId);
   };
 
   return (
@@ -97,8 +111,13 @@ export const Notification = ({ isOpen, onClose }: NotificationProps) => {
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllAsRead()}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                  모두 읽음
+                  disabled={isMarkingAllAsRead}
+                  className={`text-sm font-medium transition-colors ${
+                    isMarkingAllAsRead
+                      ? 'cursor-wait text-gray-400'
+                      : 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300'
+                  }`}>
+                  {isMarkingAllAsRead ? '처리 중...' : '모두 읽음'}
                 </button>
               )}
               <button
@@ -120,45 +139,77 @@ export const Notification = ({ isOpen, onClose }: NotificationProps) => {
                 새로운 알림이 없습니다.
               </div>
             ) : (
-              notifications.map(notif => (
-                <div
-                  key={notif.id}
-                  onClick={() => handleNotificationClick(notif)}
-                  className={`cursor-pointer rounded-xl p-3 transition-all ${
-                    notif.isRead
-                      ? 'bg-gray-50 dark:bg-gray-700/50'
-                      : 'bg-blue-50 dark:bg-blue-900/50'
-                  } hover:bg-gray-100 dark:hover:bg-gray-700`}>
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${getIconBgColor(notif.type)}`}>
-                      <NotificationIcon type={notif.type} />
-                    </div>
+              notifications.map(notif => {
+                const isProcessing = isMarkingAsRead(notif.id);
+                const isDeleting = isDeletingNotification(notif.id);
+                const isAnyAction = isProcessing || isDeleting;
 
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 dark:text-gray-50">
-                        {notif.title}
-                      </h3>
-                      <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-300">
-                        {notif.message}
-                      </p>
-                      <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                        {new Date(notif.createdAt).toLocaleString('ko-KR', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: 'numeric'
-                        })}
-                      </p>
-                    </div>
+                return (
+                  <div
+                    key={notif.id}
+                    onClick={() =>
+                      !isAnyAction && handleNotificationClick(notif)
+                    }
+                    className={`relative rounded-xl p-3 transition-all ${
+                      isAnyAction
+                        ? 'cursor-wait opacity-70'
+                        : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${
+                      notif.isRead
+                        ? 'bg-gray-50 dark:bg-gray-700/50'
+                        : 'bg-blue-50 dark:bg-blue-900/50'
+                    }`}>
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${getIconBgColor(notif.type)}`}>
+                        <NotificationIcon type={notif.type} />
+                      </div>
 
-                    {!notif.isRead && (
-                      <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500"></div>
-                    )}
+                      <div className="flex-1 pr-8">
+                        {' '}
+                        {/* 삭제 버튼 공간 확보 */}
+                        <h3 className="font-medium text-gray-900 dark:text-gray-50">
+                          {notif.title}
+                        </h3>
+                        <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-300">
+                          {notif.message}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                          {new Date(notif.createdAt).toLocaleString('ko-KR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: 'numeric'
+                          })}
+                        </p>
+                      </div>
+
+                      {/* 우측 상단 영역 */}
+                      <div className="absolute top-2 right-2 flex items-center gap-2">
+                        {/* 삭제 버튼 */}
+                        <button
+                          onClick={e => handleDeleteNotification(e, notif.id)}
+                          disabled={isAnyAction}
+                          className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ${
+                            isAnyAction
+                              ? 'cursor-not-allowed opacity-50'
+                              : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                          }`}
+                          title="알림 삭제"
+                          aria-label="알림 삭제">
+                          <Icons.Close className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                        </button>
+
+                        {/* 읽지 않음 표시 */}
+                        {!notif.isRead && (
+                          <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
