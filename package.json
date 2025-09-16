@@ -4,11 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "clean": "rmdir /s /q .next 2>nul || echo Clean completed",
-    "build": "npm run clean && next build",
-    "build:fast": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "optimize-images": "node scripts/optimize-images.mjs",
     "restore-original": "node scripts/clean-optimized.mjs"
   },
