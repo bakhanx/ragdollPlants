@@ -7,13 +7,13 @@ import { EventUploadForm } from './_components';
 export default function UploadEventPage() {
   return (
     <>
-      <BackgroundImage src="/images/welcome-bg-02.webp" />
+      <BackgroundImage src="/images/welcome-bg-05.webp" />
       <ContentsLayout>
         <Header
           title="이벤트 등록"
           showBack={true}
         />
-        
+
         <EventUploadForm mode="create" />
       </ContentsLayout>
     </>
