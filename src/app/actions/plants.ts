@@ -71,18 +71,11 @@ async function getMyPlantsInternal(
   };
 
   // 식물 목록과 총 개수를 병렬로 조회
+
   const [plants, totalCount] = await Promise.all([
     prisma.plant.findMany({
       where: whereCondition,
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true
-          }
-        }
-      },
+
       orderBy: {
         createdAt: 'desc'
       },
@@ -94,7 +87,15 @@ async function getMyPlantsInternal(
     })
   ]);
 
-  const plantsWithLikes = await populateLikeInfo(plants, 'plant', userId);
+  // TODO: 좋아요 기능
+  // const plantsWithLikes = await populateLikeInfo(plants, 'plant', userId);
+
+  // 좋아요 정보를 기본값으로 설정 (임시)
+  const plantsWithLikes = plants.map(plant => ({
+    ...plant,
+    likes: 0,
+    isLiked: false
+  }));
 
   // 캐시용 데이터로 변환
   const cachedPlants = plantsWithLikes.map(plant => plantForCache(plant));
@@ -118,7 +119,7 @@ async function getMyPlantsInternal(
 function getCachedMyPlants(userId: string, page: number, limit: number) {
   return unstable_cache(
     () => getMyPlantsInternal(userId, { page, limit }),
-    [`my-plants-${userId}`, `${page}`, `${limit}`],
+    [`my-plants-${userId}-p${page}-l${limit}`],
     {
       tags: [CacheTags.plants(userId)]
     }
@@ -141,18 +142,17 @@ export async function getMyPlants(params?: {
         isLoggedIn: false
       };
     }
-
     // 세션이 있을 때 DB에서 사용자 존재 여부 확인
-    const userExists = await checkUserExists(user.id);
+    // const userExists = await checkUserExists(user.id);
 
-    // 세션은 있지만 DB에 사용자가 없는 경우
-    if (!userExists) {
-      return {
-        ...DEMO_PLANTS_RESPONSE,
-        isLoggedIn: false,
-        authMismatch: true
-      };
-    }
+    // // 세션은 있지만 DB에 사용자가 없는 경우
+    // if (!userExists) {
+    //   return {
+    //     ...DEMO_PLANTS_RESPONSE,
+    //     isLoggedIn: false,
+    //     authMismatch: true
+    //   };
+    // }
 
     const page = params?.page || 1;
     const limit = params?.limit || 4;
