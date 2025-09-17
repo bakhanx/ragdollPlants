@@ -2,7 +2,7 @@ import { Plant } from '@prisma/client';
 
 // 기본 Plant 타입 (Prisma 기반)
 export type PlantWithAuthor = Plant & {
-  author: {
+  author?: {
     id: string;
     name: string;
     image: string | null;
