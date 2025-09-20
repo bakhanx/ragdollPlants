@@ -110,3 +110,34 @@ export function calculateProgressPercentage(
 
   return Math.max(0, Math.min(100, Math.round(progress)));
 }
+
+/**
+ * 상대적 시간 표시 ("3일 전", "1주일 전" 등)
+ * @param date - 기준 날짜
+ * @returns 상대적 시간 문자열
+ */
+export function formatRelativeTime(date: Date | string): string {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const now = new Date();
+  const diffMs = now.getTime() - dateObj.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffWeeks = Math.floor(diffDays / 7);
+  const diffMonths = Math.floor(diffDays / 30);
+  const diffYears = Math.floor(diffDays / 365);
+  
+  if (diffMinutes < 1) return '방금 전';
+  if (diffMinutes < 60) return `${diffMinutes}분 전`;
+  if (diffHours < 24) return `${diffHours}시간 전`;
+  if (diffDays === 1) return '1일 전';
+  if (diffDays < 7) return `${diffDays}일 전`;
+  if (diffWeeks === 1) return '1주일 전';
+  if (diffWeeks < 5) return `${diffWeeks}주일 전`;
+  if (diffMonths === 1) return '1개월 전';
+  if (diffMonths < 12) return `${diffMonths}개월 전`;
+  if (diffYears === 1) return '1년 전';
+  return `${diffYears}년 전`;
+}
