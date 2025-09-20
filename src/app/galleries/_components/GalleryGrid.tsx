@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { GalleryImageModal } from './GalleryImageModal';
 import { GalleriesResponse } from '@/types/cache/gallery';
+import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 interface GalleryGridProps {
   initialData: GalleriesResponse | null;
@@ -143,7 +144,11 @@ export const GalleryGrid = ({
                 src={featuredItem.image}
                 alt={featuredItem.title}
                 fill
+                placeholder="blur"
+                blurDataURL={GRAY_PLACEHOLDER}
                 className="object-cover transition-transform duration-700 hover:scale-105"
+                priority
+                sizes="(max-width: 768px) 100vw, 768px"
               />
 
               {/* 그라데이션 오버레이 */}
@@ -220,6 +225,8 @@ export const GalleryGrid = ({
                     sizes="224px"
                     quality={75}
                     fill
+                    placeholder="blur"
+                    blurDataURL={GRAY_PLACEHOLDER}
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
 

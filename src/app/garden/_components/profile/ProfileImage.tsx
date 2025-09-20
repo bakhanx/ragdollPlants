@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { EditIcon } from '@/app/_components/icons';
+import { PROFILE_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 type ProfileImageProps = {
   src: string;
@@ -23,6 +24,8 @@ export default function ProfileImage({
           alt={alt}
           fill
           sizes="(max-width: 768px) 96px, 112px"
+          placeholder="blur"
+          blurDataURL={PROFILE_PLACEHOLDER}
           className="object-cover"
           priority
         />

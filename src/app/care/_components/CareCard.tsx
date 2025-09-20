@@ -6,6 +6,7 @@ import { Water2Icon, NutrientIcon } from '@/app/_components/icons/Icons';
 import ProgressBar from './ProgressBar';
 import { usePlantCare, type PlantCareData } from '@/hooks/usePlantCare';
 import { useEffect } from 'react';
+import { PLANT_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 interface CareCardProps {
   plant: PlantCareData;
@@ -56,7 +57,10 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                 src={currentPlant.image}
                 alt={currentPlant.name}
                 fill
+                placeholder="blur"
+                blurDataURL={PLANT_PLACEHOLDER}
                 className="rounded-lg object-cover"
+                sizes="80px"
               />
             </div>
           </Link>

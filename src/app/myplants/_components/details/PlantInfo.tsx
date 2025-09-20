@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { EditIcon } from '@/app/_components/icons/Icons';
 import { formatDateKorean } from '@/app/_utils/dateUtils';
+import { PLANT_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 interface PlantInfoProps {
   id: string;
@@ -28,7 +29,11 @@ export const PlantInfo = ({
           src={imageUrl}
           alt={name}
           fill
+          placeholder="blur"
+          blurDataURL={PLANT_PLACEHOLDER}
           className="object-cover"
+          priority
+          sizes="100vw"
         />
       </div>
 

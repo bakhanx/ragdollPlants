@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CachedEvent } from '@/types/cache/event';
+import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 interface EventCardProps {
   event: CachedEvent;
@@ -23,7 +24,10 @@ export default function EventCard({ event }: EventCardProps) {
           src={event.image}
           alt={event.title}
           fill
+          placeholder="blur"
+          blurDataURL={GRAY_PLACEHOLDER}
           className="object-cover"
+          sizes="(max-width: 768px) 100vw, 400px"
         />
 
         {/* 오버레이 */}

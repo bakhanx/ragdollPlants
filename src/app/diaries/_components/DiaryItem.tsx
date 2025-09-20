@@ -3,6 +3,7 @@ import Pin from './Pin';
 import Image from 'next/image';
 import { DiaryItemProps } from '@/types/components/diaries';
 import { formatDate } from '@/app/_utils/dateUtils';
+import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 export default function DiaryItem({ post, index }: DiaryItemProps) {
   return (
@@ -20,6 +21,8 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
             src={post.image || '/images/plant-default.png'}
             alt={post.title}
             fill
+            placeholder="blur"
+            blurDataURL={GRAY_PLACEHOLDER}
             className="rounded-t-lg object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />

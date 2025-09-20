@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { WaterIcon, NutrientIcon } from '@/app/_components/icons/Icons';
 import { getMyPlants } from '@/app/actions/plants';
 import { CachedPlant } from '@/types/cache/plant';
+import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 interface MyPlantListProps {
   plantsData: Awaited<ReturnType<typeof getMyPlants>> | null;
@@ -49,12 +50,16 @@ export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
               href={`/myplants/${plant.id}`}
               key={plant.id}
               className="relative flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-lg">
-              <div className="relative aspect-square w-full overflow-hidden">
+              <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
                 <Image
                   src={plant.image}
                   alt={plant.name}
                   fill
-                  className="object-cover brightness-80 filter transition-all duration-200 hover:brightness-100"
+                  placeholder="blur"
+                  blurDataURL={GRAY_PLACEHOLDER}
+                  className="object-cover brightness-80 filter transition-all duration-300 hover:brightness-100"
+                  priority={false}
+                  sizes="(max-width: 768px) 50vw, 25vw"
                 />
                 {/* 물/영양 아이콘 */}
                 <div className="absolute top-2 right-2 flex space-y-1 gap-x-2">

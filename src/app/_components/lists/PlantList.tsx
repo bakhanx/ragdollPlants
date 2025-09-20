@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import React from 'react';
+import { PLANT_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 type PlantListProps = {
   items: {
@@ -24,7 +25,10 @@ export const PlantList = ({ items }: PlantListProps) => {
                 fill
                 src={plant.image}
                 alt={plant.name || 'New Plant'}
+                placeholder="blur"
+                blurDataURL={PLANT_PLACEHOLDER}
                 style={{ objectFit: 'cover', borderRadius: '5%' }}
+                sizes="(max-width: 768px) 50vw, 25vw"
               />
             </div>
           </div>
