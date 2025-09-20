@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Textarea } from './Textarea';
 
@@ -33,6 +33,20 @@ export const ReportModal = ({
 }: ReportModalProps) => {
   const [selectedReason, setSelectedReason] = useState<ReportReason | ''>('');
   const [description, setDescription] = useState('');
+
+  // 모달이 열렸을 때 스크롤 방지
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // 컴포넌트 언마운트 시 정리
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handleSubmit = async () => {
     if (!selectedReason) {
@@ -71,15 +85,15 @@ export const ReportModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed z-50 inset-0">
       {/* 오버레이 */}
       <div 
-        className="absolute inset-0 bg-black/50"
+        className="absolute w-full h-screen bg-black/50"
         onClick={handleClose}
       />
       
       {/* 모달 컨텐츠 */}
-      <div className="relative w-full max-w-md mx-4 bg-white rounded-lg shadow-lg">
+      <div className="relative w-full max-w-md bg-white rounded-lg shadow-lg translate-y-1/4 ">
         <div className="p-6">
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-4">
