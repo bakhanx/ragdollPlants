@@ -111,37 +111,39 @@ export const HeaderActions = ({
   };
 
   return (
-    <div className="relative">
-      <button
-        onClick={handleMenuClick}
-        className="group relative flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all hover:bg-white/70 hover:shadow-md"
-        aria-label={getAriaLabel()}>
-        <MenuIcon
-          size={18}
-          className="[&_circle]:stroke-gray-700"
-        />
-      </button>
+    <>
+      <div className="relative">
+        <button
+          onClick={handleMenuClick}
+          className="group relative flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all hover:bg-white/70 hover:shadow-md"
+          aria-label={getAriaLabel()}>
+          <MenuIcon
+            size={18}
+            className="[&_circle]:stroke-gray-700"
+          />
+        </button>
 
-      {showMenu && (
-        <div className="absolute top-10 right-0 z-20 w-36 overflow-hidden rounded-lg bg-white shadow-lg">
-          <ul>
-            {menuItems.map((item, index) => (
-              <li key={index}>
-                <button
-                  className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
-                    item.isDanger ? 'text-red-500' : ''
-                  }`}
-                  onClick={() => {
-                    item.onClick();
-                    setShowMenu(false);
-                  }}>
-                  {item.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {showMenu && (
+          <div className="absolute top-10 right-0 z-20 w-36 overflow-hidden rounded-lg bg-white shadow-lg">
+            <ul>
+              {menuItems.map((item, index) => (
+                <li key={index}>
+                  <button
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
+                      item.isDanger ? 'text-red-500' : ''
+                    }`}
+                    onClick={() => {
+                      item.onClick();
+                      setShowMenu(false);
+                    }}>
+                    {item.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* 신고 모달 */}
       <ReportModal
@@ -151,6 +153,6 @@ export const HeaderActions = ({
         contentType={contentType}
         isSubmitting={isReportSubmitting}
       />
-    </div>
+    </>
   );
 };
