@@ -20,7 +20,8 @@ const ADMIN_PATHS = [
 const PROTECTED_PATHS = [
   '/garden/profile',
   '/diaries/upload',
-  '/galleries/upload'
+  '/galleries/upload',
+  '/myplants/upload'
 ];
 
 export default async function middleware(request: NextRequest) {
@@ -96,6 +97,7 @@ export const config = {
     // 로그인이 필요한 사용자 페이지
     '/garden/profile/:path*',
     '/diaries/upload/:path*',
-    '/galleries/upload/:path*'
+    '/galleries/upload/:path*',
+    '/myplants/upload/:path*'
   ]
 };
