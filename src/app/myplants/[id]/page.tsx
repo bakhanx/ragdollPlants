@@ -53,6 +53,7 @@ export default async function MyPlantDetailPage({
             <PlantInfo
               id={plant.id}
               name={plant.name}
+              isOwner={plant.isOwner}
               imageUrl={plant.image || '/images/plant-default.png'}
               plantType={plant.category}
               location={plant.location || ''}
