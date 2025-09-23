@@ -12,6 +12,7 @@ interface PlantInfoProps {
   plantType: string;
   location: string;
   acquiredDate: string;
+  isOwner?: boolean;
 }
 
 export const PlantInfo = ({
@@ -20,7 +21,8 @@ export const PlantInfo = ({
   imageUrl,
   plantType,
   location,
-  acquiredDate
+  acquiredDate,
+  isOwner,
 }: PlantInfoProps) => {
   return (
     <div className="flex flex-col py-4">
@@ -33,20 +35,22 @@ export const PlantInfo = ({
           blurDataURL={PLANT_PLACEHOLDER}
           className="object-cover"
           priority
-          sizes="100vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
 
       <div className="relative mx-auto my-2 flex items-center justify-center">
         <h1 className="text-center text-2xl font-bold text-gray-50">{name}</h1>
-        <Link
-          href={`/myplants/${id}/edit`}
-          className="absolute right-0 translate-x-6 text-gray-500">
-          <EditIcon
-            size={18}
-            className="[&_path]:stroke-gray-50"
-          />
-        </Link>
+        {isOwner && (
+          <Link
+            href={`/myplants/${id}/edit`}
+            className="absolute right-0 translate-x-6 text-gray-500">
+            <EditIcon
+              size={18}
+              className="[&_path]:stroke-gray-50"
+            />
+          </Link>
+        )}
       </div>
 
       <div className="text-center text-sm text-gray-50">
