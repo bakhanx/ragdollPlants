@@ -102,7 +102,9 @@ export const SignUpForm: React.FC = () => {
       const result = await signUpAction(formData);
 
       if (result.success) {
-        setServerMessage(result.message || '회원가입이 완료되었습니다!');
+        setServerMessage(
+          result.message || '회원가입이 완료되었습니다! 로그인 중...'
+        );
         // 성공 시에만 폼 초기화
         reset();
         setAgreements({
@@ -111,14 +113,10 @@ export const SignUpForm: React.FC = () => {
           age: false,
           marketing: false
         });
-        // 3초 후 로그인 페이지로 이동
-        setTimeout(() => {
-          router.push('/login');
-        }, 3000);
       } else {
         setServerMessage(result.message || '회원가입에 실패했습니다.');
 
-        // 서버에서 반환된 필드별 에러 처리 (폼 데이터는 자동 보존됨!)
+        // 폼 데이터 보존
         if (result.errors) {
           Object.entries(result.errors).forEach(([field, messages]) => {
             setError(field as keyof SignUpData, {
