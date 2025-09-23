@@ -21,8 +21,15 @@ const PROTECTED_PATHS = [
   '/garden/profile',
   '/diaries/upload',
   '/galleries/upload',
-  '/myplants/upload'
+  '/myplants/upload',
 ];
+
+const PROTECTED_DYNAMIC_PATHS = [
+  { pattern: /^\/myplants\/[^/]+\/edit$/, path: '/myplants/[id]/edit' },
+  { pattern: /^\/diaries\/[^/]+\/edit$/, path: '/diaries/[id]/edit' },
+  { pattern: /^\/galleries\/[^/]+\/edit$/, path: '/galleries/[id]/edit' }
+];
+
 
 export default async function middleware(request: NextRequest) {
   // JWT 토큰 검증
@@ -74,12 +81,20 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  // 로그인이 필요한 페이지 체크
+  // 로그인이 필요한 페이지 체크 (정적 경로)
   if (PROTECTED_PATHS.some(path => pathname.startsWith(path))) {
     if (!session) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
+
+   // 로그인이 필요한 페이지 체크 (동적 경로)
+  if (PROTECTED_DYNAMIC_PATHS.some(route => route.pattern.test(pathname))) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
 
   return NextResponse.next();
 }
@@ -91,13 +106,16 @@ export const config = {
     // 관리자 페이지
     '/admin/:path*',
     '/articles/upload/:path*',
-    '/articles/:id/edit',
+    '/articles/:id*/edit',
     '/events/upload/:path*',
-    '/events/:id/edit',
+    '/events/:id*/edit',
     // 로그인이 필요한 사용자 페이지
     '/garden/profile/:path*',
     '/diaries/upload/:path*',
     '/galleries/upload/:path*',
-    '/myplants/upload/:path*'
+    '/myplants/upload/:path*',
+    '/myplants/:id*/edit',
+    '/diaries/:id*/edit',
+    '/galleries/:id*/edit'
   ]
 };
