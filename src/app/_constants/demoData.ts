@@ -35,6 +35,7 @@ export type DemoDiary = Omit<Diary, 'date' | 'createdAt' | 'updatedAt'> & {
     id: string;
     name: string;
   } | null;
+    isOwner: boolean;
 };
 
 export type DemoGallery = Omit<Gallery, 'createdAt' | 'updatedAt'> & {
@@ -111,9 +112,9 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
     purchaseDate: '2024-01-15T00:00:00.000Z',
     wateringInterval: 7,
     nutrientInterval: 30,
-    lastWateredDate: '2024-01-20T00:00:00.000Z',
-    nextWateringDate: '2024-01-27T00:00:00.000Z',
-    lastNutrientDate: '2024-01-15T00:00:00.000Z',
+    lastWateredDate: '2025-09-16T00:00:00.000Z',
+    nextWateringDate: '2024-01-28T00:00:00.000Z',
+    lastNutrientDate: '2024-01-29T00:00:00.000Z',
     nextNutrientDate: '2024-02-15T00:00:00.000Z',
     temperature: 22.0,
     humidity: 55.0,
@@ -121,10 +122,10 @@ const DEMO_PLANTS_DATA: DemoPlant[] = [
     isPublic: true,
     isActive: true,
     needsWater: true,
-    needsNutrient: false,
+    needsNutrient: true,
     tags: ['몬스테라', '초보', '실내식물'],
     reportCount: 0,
-    createdAt: '2024-01-15T00:00:00.000Z',
+    createdAt: '2024-01-18T00:00:00.000Z',
     updatedAt: '2024-01-20T00:00:00.000Z',
     authorId: 'demo-user',
     // 추가 필드
@@ -192,7 +193,8 @@ const DEMO_DIARIES_DATA: DemoDiary[] = [
     plant: {
       id: 'demo-plant-1',
       name: '내 첫 몬스테라'
-    }
+    },
+    isOwner: true
   },
   {
     id: 'demo-diary-2',
@@ -217,7 +219,8 @@ const DEMO_DIARIES_DATA: DemoDiary[] = [
     plant: {
       id: 'demo-plant-2',
       name: '귀여운 스킨답서스'
-    }
+    },
+    isOwner: true
   }
 ];
 
@@ -328,10 +331,10 @@ const DEMO_CARE_DATA: DemoCare[] = [
     waterStatus: true,
     nutrientStatus: false,
     waterAmount: 150,
-    lastWateredDate: '2024-01-20',
+    lastWateredDate: '2024-01-24',
     nextWateringDate: '2024-01-27',
     waterInterval: 7,
-    lastNutrientDate: '2024-01-15',
+    lastNutrientDate: '2024-01-27',
     nextNutrientDate: '2024-02-15',
     nutrientInterval: 30,
     temperature: 22,
