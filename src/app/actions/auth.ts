@@ -12,6 +12,7 @@ type ActionResult = {
   success: boolean;
   message?: string;
   errors?: Record<string, string[]>;
+  redirectTo?: string;
 };
 
 // 로그인 액션
@@ -176,17 +177,25 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
         phone: phone || null // 빈 문자열이면 null로 저장
       }
     });
+
+    // DB 생성 완료 후 자동 로그인 시도
+    try {
+      await signIn('credentials', {
+        email,
+        password, // 원본 비밀번호 사용 (해싱 전)
+        redirect: false
+      });
+    } catch (loginError) {
+      console.error('자동 로그인 실패:', loginError);
+    }
   } catch (error) {
     console.error('회원가입 에러:', error);
-
     return {
       success: false,
       message: '회원가입 중 오류가 발생했습니다. 다시 시도해주세요.'
     };
   }
-
-  // 성공 시 로그인 페이지로 리다이렉트
-  redirect('/login');
+  redirect('/');
 }
 
 // 로그아웃 액션
