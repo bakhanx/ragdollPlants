@@ -1,4 +1,5 @@
 import React from 'react';
+import { redirect } from 'next/navigation';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import { ContentsLayout } from '@/app/_components/layout/ContentsLayout';
 import { Header } from '@/app/_components/header/Header';
@@ -13,28 +14,31 @@ interface EditDiaryPageProps {
 }
 
 export default async function EditDiaryPage({ params }: EditDiaryPageProps) {
-  try {
-    const { id } = await params;
-    const diary = await getDiaryById(id);
+  const { id } = await params;
+  const diary = await getDiaryById(id);
 
-    return (
-      <>
-        <BackgroundImage src="/images/welcome-bg-06.webp" />
-        <ContentsLayout>
-          <Header
-            title="다이어리 수정"
-            showBack
-          />
-
-          <DiaryForm
-            mode="edit"
-            initialData={diary || undefined}
-          />
-        </ContentsLayout>
-      </>
-    );
-  } catch (error) {
-    console.error('다이어리 정보 로딩 오류:', error);
+  if (!diary) {
     notFound();
   }
-} 
+
+  if (!diary.isOwner) {
+    redirect(`/diaries/${id}`);
+  }
+
+  return (
+    <>
+      <BackgroundImage src="/images/welcome-bg-06.webp" />
+      <ContentsLayout>
+        <Header
+          title="다이어리 수정"
+          showBack
+        />
+
+        <DiaryForm
+          mode="edit"
+          initialData={diary}
+        />
+      </ContentsLayout>
+    </>
+  );
+}
