@@ -768,7 +768,8 @@ export async function getDiaryById(id: string) {
     return {
       ...cachedDiary,
       likes: likesCount,
-      isLiked: !!userLike
+      isLiked: !!userLike,
+      isOwner: currentUser ? currentUser.id === cachedDiary.authorId : false
     };
   } catch (error) {
     console.error('다이어리 조회 오류:', error);
