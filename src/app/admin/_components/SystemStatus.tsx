@@ -1,20 +1,19 @@
 import { prisma } from '@/lib/prisma';
-import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon
+} from '@heroicons/react/24/outline';
 
 async function getSystemStatus() {
   try {
     // 데이터베이스 연결 테스트
     await prisma.$queryRaw`SELECT 1`;
-    
+
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
+
     // 최근 24시간 활동
-    const [
-      recentUsers,
-      recentContent,
-      errorReports
-    ] = await Promise.all([
+    const [recentUsers, recentContent, errorReports] = await Promise.all([
       prisma.user.count({
         where: {
           createdAt: {
@@ -47,9 +46,10 @@ async function getSystemStatus() {
       },
       reports: {
         status: errorReports > 10 ? 'warning' : 'healthy',
-        message: errorReports > 10 ? 
-          `대기 중인 신고 ${errorReports}건` : 
-          `처리 대기 신고 ${errorReports}건`
+        message:
+          errorReports > 10
+            ? `대기 중인 신고 ${errorReports}건`
+            : `처리 대기 신고 ${errorReports}건`
       }
     };
   } catch (error) {
@@ -101,18 +101,19 @@ export default async function SystemStatus() {
   };
 
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
+    <div className="overflow-hidden rounded-lg bg-white shadow">
       <div className="p-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+        <h3 className="mb-4 text-lg leading-6 font-medium text-gray-900">
           시스템 상태
         </h3>
-        
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="flex items-center space-x-3">
             {getStatusIcon(status.database.status)}
             <div>
               <p className="text-sm font-medium text-gray-900">데이터베이스</p>
-              <p className={`text-sm ${getStatusColor(status.database.status)}`}>
+              <p
+                className={`text-sm ${getStatusColor(status.database.status)}`}>
                 {status.database.message}
               </p>
             </div>
@@ -122,7 +123,8 @@ export default async function SystemStatus() {
             {getStatusIcon(status.activity.status)}
             <div>
               <p className="text-sm font-medium text-gray-900">사용자 활동</p>
-              <p className={`text-sm ${getStatusColor(status.activity.status)}`}>
+              <p
+                className={`text-sm ${getStatusColor(status.activity.status)}`}>
                 {status.activity.message}
               </p>
             </div>
@@ -139,16 +141,10 @@ export default async function SystemStatus() {
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
           <p className="text-sm text-gray-500">
             마지막 업데이트: {new Date().toLocaleString('ko-KR')}
           </p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="text-sm font-medium text-blue-600 hover:text-blue-800"
-          >
-            새로고침
-          </button>
         </div>
       </div>
     </div>
