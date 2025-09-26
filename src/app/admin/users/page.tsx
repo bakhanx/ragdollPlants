@@ -3,11 +3,12 @@ import UserList from '../_components/users/UserList';
 import UserStats from '../_components/users/UserStats';
 import UserFilters from '../_components/users/UserFilters';
 
-export default function AdminUsersPage({
+export default async function AdminUsersPage({
   searchParams
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   return (
     <div className="space-y-6">
       {/* 페이지 제목 */}
@@ -30,7 +31,7 @@ export default function AdminUsersPage({
 
       {/* 사용자 목록 */}
       <Suspense fallback={<div className="animate-pulse bg-gray-200 h-96 rounded-lg"></div>}>
-        <UserList searchParams={searchParams} />
+        <UserList searchParams={resolvedSearchParams} />
       </Suspense>
     </div>
   );
