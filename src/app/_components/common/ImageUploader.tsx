@@ -100,7 +100,7 @@ export const ImageUploader = ({
         {imagePreview ? (
           <>
             <Image
-              src={imagePreview}
+              src={`${imagePreview}/large`}
               alt="이미지 미리보기"
               fill
               className="object-cover"
