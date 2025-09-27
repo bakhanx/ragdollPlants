@@ -3,6 +3,7 @@ import SystemHealth from '../_components/system/SystemHealth';
 import DatabaseManagement from '../_components/system/DatabaseManagement';
 import BackupRestore from '../_components/system/BackupRestore';
 import SystemSettings from '../_components/system/SystemSettings';
+import RefreshButton from '../_components/common/RefreshButton';
 
 export default function AdminSystemPage() {
   return (
@@ -17,12 +18,7 @@ export default function AdminSystemPage() {
         </div>
         
         <div className="flex space-x-3">
-          <button 
-            onClick={() => window.location.reload()}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            새로고침
-          </button>
+          <RefreshButton />
         </div>
       </div>
 
