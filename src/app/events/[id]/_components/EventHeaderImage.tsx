@@ -15,15 +15,17 @@ export const EventHeaderImage = ({
   title,
   isEnded,
   isEarlyTerminated = false,
-  eventId,
+  eventId
 }: EventHeaderImageProps) => {
   return (
     <div className="relative mb-4 h-96 w-full overflow-hidden rounded-xl">
       <Image
-        src={imageUrl}
+        src={`${imageUrl}/large`}
         alt={title}
         fill
         className={`object-cover ${isEnded ? 'grayscale' : ''}`}
+        priority
+        unoptimized
       />
 
       {!isEnded && (
@@ -50,4 +52,4 @@ export const EventHeaderImage = ({
       )}
     </div>
   );
-}; 
+};

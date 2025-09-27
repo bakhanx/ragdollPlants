@@ -148,7 +148,7 @@ export const GalleryGrid = ({
                 blurDataURL={GRAY_PLACEHOLDER}
                 className="object-cover transition-transform duration-700 hover:scale-105"
                 priority
-                sizes="(max-width: 768px) 100vw, 768px"
+                unoptimized
               />
 
               {/* 그라데이션 오버레이 */}
@@ -228,6 +228,8 @@ export const GalleryGrid = ({
                     placeholder="blur"
                     blurDataURL={GRAY_PLACEHOLDER}
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    priority
+                    unoptimized
                   />
 
                   {/* 호버 오버레이 */}

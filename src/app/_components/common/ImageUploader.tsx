@@ -104,6 +104,8 @@ export const ImageUploader = ({
               alt="이미지 미리보기"
               fill
               className="object-cover"
+              priority
+              unoptimized
             />
             {showRemoveButton && (
               <button

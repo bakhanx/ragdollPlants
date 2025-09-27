@@ -59,7 +59,7 @@ export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
                   blurDataURL={GRAY_PLACEHOLDER}
                   className="object-cover brightness-80 filter transition-all duration-300 hover:brightness-100"
                   priority={false}
-                  sizes="(max-width: 768px) 50vw, 25vw"
+                  unoptimized
                 />
                 {/* 물/영양 아이콘 */}
                 <div className="absolute top-2 right-2 flex space-y-1 gap-x-2">

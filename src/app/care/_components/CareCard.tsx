@@ -60,7 +60,8 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                 placeholder="blur"
                 blurDataURL={PLANT_PLACEHOLDER}
                 className="rounded-lg object-cover"
-                sizes="80px"
+                priority
+                unoptimized
               />
             </div>
           </Link>

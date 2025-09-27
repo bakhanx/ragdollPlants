@@ -127,10 +127,11 @@ export default function UserTable({ users }: UserTableProps) {
                     {user.image ? (
                       <Image
                         className="h-10 w-10 rounded-full object-cover"
-                        src={user.image}
+                        src={`${user.image}/tiny`}
                         alt={user.name}
                         width={40}
                         height={40}
+                        unoptimized
                       />
                     ) : (
                       <UserCircleIcon className="h-10 w-10 text-gray-400" />

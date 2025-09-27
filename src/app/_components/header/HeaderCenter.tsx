@@ -21,9 +21,11 @@ export const HeaderCenter = ({ title, logoSrc }: HeaderCenterProps) => {
           <Image
             className="rounded-full"
             alt="Logo"
-            src={logoSrc}
+            src={`${logoSrc}/tiny`}
             style={{ objectFit: 'cover' }}
             fill
+            priority
+            unoptimized
           />
         </div>
         <h1 className="truncate text-lg leading-tight font-semibold text-gray-100">

@@ -9,16 +9,20 @@ interface EventDetailProps {
   eventDetail: EventDetailType;
 }
 
-export default function EventDetailComponent({ eventDetail }: EventDetailProps) {
+export default function EventDetailComponent({
+  eventDetail
+}: EventDetailProps) {
   return (
     <div className="mx-auto w-full max-w-md py-4">
       {/* 이벤트 헤더 이미지 */}
       <div className="relative mb-4 h-48 w-full overflow-hidden rounded-lg">
         <Image
-          src={eventDetail.imageUrl}
+          src={`${eventDetail.imageUrl}/large`}
           alt={eventDetail.title}
           fill
           className={`object-cover ${eventDetail.isEnded ? 'grayscale' : ''}`}
+          priority
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
 
@@ -66,4 +70,4 @@ export default function EventDetailComponent({ eventDetail }: EventDetailProps) 
       </div>
     </div>
   );
-} 
+}

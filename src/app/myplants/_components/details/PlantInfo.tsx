@@ -22,7 +22,7 @@ export const PlantInfo = ({
   plantType,
   location,
   acquiredDate,
-  isOwner,
+  isOwner
 }: PlantInfoProps) => {
   return (
     <div className="flex flex-col py-4">
@@ -32,10 +32,10 @@ export const PlantInfo = ({
           alt={name}
           fill
           placeholder="blur"
-          blurDataURL={`${imageUrl}/small` || PLANT_PLACEHOLDER}
+          blurDataURL={imageUrl ? `${imageUrl}/small` : PLANT_PLACEHOLDER}
           className="object-cover"
           priority
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized
         />
       </div>
 

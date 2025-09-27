@@ -356,6 +356,8 @@ export const GalleryEditForm = ({ galleryId }: GalleryEditFormProps) => {
                   alt={item.title}
                   fill
                   className="object-cover"
+                  priority
+                  unoptimized
                 />
                 {index === 0 && (
                   <div className="absolute top-1 right-1 rounded bg-yellow-500 px-1 text-xs text-black">

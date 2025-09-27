@@ -13,7 +13,7 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
       {/* 핀 컴포넌트 */}
       <Pin index={index} />
 
-      <article className="relative h-[280px] flex flex-col">
+      <article className="relative flex h-[280px] flex-col">
         {/* 이미지 영역 */}
         <div className="relative h-32 w-full overflow-hidden">
           <div className="absolute inset-0 bg-amber-50/50"></div>
@@ -24,7 +24,8 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
             placeholder="blur"
             blurDataURL={GRAY_PLACEHOLDER}
             className="rounded-t-lg object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority
+            unoptimized
           />
 
           {/* 날짜 스티커 */}
@@ -34,13 +35,13 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
         </div>
 
         {/* 콘텐츠 영역 */}
-        <div className="flex-1 bg-[linear-gradient(transparent_0px,transparent_16px,#c8ccd0_17px)] bg-[size:100%_18px] p-4 pt-2 overflow-hidden">
-          <h2 className="mb-3 rounded bg-amber-50/70 px-1 py-1 text-lg font-bold text-gray-800 line-clamp-1">
+        <div className="flex-1 overflow-hidden bg-[linear-gradient(transparent_0px,transparent_16px,#c8ccd0_17px)] bg-[size:100%_18px] p-4 pt-2">
+          <h2 className="mb-3 line-clamp-1 rounded bg-amber-50/70 px-1 py-1 text-lg font-bold text-gray-800">
             {post.title}
           </h2>
 
           <div className="relative">
-            <p className="mb-4 px-1 text-sm leading-[18px] font-medium text-gray-700 line-clamp-5 overflow-hidden">
+            <p className="mb-4 line-clamp-5 overflow-hidden px-1 text-sm leading-[18px] font-medium text-gray-700">
               {post.content}
             </p>
 

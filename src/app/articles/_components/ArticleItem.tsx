@@ -27,11 +27,12 @@ export const ArticleItem = ({ post }: { post: CachedArticle }) => {
         {/* 이미지 */}
         <div className="relative h-48 w-full overflow-hidden">
           <Image
-            src={imageSource}
+            src={`${imageSource}/medium`}
             alt={post.title}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority
+            unoptimized
           />
 
           {/* 카테고리 배지 */}

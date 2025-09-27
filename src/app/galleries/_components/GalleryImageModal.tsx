@@ -324,7 +324,7 @@ export const GalleryImageModal = ({
 
               {/* 실제 이미지 */}
               <Image
-                src={`${item.image}/public`}
+                src={`${item.image}/large`}
                 alt={item.title}
                 fill
                 className={`bg-black/60 object-contain transition-opacity duration-500 ${
@@ -332,6 +332,7 @@ export const GalleryImageModal = ({
                 }`}
                 onLoad={handleImageLoad}
                 priority
+                unoptimized
               />
 
               {/* 이미지 정보 오버레이 */}

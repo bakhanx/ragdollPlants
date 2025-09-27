@@ -20,7 +20,7 @@ export default function ProfileImage({
       <div
         className={`relative overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg size-28 ${className} group mt-1`}>
         <Image
-          src={src}
+          src={`${src}/small`}
           alt={alt}
           fill
           sizes="(max-width: 768px) 96px, 112px"
@@ -28,6 +28,7 @@ export default function ProfileImage({
           blurDataURL={PROFILE_PLACEHOLDER}
           className="object-cover"
           priority
+          unoptimized
         />
 
         {showEditHint && (

@@ -205,10 +205,12 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
             onClick={handleImageSelect}>
             {formData.profileImage ? (
               <Image
-                src={formData.profileImage}
+                src={`${formData.profileImage}/small`}
                 alt="프로필 이미지"
                 fill
                 style={{ objectFit: 'cover' }}
+                priority
+                unoptimized
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gray-100">

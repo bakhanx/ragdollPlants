@@ -35,19 +35,23 @@ export function ShareableImage({
   const url = `${baseUrl}/${contentType}s/${id}`;
 
   return (
-    <div className={`relative ${height} w-full overflow-hidden rounded-lg ${className}`}>
+    <div
+      className={`relative ${height} w-full overflow-hidden rounded-lg ${className}`}>
       <Image
-        src={src}
+        src={`${src}/medium`}
         alt={alt}
         fill
         className={`object-cover ${isGrayscale ? 'grayscale' : ''}`}
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         priority={priority}
+        unoptimized
       />
 
       {showShare && (
         <div className="absolute right-2 bottom-2 z-20">
-          <ShareButton url={url} title={title} />
+          <ShareButton
+            url={url}
+            title={title}
+          />
         </div>
       )}
 
@@ -59,4 +63,4 @@ export function ShareableImage({
       {children}
     </div>
   );
-} 
+}

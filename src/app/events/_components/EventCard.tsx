@@ -21,13 +21,14 @@ export default function EventCard({ event }: EventCardProps) {
       <div
         className={`relative h-40 w-full overflow-hidden rounded-lg transition-shadow hover:shadow-lg ${event.isEnded ? 'grayscale' : ''}`}>
         <Image
-          src={event.image}
+          src={`${event.image}/medium`}
           alt={event.title}
           fill
           placeholder="blur"
           blurDataURL={GRAY_PLACEHOLDER}
           className="object-cover"
-          sizes="(max-width: 768px) 100vw, 400px"
+          priority
+          unoptimized
         />
 
         {/* 오버레이 */}

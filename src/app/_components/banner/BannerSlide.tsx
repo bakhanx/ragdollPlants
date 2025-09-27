@@ -31,12 +31,13 @@ export const BannerSlide: React.FC<BannerSlideProps> = ({
       {/* 배경 이미지 */}
       <div className="relative h-full w-full">
         <Image
-          src={image}
+          src={`${image}/medium`}
           alt={title}
           fill
           style={{ objectFit: 'cover' }}
           className="rounded-xl"
           priority
+          unoptimized
         />
         {/* 어두운 오버레이 */}
         <div className="absolute inset-0 rounded-xl bg-black opacity-30" />

@@ -7,16 +7,20 @@ interface ArticleImageProps {
   id: string | number;
 }
 
-export default function ArticleImage({ imageUrl, title, id }: ArticleImageProps) {
+export default function ArticleImage({
+  imageUrl,
+  title,
+  id
+}: ArticleImageProps) {
   return (
-    <div className="relative h-[calc(50vh-16px)] w-full ">
+    <div className="relative h-[calc(50vh-16px)] w-full">
       <Image
-        src={imageUrl}
+        src={`${imageUrl}/large`}
         alt={title}
         fill
-        className="object-cover rounded-xl"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className="rounded-xl object-cover"
         priority
+        unoptimized
       />
 
       <div className="absolute right-4 bottom-12 z-20">
@@ -29,4 +33,4 @@ export default function ArticleImage({ imageUrl, title, id }: ArticleImageProps)
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
     </div>
   );
-} 
+}
