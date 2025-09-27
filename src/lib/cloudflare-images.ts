@@ -78,7 +78,7 @@ export async function uploadImageToCloudflare(
     if (result.success && result.result) {
       // Cloudflare Images 변형 URL 반환
       const imageUrl = deliveryUrl 
-        ? `${deliveryUrl}/${result.result.id}/public`
+        ? `${deliveryUrl}/${result.result.id}`
         : result.result.variants[0]; // 첫 번째 변형 사용
 
       console.log('이미지 업로드 성공:', imageUrl);
