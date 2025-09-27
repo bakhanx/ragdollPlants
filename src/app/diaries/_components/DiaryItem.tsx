@@ -18,7 +18,7 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
         <div className="relative h-32 w-full overflow-hidden">
           <div className="absolute inset-0 bg-amber-50/50"></div>
           <Image
-            src={post.image || '/images/plant-default.png'}
+            src={`${post.image}/small` || '/images/plant-default.png'}
             alt={post.title}
             fill
             placeholder="blur"

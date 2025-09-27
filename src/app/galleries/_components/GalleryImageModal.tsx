@@ -324,7 +324,7 @@ export const GalleryImageModal = ({
 
               {/* 실제 이미지 */}
               <Image
-                src={item.image}
+                src={`${item.image}/public`}
                 alt={item.title}
                 fill
                 className={`bg-black/60 object-contain transition-opacity duration-500 ${

@@ -52,7 +52,7 @@ export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
               className="relative flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-lg">
               <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
                 <Image
-                  src={plant.image}
+                  src={`${plant.image}/small`}
                   alt={plant.name}
                   fill
                   placeholder="blur"

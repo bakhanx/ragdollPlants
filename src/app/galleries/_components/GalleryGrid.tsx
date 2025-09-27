@@ -141,7 +141,7 @@ export const GalleryGrid = ({
           <div className="relative cursor-pointer overflow-hidden rounded-2xl shadow-2xl transition-transform duration-300 hover:scale-[1.02]">
             <div className="relative aspect-[4/3]">
               <Image
-                src={featuredItem.image}
+                src={`${featuredItem.image}/medium`}
                 alt={featuredItem.title}
                 fill
                 placeholder="blur"
@@ -220,7 +220,7 @@ export const GalleryGrid = ({
               <div className="group relative cursor-pointer overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 <div className="relative aspect-square">
                   <Image
-                    src={item.image}
+                    src={`${item.image}/small`}
                     alt={item.title}
                     sizes="224px"
                     quality={75}

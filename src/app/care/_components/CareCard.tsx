@@ -54,7 +54,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
           <Link href={`/myplants/${currentPlant.id}`}>
             <div className="relative size-20 shrink-0 cursor-pointer self-start transition-opacity hover:opacity-80">
               <Image
-                src={currentPlant.image}
+                src={`${currentPlant.image}/small`}
                 alt={currentPlant.name}
                 fill
                 placeholder="blur"

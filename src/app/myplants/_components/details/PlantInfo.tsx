@@ -28,11 +28,11 @@ export const PlantInfo = ({
     <div className="flex flex-col py-4">
       <div className="relative mx-auto mb-4 aspect-square w-full overflow-hidden rounded-md">
         <Image
-          src={imageUrl}
+          src={`${imageUrl}/large`}
           alt={name}
           fill
           placeholder="blur"
-          blurDataURL={PLANT_PLACEHOLDER}
+          blurDataURL={`${imageUrl}/small` || PLANT_PLACEHOLDER}
           className="object-cover"
           priority
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

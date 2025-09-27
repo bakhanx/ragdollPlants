@@ -340,7 +340,7 @@ export const GalleryEditForm = ({ galleryId }: GalleryEditFormProps) => {
               </div>
 
               {/* 체크박스 */}
-              <div className="flex items-center">
+              <div className="flex items-start pt-1">
                 <input
                   type="checkbox"
                   checked={selectedItems.has(item.id)}
@@ -352,7 +352,7 @@ export const GalleryEditForm = ({ galleryId }: GalleryEditFormProps) => {
               {/* 이미지 */}
               <div className="relative h-20 w-20 overflow-hidden rounded-lg bg-black/20">
                 <Image
-                  src={item.image}
+                  src={`${item.image}/small`}
                   alt={item.title}
                   fill
                   className="object-cover"
