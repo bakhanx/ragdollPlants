@@ -12,23 +12,14 @@ interface HeaderRightProps {
   showContentMenu: boolean;
   contentType?: ContentType;
   contentId?: string;
-  contentAuthorId?: string; // 추가: 콘텐츠 작성자 ID
 }
 
 export const HeaderRight = ({
   showContentMenu,
   contentType,
-  contentId,
-  contentAuthorId
+  contentId
 }: HeaderRightProps) => {
   const { user, isInitialized } = useAuthStore();
-
-  // 소유권 확인 (store의 user id와 contentAuthorId 비교)
-  const isOwner = contentAuthorId ? user?.id === contentAuthorId : false;
-
-  // 관리자 권한 확인 (article, event는 관리자만)
-  const isAdminContent = contentType === 'article' || contentType === 'event';
-  const hasPermission = isAdminContent ? user?.role === 'ADMIN' : isOwner;
 
   return (
     <div className="ml-auto flex w-auto items-center justify-end gap-2">
@@ -41,7 +32,7 @@ export const HeaderRight = ({
 
       {!isInitialized && (
         <div
-          className="absolute flex size-9 items-center justify-center rounded-xl bg-white/50 transition-all cursor-wait z-10"
+          className="absolute z-10 flex size-9 cursor-wait items-center justify-center rounded-xl bg-white/50 transition-all"
           aria-label="알림">
           <BellIcon
             size={20}
@@ -57,7 +48,7 @@ export const HeaderRight = ({
         <HeaderActions
           contentType={contentType}
           id={contentId}
-          isOwner={hasPermission}
+          isOwner={showContentMenu}
         />
       )}
     </div>

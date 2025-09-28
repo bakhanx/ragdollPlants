@@ -16,7 +16,6 @@ interface HeaderProps {
   title?: string;
   variant?: HeaderVariant;
   contentType?: ContentType;
-  contentAuthorId?: string;
   showMenuButton?: boolean;
   showContentMenu?: boolean;
 }
@@ -35,7 +34,6 @@ export const Header = ({
   title = '랙돌플랜츠',
   variant = 'default',
   contentType,
-  contentAuthorId,
   showContentMenu = false
 }: HeaderProps) => {
   return (
@@ -59,7 +57,6 @@ export const Header = ({
             showContentMenu={showContentMenu}
             contentType={contentType}
             contentId={id}
-            contentAuthorId={contentAuthorId}
           />
         </Suspense>
       </div>
