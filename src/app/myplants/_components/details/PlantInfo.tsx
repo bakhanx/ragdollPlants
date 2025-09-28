@@ -28,11 +28,11 @@ export const PlantInfo = ({
     <div className="flex flex-col py-4">
       <div className="relative mx-auto mb-4 aspect-square w-full overflow-hidden rounded-md">
         <Image
-          src={`${imageUrl}/large`}
+          src={`${imageUrl}/medium`}
           alt={name}
           fill
           placeholder="blur"
-          blurDataURL={imageUrl ? `${imageUrl}/small` : PLANT_PLACEHOLDER}
+          blurDataURL={`${imageUrl}/small` || PLANT_PLACEHOLDER}
           className="object-cover"
           priority
           unoptimized

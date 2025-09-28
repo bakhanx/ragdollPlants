@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import { ImageIcon, CloseIcon } from '@/app/_components/icons/Icons';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 type ImageUploaderProps = {
   // 기본 설정
@@ -100,10 +101,11 @@ export const ImageUploader = ({
         {imagePreview ? (
           <>
             <Image
-              src={`${imagePreview}/large`}
+              src={getImageSrc(imagePreview, 'small')}
               alt="이미지 미리보기"
-              fill
-              className="object-cover"
+              className="h-full w-full object-cover"
+              width={128}
+              height={128}
               priority
               unoptimized
             />
@@ -125,7 +127,7 @@ export const ImageUploader = ({
               <>
                 <ImageIcon
                   size={multiMode ? 24 : 32}
-                  className="mb-1 [&_path]:stroke-gray-200"
+                  className="mb-1 text-gray-200"
                 />
                 <p
                   className={`${multiMode ? 'text-[11px]' : 'text-sm'} text-gray-200`}>

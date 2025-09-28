@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { EditIcon } from '@/app/_components/icons';
 import { PROFILE_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 type ProfileImageProps = {
   src: string;
@@ -20,7 +21,7 @@ export default function ProfileImage({
       <div
         className={`relative overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg size-28 ${className} group mt-1`}>
         <Image
-          src={`${src}/small`}
+          src={getImageSrc(src, 'small')}
           alt={alt}
           fill
           sizes="(max-width: 768px) 96px, 112px"

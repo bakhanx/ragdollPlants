@@ -20,7 +20,7 @@ export default function DiaryImage({
   return (
     <div className="relative h-[calc(50vh-16px)] w-full">
       <Image
-        src={`${imageUrl}/large`}
+        src={`${imageUrl}/medium`}
         alt={title}
         fill
         className="object-cover"

@@ -20,10 +20,11 @@ export const EventHeaderImage = ({
   return (
     <div className="relative mb-4 h-96 w-full overflow-hidden rounded-xl">
       <Image
-        src={`${imageUrl}/large`}
+        src={`${imageUrl}/medium`}
         alt={title}
         fill
-        className={`object-cover ${isEnded ? 'grayscale' : ''}`}
+        style={{objectFit: 'cover' }}
+        className={`${isEnded ? 'grayscale' : ''}`}
         priority
         unoptimized
       />
