@@ -1,16 +1,12 @@
 import { getEvents } from '@/app/actions/events';
-import { checkIsAdmin } from '@/lib/auth-utils';
 import EventList from './EventList';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default async function EventListWrapper() {
   let eventsData: Awaited<ReturnType<typeof getEvents>> | null = null;
-  let isAdmin = false;
   let hasError = false;
 
   try {
-    [eventsData, isAdmin] = await Promise.all([getEvents(), checkIsAdmin()]);
+    eventsData = await getEvents();
   } catch (error) {
     console.error('이벤트 목록 로딩 오류:', error);
     hasError = true;
@@ -45,7 +41,6 @@ export default async function EventListWrapper() {
   return (
     <EventList
       initialData={eventsData}
-      isAdmin={isAdmin}
     />
   );
 }
