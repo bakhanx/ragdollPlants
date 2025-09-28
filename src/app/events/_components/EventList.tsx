@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTabItems } from '@/app/_hooks/useTabItems';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
@@ -12,10 +12,9 @@ import { EventTabType } from '@/types/models/event';
 
 interface EventListProps {
   initialData: EventsResponse | null;
-  isAdmin: boolean;
 }
 
-export default function EventList({ initialData, isAdmin }: EventListProps) {
+export default function EventList({ initialData }: EventListProps) {
   const router = useRouter();
 
   // 날짜 체크 및 새로고침
@@ -33,21 +32,19 @@ export default function EventList({ initialData, isAdmin }: EventListProps) {
     }
   }, [router]);
 
-  const events = initialData?.events || [];
 
-  const activeEvents = events.filter(event => !event.isEnded);
-  const endedEvents = events.filter(event => event.isEnded);
+  const events = useMemo(() => initialData?.events || [], [initialData]);
 
-  // allItems 객체만 메모이제이션 (참조 안정성)
-  // 길이 변화로 의존성 체크 단순화
-  const allItems = useMemo(
-    () => ({
+  // 이벤트 상태별 분류
+  const allItems = useMemo(() => {
+    const activeEvents = events.filter(event => !event.isEnded);
+    const endedEvents = events.filter(event => event.isEnded);
+
+    return {
       active: activeEvents,
       ended: endedEvents
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeEvents.length, endedEvents.length]
-  );
+    };
+  }, [events]);
 
   // 탭/검색/더보기 등 상태 관리
   const {
@@ -56,8 +53,7 @@ export default function EventList({ initialData, isAdmin }: EventListProps) {
     visibleItems,
     hasMore,
     handleSearch,
-    handleLoadMore,
-    filteredItemsCount
+    handleLoadMore
   } = useTabItems<CachedEvent, EventTabType>({
     allItems,
     filterFn: (item: CachedEvent, query: string) => {
@@ -70,16 +66,14 @@ export default function EventList({ initialData, isAdmin }: EventListProps) {
     initialTab: 'active'
   });
 
-  const tabs: { id: EventTabType; label: string; count: number }[] = [
+  const tabs: { id: EventTabType; label: string }[] = [
     {
       id: 'active',
-      label: '진행 중인 이벤트',
-      count: filteredItemsCount.active
+      label: '진행 중인 이벤트'
     },
     {
       id: 'ended',
-      label: '종료된 이벤트',
-      count: filteredItemsCount.ended
+      label: '종료된 이벤트'
     }
   ];
 
@@ -136,7 +130,7 @@ export default function EventList({ initialData, isAdmin }: EventListProps) {
   return (
     <>
       {/* 검색 입력 */}
-      <div className="mb-6">
+      <div className="my-6">
         <SearchInput
           placeholder="이벤트 검색"
           onSearch={handleSearch}
