@@ -274,21 +274,6 @@ export async function getUserGalleries(
       };
     }
 
-    // 세션이 있지만 타겟 사용자가 세션 사용자와 같을 때 DB 검증
-    if (session && !userId && targetUserId === currentUserId) {
-      const userExists = await checkUserExists(targetUserId);
-
-      // 세션은 있지만 DB에 사용자가 없는 경우
-      if (!userExists) {
-        return {
-          ...DEMO_GALLERIES_RESPONSE,
-          isOwner: true,
-          isLoggedIn: false,
-          authMismatch: true
-        };
-      }
-    }
-
     const isOwner = currentUserId === targetUserId;
     const galleryData = await getCachedUserGalleries(targetUserId, isOwner);
 
@@ -390,11 +375,18 @@ export async function createGallery(formData: FormData) {
       }
     });
 
-    // 갤러리 업로드 경험치 부여 (+20)
-    await grantExperience(user.id, 'UPLOAD_GALLERY', '갤러리 사진 업로드');
-
-    // 캐시 무효화
     revalidateUserCache('galleryCreate', user.id);
+
+    // 백그라운드에서 경험치 부여만 처리
+    Promise.resolve().then(async () => {
+      try {
+        // 갤러리 업로드 경험치 부여 (+20)
+        await grantExperience(user.id, 'UPLOAD_GALLERY', '갤러리 사진 업로드');
+        console.log('갤러리 경험치 부여 완루:', gallery.id);
+      } catch (error) {
+        console.error('갤러리 경험치 부여 오류:', error);
+      }
+    });
 
     return {
       success: true,

@@ -362,11 +362,18 @@ export async function createPlant(formData: FormData) {
       }
     });
 
-    // 식물 등록 경험치 부여 (+30)
-    await grantExperience(user.id, 'ADD_PLANT', '새로운 식물 등록');
-
-    // 캐시 무효화
     revalidateUserCache('plantCreate', user.id);
+
+    // 백그라운드에서 경험치 부여만 처리
+    Promise.resolve().then(async () => {
+      try {
+        // 식물 등록 경험치 부여 (+30)
+        await grantExperience(user.id, 'ADD_PLANT', '새로운 식물 등록');
+        console.log('식물 등록 경험치 부여 완루:', plant.id);
+      } catch (error) {
+        console.error('식물 등록 경험치 부여 오류:', error);
+      }
+    });
 
     return {
       success: true,

@@ -379,13 +379,19 @@ export async function createDiary(formData: FormData) {
 
     console.log('다이어리 생성 완료:', { id: diary.id, title: diary.title });
 
-    // 다이어리 작성 경험치 부여 (+25)
-    await grantExperience(user.id, 'CREATE_DIARY', '다이어리 작성');
-
-    // 캐시 무효화
     revalidateUserCache('diaryCreate', user.id);
 
-    // 성공 결과 반환
+    // 백그라운드에서 경험치 부여만 처리
+    Promise.resolve().then(async () => {
+      try {
+        // 다이어리 작성 경험치 부여 (+25)
+        await grantExperience(user.id, 'CREATE_DIARY', '다이어리 작성');
+        console.log('다이어리 경험치 부여 완룼:', diary.id);
+      } catch (error) {
+        console.error('다이어리 경험치 부여 오류:', error);
+      }
+    });
+
     return {
       success: true,
       diaryId: diary.id,
@@ -503,10 +509,8 @@ export async function updateDiary(id: string, formData: FormData) {
       title: updatedDiary.title
     });
 
-    // 캐시 무효화
     revalidateDiaryUpdate(user.id, id);
 
-    // 성공 결과 반환
     return {
       success: true,
       diaryId: id,
