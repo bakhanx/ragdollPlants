@@ -49,7 +49,7 @@ const DatePickerField = ({
         <div className="pr-3">
           <ScheduleIcon
             size={20}
-            className="[&_path]:stroke-gray-50"
+            className="text-gray-50"
           />
         </div>
       </div>
