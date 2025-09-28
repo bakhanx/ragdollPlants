@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useTabItems } from '@/app/_hooks/useTabItems';
 import { TabNavigation } from '@/app/_components/common/TabNavigation';
 import { LoadMoreButton } from '@/app/_components/common/LoadMoreButton';
@@ -14,21 +15,22 @@ interface ArticleListProps {
 }
 
 export default function ArticleList({ initialData }: ArticleListProps) {
-  const articles = initialData || [];
+  const articles = useMemo(() => initialData || [], [initialData]);
 
-  // 카테고리별 분류 (서버에서 받은 데이터 기준)
-  const allArticles = articles;
-  const tipsArticles = articles.filter(a => a.category?.name === 'tips');
-  const newsArticles = articles.filter(a => a.category?.name === 'news');
-  const guideArticles = articles.filter(a => a.category?.name === 'guide');
+  // 카테고리별 분류
+  const allItems = useMemo(() => {
+    const allArticles = articles;
+    const tipsArticles = articles.filter(a => a.category?.id === 'TIPS');
+    const newsArticles = articles.filter(a => a.category?.id === 'NEWS');
+    const guideArticles = articles.filter(a => a.category?.id === 'GUIDE');
 
-  // 서버에서 미리 분류된 정적 객체 (Event 페이지와 동일한 패턴)
-  const allItems = {
-    all: allArticles,
-    tips: tipsArticles,
-    news: newsArticles,
-    guide: guideArticles
-  };
+    return {
+      ALL: allArticles,
+      TIPS: tipsArticles,
+      NEWS: newsArticles,
+      GUIDE: guideArticles
+    };
+  }, [articles]);
 
   // 탭/검색/더보기 등 상태 관리
   const {
@@ -37,21 +39,20 @@ export default function ArticleList({ initialData }: ArticleListProps) {
     visibleItems,
     hasMore,
     handleSearch,
-    handleLoadMore,
-    filteredItemsCount
+    handleLoadMore
   } = useTabItems<CachedArticle, ArticleTabType>({
     allItems,
     filterFn: (item, query) =>
       item.title.toLowerCase().includes(query.toLowerCase()),
-    initialTab: 'all'
+    initialTab: 'ALL'
   });
 
   // 탭 정보
-  const tabs: { id: ArticleTabType; label: string; count: number }[] = [
-    { id: 'all', label: '전체', count: filteredItemsCount.all },
-    { id: 'tips', label: '팁과 정보', count: filteredItemsCount.tips },
-    { id: 'news', label: '뉴스', count: filteredItemsCount.news },
-    { id: 'guide', label: '가이드', count: filteredItemsCount.guide }
+  const tabs: { id: ArticleTabType; label: string }[] = [
+    { id: 'ALL', label: '전체' },
+    { id: 'TIPS', label: '팁과 정보' },
+    { id: 'NEWS', label: '뉴스' },
+    { id: 'GUIDE', label: '가이드' }
   ];
 
   if (!initialData) {
@@ -107,7 +108,7 @@ export default function ArticleList({ initialData }: ArticleListProps) {
   return (
     <>
       {/* 검색 입력 */}
-      <div className="mb-6">
+      <div className="my-6">
         <SearchInput
           placeholder="기사 검색..."
           onSearch={handleSearch}
