@@ -45,8 +45,7 @@ export default async function MyPlantDetailPage({
             title={plant.name}
             showBack
             contentType="plant"
-            contentAuthorId={plant.authorId}
-            showContentMenu={true}
+            showContentMenu={plant.isOwner}
           />
 
           <div className="w-full divide-y divide-gray-100">

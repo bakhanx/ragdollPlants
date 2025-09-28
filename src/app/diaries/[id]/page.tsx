@@ -15,8 +15,7 @@ export default async function DiaryDetail(props: {
   const id = params.id;
 
   try {
-    const { diary } = await getDiaryWithOwnership(id);
-
+    const { diary, isOwner } = await getDiaryWithOwnership(id);
     const diaryDetail = {
       id: diary.id,
       title: diary.title,
@@ -37,13 +36,13 @@ export default async function DiaryDetail(props: {
             variant="glass"
             contentType="diary"
             id={id}
-            showContentMenu
+            showContentMenu={isOwner}
           />
 
           <div className="w-full overflow-hidden rounded-2xl">
             {/* 이미지 및 공유 버튼 */}
             <DiaryImage
-              imageUrl={`${diary.image}/large` || '/images/plant-default.png'}
+              imageUrl={`${diary.image}` || '/images/plant-default.png'}
               title={diary.title}
               id={diary.id}
             />
