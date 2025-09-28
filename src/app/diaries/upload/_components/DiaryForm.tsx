@@ -11,7 +11,7 @@ import { DiaryImageUploadSection } from './DiaryImageUploadSection';
 import { createDiary, updateDiary } from '@/app/actions/diaries';
 import { getMyPlantsBasicInfo } from '@/app/actions/plants';
 
-const MAX_PHOTO_COUNT = 5; // 최대 사진 개수
+const MAX_PHOTO_COUNT = 1; // 최대 사진 개수 (단일 이미지)
 
 interface DiaryFormProps {
   mode?: 'create' | 'edit';
@@ -130,8 +130,10 @@ export const DiaryForm = ({
       }
 
       if (result?.success) {
-        // 성공 시 리다이렉트
+        // 성공 시 즉시 로딩 상태 해제 및 리다이렉트
+        setIsSubmitting(false);
         router.push(result.redirectTo!);
+        return; // finally 블록 실행 방지
       } else {
         // 실패 시 에러 메시지 표시
         const actionText = mode === 'edit' ? '수정' : '생성';
