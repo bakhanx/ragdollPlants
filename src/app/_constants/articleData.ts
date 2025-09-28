@@ -96,7 +96,7 @@ export const ARTICLE_DATA: ArticleData[] = [
 <p>몬스테라는 관리가 쉬운 편이지만, 기본적인 관리법을 지켜주면 더욱 건강하게 자랍니다. 인내심을 갖고 꾸준히 관리해주시면 아름다운 몬스테라를 키울 수 있을 거예요!</p>`,
     image: '/images/welcome-bg-02.webp',
     tags: ['몬스테라', '초보자', '실내식물', '관리법'],
-    categoryId: 'care-guide'
+    categoryId: 'GUIDE'
   },
   {
     title: '실내 공기정화 식물 BEST 10',
@@ -165,7 +165,7 @@ export const ARTICLE_DATA: ArticleData[] = [
 <p>건강한 실내 환경을 위해 지금 바로 공기정화 식물을 들여보세요!</p>`,
     image: '/images/welcome-bg-03.webp',
     tags: ['공기정화', '실내식물', '건강', 'NASA'],
-    categoryId: 'plant-info'
+    categoryId: 'TIPS'
   },
   {
     title: '겨울철 식물 관리의 모든 것',
@@ -240,6 +240,6 @@ export const ARTICLE_DATA: ArticleData[] = [
 <p>겨울철 올바른 관리로 식물들과 함께 따뜻한 겨울을 보내세요!</p>`,
     image: '/images/welcome-bg-05.webp',
     tags: ['겨울관리', '휴면기', '온도관리', '물주기'],
-    categoryId: 'care-guide'
+    categoryId: 'GUIDE'
   }
 ];

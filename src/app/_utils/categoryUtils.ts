@@ -22,7 +22,7 @@ export function inferArticleCategory(
     lowerTitle.includes('예방') ||
     lowerTitle.startsWith('[tip]')
   ) {
-    return 'tips';
+    return 'TIPS';
   }
 
   if (
@@ -31,7 +31,7 @@ export function inferArticleCategory(
     lowerTitle.includes('키우기') ||
     lowerTitle.includes('초보자')
   ) {
-    return 'guide';
+    return 'GUIDE';
   }
 
   // 내용 기반 분류 (옵션)
@@ -43,7 +43,7 @@ export function inferArticleCategory(
       lowerContent.includes('방법') ||
       lowerContent.includes('요령')
     ) {
-      return 'tips';
+      return 'TIPS';
     }
 
     if (
@@ -51,23 +51,23 @@ export function inferArticleCategory(
       lowerContent.includes('초보자') ||
       lowerContent.includes('입문')
     ) {
-      return 'guide';
+      return 'GUIDE';
     }
   }
 
   // 태그 기반 분류
   if (tags && tags.length > 0) {
     if (tags.some(tag => ['팁', '관리', '예방', '방법'].includes(tag))) {
-      return 'tips';
+      return 'TIPS';
     }
 
     if (tags.some(tag => ['가이드', '입문', '초보'].includes(tag))) {
-      return 'guide';
+      return 'GUIDE';
     }
   }
 
   // 기본값: 뉴스
-  return 'news';
+  return 'NEWS';
 }
 
 /**
@@ -78,11 +78,9 @@ export function getCategoryColors(category: ArticleCategory | string): {
   text: string;
 } {
   const colorMap: Record<string, { bg: string; text: string }> = {
-    tips: { bg: 'bg-blue-100', text: 'text-blue-800' },
-    news: { bg: 'bg-amber-100', text: 'text-amber-800' },
-    guide: { bg: 'bg-emerald-100', text: 'text-emerald-800' },
-    'care-guide': { bg: 'bg-green-100', text: 'text-green-800' },
-    'plant-info': { bg: 'bg-blue-100', text: 'text-blue-800' }
+    'NEWS': { bg: 'bg-amber-100', text: 'text-amber-800' },
+    'TIPS': { bg: 'bg-blue-100', text: 'text-blue-800' },
+    'GUIDE': { bg: 'bg-emerald-100', text: 'text-emerald-800' }
   };
 
   return colorMap[category] || { bg: 'bg-gray-100', text: 'text-gray-800' };
@@ -93,11 +91,9 @@ export function getCategoryColors(category: ArticleCategory | string): {
  */
 export function getCategoryLabel(category: ArticleCategory | string): string {
   const labelMap: Record<string, string> = {
-    tips: '팁과 정보',
-    news: '뉴스',
-    guide: '가이드',
-    'care-guide': '관리 가이드',
-    'plant-info': '식물 정보'
+    'NEWS': '뉴스',
+    'TIPS': '팁과 정보',
+    'GUIDE': '가이드'
   };
 
   return labelMap[category] || '기타';

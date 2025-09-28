@@ -44,9 +44,9 @@ export interface ArticlePreview {
   likes?: number;
 }
 
-export type ArticleCategory = 'tips' | 'news' | 'guide';
+export type ArticleCategory = 'TIPS' | 'NEWS' | 'GUIDE';
 
-export type ArticleTabType = 'all' | ArticleCategory;
+export type ArticleTabType = 'ALL' | ArticleCategory;
 
 // Prisma에서 사용할 Article 생성 타입
 export interface ArticleCreateInput {
