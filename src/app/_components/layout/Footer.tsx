@@ -26,14 +26,14 @@ export const Footer = () => {
             <div className="flex flex-col space-y-1">
               <Link href="/garden" className="hover:text-green-600">내 정원</Link>
               <Link href="/care" className="hover:text-green-600">식물 케어</Link>
-              <Link href="/gallery" className="hover:text-green-600">식물 갤러리</Link>
+              <Link href="/galleries" className="hover:text-green-600">식물 갤러리</Link>
             </div>
           </div>
           <div>
             <h3 className="mb-1 font-medium">계정</h3>
             <div className="flex flex-col space-y-1">
-              <Link href="/profile" className="hover:text-green-600">프로필</Link>
-              <Link href="/settings" className="hover:text-green-600">설정</Link>
+              <Link href="/garden" className="hover:text-green-600">프로필</Link>
+              {/* <Link href="/settings" className="hover:text-green-600">설정</Link> */}
             </div>
           </div>
           <div>
