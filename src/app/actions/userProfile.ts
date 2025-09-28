@@ -2,12 +2,13 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath, unstable_cache } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth-utils';
+import { uploadImageToCloudflare } from '@/lib/cloudflare-images';
 import { DEMO_USER_PROFILE } from '@/app/_constants/demoData';
 import { CacheTags } from '@/lib/cache/cacheTags';
 import { revalidateUserCache } from '@/lib/cache/cacheInvalidation';
 import { getLevelInfo } from '@/lib/gamification';
+import { success } from 'zod/v4';
 
 // 사용자 프로필 데이터 타입
 export type UserProfileData = {
@@ -224,22 +225,57 @@ export async function updateUserProfile(formData: FormData) {
     const user = await getCurrentUser();
 
     if (!user) {
-      return;
+      return {
+        success: false,
+        message: '로그인이 필요합니다.'
+      };
     }
+    
     // FormData에서 데이터 추출
     const name = formData.get('name') as string;
     const bio = formData.get('bio') as string;
     const interests = formData.get('interests') as string;
-    const image = formData.get('image') as string;
+    const image = formData.get('image') as File | string | null;
 
     // 입력 검증
     if (!name || name.trim() === '') {
-      throw new Error('이름은 필수입니다');
+      return {
+        success: false,
+        message: '이름은 필수입니다.'
+      };
     }
 
     const parsedInterests = interests ? JSON.parse(interests) : [];
     if (parsedInterests.length > 20) {
-      throw new Error('관심사는 최대 20개까지 선택 가능합니다');
+      return {
+        success: false,
+        message: '관심사는 최대 20개까지 선택 가능합니다.'
+      };
+    }
+
+    // 이미지 처리
+    let finalImageUrl: string | null = null;
+    
+    if (image instanceof File && image.size > 0) {
+      // 새로운 파일 업로드
+      try {
+        finalImageUrl = await uploadImageToCloudflare(
+          image,
+          user.image || '/images/profile-default.webp'
+        );
+      } catch (uploadError) {
+        console.error('이미지 업로드 오류:', uploadError);
+        return {
+          success: false,
+          message: '이미지 업로드에 실패했습니다.'
+        };
+      }
+    } else if (typeof image === 'string' && image.trim() !== '') {
+      // 기존 이미지 URL 유지
+      finalImageUrl = image;
+    } else {
+      // 이미지 업로드 안 함 - 기존 이미지 유지
+      finalImageUrl = user.image || null;
     }
 
     // 프로필 업데이트
@@ -249,19 +285,24 @@ export async function updateUserProfile(formData: FormData) {
         name: name.trim(),
         bio: bio?.trim() || null,
         interests: parsedInterests,
-        image: image || null
+        image: finalImageUrl
       }
     });
 
     // 캐시 무효화
     revalidateUserCache('gardenProfile', user.loginId);
 
-    // 성공 시 정원으로 리다이렉트
-    redirect('/garden');
+    return {
+      success: true,
+      message: '프로필이 성공적으로 업데이트되었습니다.',
+      redirectTo: '/garden'
+    };
   } catch (error) {
-    // 에러 처리
     console.error('프로필 업데이트 오류:', error);
-    throw error;
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '프로필 업데이트에 실패했습니다.'
+    };
   }
 }
 
