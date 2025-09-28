@@ -29,6 +29,15 @@ export default function RootLayout({
     <html
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        {/* 배경 이미지 우선 로딩 */}
+        <link
+          rel="preload"
+          href="/images/welcome-bg-07.webp"
+          as="image"
+          type="image/webp"
+        />
+      </head>
       <body className="">
         <AuthProvider>
           <main className="relative flex min-h-screen items-center justify-center">
