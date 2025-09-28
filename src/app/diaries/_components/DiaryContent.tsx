@@ -26,7 +26,7 @@ export default function DiaryContent({ diary }: DiaryContentProps) {
   const { title, date, authorName, status, content } = diary;
 
   return (
-    <div className="relative z-10 -mt-10 min-h-[40vh] rounded-t-3xl bg-white/90 p-8 shadow-lg backdrop-blur-sm">
+    <div className="relative z-0 -mt-10 min-h-[40vh] rounded-t-3xl bg-white/90 p-8 shadow-lg backdrop-blur-sm">
       {/* 제목과 날짜/시간 */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
