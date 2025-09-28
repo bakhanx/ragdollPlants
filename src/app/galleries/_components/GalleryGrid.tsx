@@ -228,7 +228,7 @@ export const GalleryGrid = ({
                     placeholder="blur"
                     blurDataURL={GRAY_PLACEHOLDER}
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    priority
+                    loading="lazy"
                     unoptimized
                   />
 
