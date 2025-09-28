@@ -11,10 +11,10 @@ import Image from 'next/image';
 export const ArticleItem = ({ post }: { post: CachedArticle }) => {
   const category = useMemo(() => {
     return (
-      post.category?.name ||
+      post.category?.id ||
       inferArticleCategory(post.title, post.content, post.tags)
     );
-  }, [post.category?.name, post.title, post.content, post.tags]);
+  }, [post.category?.id, post.title, post.content, post.tags]);
 
   // 이미지 소스 설정
   const imageSource = post.image || '';

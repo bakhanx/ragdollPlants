@@ -31,7 +31,7 @@ export default async function ArticleDetailPage({
       author: article.author.name || '익명',
       date: article.createdAt.toISOString().split('T')[0].replace(/-/g, '.'),
       content: article.content,
-      category: article.category.name as ArticleCategory,
+      category: article.category.id as ArticleCategory,
       tags: article.tags
     };
 
