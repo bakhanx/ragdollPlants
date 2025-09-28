@@ -7,6 +7,11 @@ import { Input, Textarea } from '@/app/_components/common';
 import { EditIcon } from '@/app/_components/icons';
 import { Button } from '@/app/_components/common/Button';
 import { PlantTitles } from '@/app/garden/_components/PlantTitle';
+import { getImageSrc } from '@/app/_utils/imageUtils';
+import {
+  getUserProfileData,
+  updateUserProfile
+} from '@/app/actions/userProfile';
 
 // 사용자 기본 정보 타입
 type UserInfo = {
@@ -39,16 +44,14 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
   // 선택된 관심사 상태
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
+  // 선택된 파일 상태
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   // 사용자 프로필 데이터 로드
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
-
-        // Server Action 동적 import
-        const { getUserProfileData } = await import(
-          '@/app/actions/userProfile'
-        );
 
         // Server Action 호출
         const userData = await getUserProfileData(userInfo.id);
@@ -91,6 +94,7 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
     }
   };
 
+
   // 이미지 변경 핸들러
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -101,6 +105,10 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
         return;
       }
 
+      // 파일 저장
+      setSelectedFile(file);
+
+      // 미리보기를 base64
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
@@ -132,13 +140,30 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
       formDataToSubmit.append('name', formData.name.trim());
       formDataToSubmit.append('bio', formData.bio.trim());
       formDataToSubmit.append('interests', JSON.stringify(selectedInterests));
-      formDataToSubmit.append('image', formData.profileImage);
 
-      // Server Action 동적 import
-      const { updateUserProfile } = await import('@/app/actions/userProfile');
+      // 이미지 처리: File 객체 또는 기존 URL
+      if (selectedFile) {
+        formDataToSubmit.append('image', selectedFile); // 새 파일
+      } else if (
+        formData.profileImage &&
+        !formData.profileImage.startsWith('data:')
+      ) {
+        formDataToSubmit.append('image', formData.profileImage); // 기존 URL 유지
+      }
 
       // Server Action 호출
-      await updateUserProfile(formDataToSubmit);
+      const result = await updateUserProfile(formDataToSubmit);
+
+      if (result.success) {
+        alert(result.message);
+
+        if (result.redirectTo) {
+          router.push(result.redirectTo);
+        }
+      } else {
+        setError(result.message);
+        setSubmitting(false);
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다'
@@ -205,7 +230,7 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
             onClick={handleImageSelect}>
             {formData.profileImage ? (
               <Image
-                src={`${formData.profileImage}/small`}
+                src={getImageSrc(formData.profileImage, 'small')}
                 alt="프로필 이미지"
                 fill
                 style={{ objectFit: 'cover' }}
@@ -214,7 +239,12 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                <span className="text-sm text-gray-400">이미지 없음</span>
+                <Image
+                  alt="default"
+                  src={'/images/default-img.webp'}
+                  width={128}
+                  height={128}
+                />
               </div>
             )}
 
@@ -254,7 +284,7 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
           <label className="mb-1 block text-sm font-medium text-gray-700">
             이메일
           </label>
-          <div className="w-full rounded-md border-2 border-gray-200 bg-black/20 p-2 text-gray-300 ">
+          <div className="w-full rounded-md border-2 border-gray-200 bg-black/20 p-2 text-gray-300">
             {userInfo.email}
           </div>
           <p className="mt-1 text-xs text-gray-50">
