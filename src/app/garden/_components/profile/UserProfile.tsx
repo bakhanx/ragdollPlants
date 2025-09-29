@@ -17,6 +17,8 @@ export default function UserProfile({
       {/* 프로필 카드 */}
       <ProfileCard
         nickname={user.name || '사용자'}
+        loginId={user.loginId}
+        bio={user.bio}
         level={user.level}
         levelTitle={user.levelTitle}
         stats={{
