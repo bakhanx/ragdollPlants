@@ -7,7 +7,6 @@ import ProfileImage from './ProfileImage';
 import UserInfoSection from './UserInfoSection';
 import LevelProgress from './LevelProgress';
 import PlantTitle from '../PlantTitle';
-import CountStatCard from './CountStatCard';
 import { shouldShowBioToggle, getTruncatedBio } from './bioUtils';
 interface ProfileCardProps {
   nickname: string;
