@@ -42,7 +42,7 @@ export default async function DiaryDetail(props: {
           <div className="w-full overflow-hidden rounded-2xl">
             {/* 이미지 및 공유 버튼 */}
             <DiaryImage
-              imageUrl={`${diary.image}` || '/images/plant-default.png'}
+              imageUrl={diary.image}
               title={diary.title}
               id={diary.id}
             />

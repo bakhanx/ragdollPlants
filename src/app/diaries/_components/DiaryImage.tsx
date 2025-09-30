@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ShareButton } from '@/app/_components/common/ShareButton';
 
 interface DiaryImageProps {
-  imageUrl: string;
+  imageUrl: string | null;
   title: string;
   id: string;
   appBaseUrl?: string;
@@ -20,7 +20,7 @@ export default function DiaryImage({
   return (
     <div className="relative h-[calc(50vh-16px)] w-full">
       <Image
-        src={`${imageUrl}/medium`}
+        src={imageUrl ? `${imageUrl}/medium` : '/images/default-img.webp'}
         alt={title}
         fill
         className="object-cover"
