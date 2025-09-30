@@ -22,7 +22,7 @@ export default function UserProfile({
         level={user.level}
         levelTitle={user.levelTitle}
         stats={{
-          diaries: user._count.galleries,
+          diaries: user._count.diaries,
           galleries: user._count.galleries,
           careCount: user.waterCount + user.nutrientCount // 누적 관리횟수
         }}
