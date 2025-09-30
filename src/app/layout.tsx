@@ -44,6 +44,7 @@ export default function RootLayout({
             {children}
           </main>
           <ScrollToTopButton />
+          <NavigationScrollManager />
         </AuthProvider>
       </body>
     </html>
