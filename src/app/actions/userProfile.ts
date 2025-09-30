@@ -29,9 +29,10 @@ export type UserProfileData = {
   nutrientCount: number;
   interests: string[];
   _count: {
+    diaries: number;
+    galleries: number;
     plants: number;
     followersList: number;
-    galleries: number;
   };
   needsWaterCount: number;
   needsNutrientCount: number;
@@ -79,9 +80,11 @@ async function getUserProfileByIdInternal(
       interests: true,
       _count: {
         select: {
+          diaries: true,
+          galleries: true,
           plants: true,
           followersList: true,
-          galleries: true
+         
         }
       }
     }
@@ -158,9 +161,10 @@ async function getUserProfileByLoginIdInternal(
       interests: true,
       _count: {
         select: {
+          diaries: true,
+          galleries: true,
           plants: true,
           followersList: true,
-          galleries: true
         }
       }
     }
@@ -230,7 +234,7 @@ export async function updateUserProfile(formData: FormData) {
         message: '로그인이 필요합니다.'
       };
     }
-    
+
     // FormData에서 데이터 추출
     const name = formData.get('name') as string;
     const bio = formData.get('bio') as string;
@@ -255,7 +259,7 @@ export async function updateUserProfile(formData: FormData) {
 
     // 이미지 처리
     let finalImageUrl: string | null = null;
-    
+
     if (image instanceof File && image.size > 0) {
       // 새로운 파일 업로드
       try {
@@ -290,7 +294,7 @@ export async function updateUserProfile(formData: FormData) {
     });
 
     // 캐시 무효화
-    revalidateUserCache('gardenProfile', user.loginId);
+    revalidateUserCache('gardenProfile', user.id);
 
     return {
       success: true,
@@ -301,7 +305,10 @@ export async function updateUserProfile(formData: FormData) {
     console.error('프로필 업데이트 오류:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : '프로필 업데이트에 실패했습니다.'
+      message:
+        error instanceof Error
+          ? error.message
+          : '프로필 업데이트에 실패했습니다.'
     };
   }
 }
