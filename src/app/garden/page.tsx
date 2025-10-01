@@ -103,18 +103,19 @@ export default async function GardenPage({ searchParams }: PageProps) {
           <Suspense fallback={<UserProfileSkeleton showCareStatus={isOwner} />}>
             <UserProfileWrapper userId={user.id} />
           </Suspense>
-
+          
+          {/* Button */}
           {isOwner && (
-            <div className="absolute top-7 right-5 flex gap-2">
+            <div className="absolute top-7 right-4 flex gap-2">
+              {/* Edit */}
               <Link
                 href="/garden/profile"
                 className="rounded-full bg-white/80 p-2 shadow-sm transition-colors hover:bg-white/100"
                 aria-label="프로필 편집">
-                <EditIcon
-                  size={20}
-                  className="text-gray-600"
-                />
+                <EditIcon className="size-4 text-gray-600 sm:size-6" />
               </Link>
+
+              {/* Logout */}
               <LogoutButton />
             </div>
           )}
