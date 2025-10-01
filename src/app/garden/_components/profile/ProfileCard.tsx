@@ -41,9 +41,9 @@ export default function ProfileCard({
 
   return (
     <Card
-      className="p-5"
+      className="p-4"
       isHover={false}>
-      <div className="relative flex gap-5">
+      <div className="relative flex sm:gap-5 gap-3 ">
         <Link
           href="/garden/profile"
           className="hover:opacity-80">
@@ -64,11 +64,11 @@ export default function ProfileCard({
 
       {/* Biography*/}
       <div className="mt-2">
-        <div className="mb-1 text-sm font-semibold text-gray-700">
+        <div className="mb-1 sm:text-sm text-xs font-semibold text-gray-800">
           @{loginId}
         </div>
         {bio && (
-          <div className="text-xs text-gray-700 leading-relaxed">
+          <div className="sm:text-sm text-xs text-gray-800 leading-relaxed">
             <span className="whitespace-pre-wrap">
               {isExpanded ? bio : getTruncatedBio(bio || '')}
             </span>
@@ -77,9 +77,9 @@ export default function ProfileCard({
                 {!isExpanded && <span>...</span>}
                 <button
                   type="button"
-                  className="ml-1 text-[11px] font-medium text-gray-400 hover:text-gray-600"
+                  className="ml-1 sm:text-sm text-xs font-medium text-gray-500 hover:text-gray-600"
                   onClick={() => setIsExpanded(prev => !prev)}>
-                  {isExpanded ? '접기' : '더 보기'}
+                  {isExpanded ? '접기' : '더보기'}
                 </button>
               </>
             )}

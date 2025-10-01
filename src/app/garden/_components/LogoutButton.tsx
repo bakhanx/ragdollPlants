@@ -11,10 +11,9 @@ export default function LogoutButton() {
         className="rounded-full bg-red-400/80 p-2 shadow-sm transition-colors hover:bg-red-400/100"
         aria-label="로그아웃">
         <SignOutIcon
-          size={20}
-          className="text-white"
+          className="text-white sm:size-6 size-4"
         />
       </button>
     </form>
   );
-} 
+}

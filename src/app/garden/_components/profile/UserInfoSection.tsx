@@ -12,26 +12,31 @@ interface UserInfoSectionProps {
   };
 }
 
-export default function UserInfoSection({ nickname, level, levelTitle, stats }: UserInfoSectionProps) {
+export default function UserInfoSection({
+  nickname,
+  level,
+  levelTitle,
+  stats
+}: UserInfoSectionProps) {
   return (
     <div className="min-w-0 flex-1">
       {/* 닉네임과 레벨 */}
       <div className="mb-3">
-        <div className="flex items-center gap-2 mb-1">
-          <h2 className="truncate text-lg font-bold text-gray-800 sm:text-xl">
-            {nickname}
-          </h2>
-          <span className="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+        <h2 className="truncate text-lg font-bold text-gray-800 sm:text-xl">
+          {nickname}
+        </h2>
+        <div className="my-1 flex items-center gap-1">
+          <span className="shrink-0 rounded-full bg-green-100 sm:px-[8px] px-[6px] sm:py-[2px] py-[1px] text-[11px] font-medium text-green-700 sm:text-xs">
             Lv. {level}
           </span>
+          <span className="text-xs font-medium text-green-600 sm:text-sm">
+            {levelTitle}
+          </span>
         </div>
-        <p className="text-sm text-green-600 font-medium">
-          {levelTitle}
-        </p>
       </div>
 
       {/* 통계 그리드 */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <CountStatCard
           value={stats.diaries}
           label="다이어리"
@@ -50,4 +55,4 @@ export default function UserInfoSection({ nickname, level, levelTitle, stats }: 
       </div>
     </div>
   );
-} 
+}

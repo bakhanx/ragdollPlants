@@ -204,7 +204,7 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
 
   return (
     <div className="space-y-5 rounded-xl border border-green-100 bg-white/30 p-5">
-      <h2 className="text-xl font-bold text-gray-800">📝 프로필 수정</h2>
+      <h2 className="sm:text-xl text-lg font-bold text-gray-800">📝 프로필 수정</h2>
 
       {error && (
         <div className="rounded-md border border-red-200 bg-red-50 p-3">
@@ -252,8 +252,8 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
               <div className="flex flex-col items-center gap-1 text-white">
                 <EditIcon
-                  size={24}
-                  className="[&_path]:stroke-white"
+                  
+                  className="[&_path]:stroke-white sm:size-6 size-4"
                 />
                 <span className="text-xs font-medium">이미지 변경</span>
               </div>
@@ -263,7 +263,8 @@ export default function EditProfile({ userInfo, onCancel }: EditProfileProps) {
           <Button
             type="button"
             onClick={handleImageSelect}
-            className="mt-3 bg-blue-500 hover:bg-blue-600">
+            className="mt-3"
+            >
             이미지 변경
           </Button>
         </div>
