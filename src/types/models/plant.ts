@@ -1,21 +1,9 @@
-/**
- * Plant 모델 타입 정의
- * Prisma와 Supabase를 고려한 구조
- */
+import { PLANT_CATEGORIES } from '@/app/_constants/plantData';
 
-// 권장 패턴:
-// 1. 객체 모델: interface 사용
-// 2. 유니온/리터럴 타입: type 사용
-// 3. 임시/변환 타입: type 사용 (접두사 Legacy 또는 접미사 Compat 추가)
+// 식물 타입 카테고리
+export type PlantCategory = (typeof PLANT_CATEGORIES)[number];
 
-/**
- * 식물 타입 카테고리
- */
-export type PlantCategory = '실내식물' | '다육식물' | '선인장' | '허브' | '관엽식물' | '기타';
-
-/**
- * 기본 Plant 인터페이스
- */
+// 기본 Plant 인터페이스
 export interface Plant {
   id: string | number;
   name: string;
@@ -103,4 +91,4 @@ export interface PlantUpdateInput {
 /**
  * 식물 최대 등록 개수 제한
  */
-export const MAX_PLANTS = 20; 
+export const MAX_PLANTS = 20;
