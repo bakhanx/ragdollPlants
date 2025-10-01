@@ -53,7 +53,7 @@ export default async function MyPlantDetailPage({
               id={plant.id}
               name={plant.name}
               isOwner={plant.isOwner}
-              imageUrl={plant.image || '/images/plant-default.png'}
+              imageUrl={plant.image}
               plantType={plant.category}
               location={plant.location || ''}
               acquiredDate={formatDateForInput(plant.purchaseDate)}
