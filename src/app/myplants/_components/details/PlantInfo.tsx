@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { EditIcon } from '@/app/_components/icons/Icons';
 import { formatDateKorean } from '@/app/_utils/dateUtils';
 import { PLANT_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 interface PlantInfoProps {
   id: string;
@@ -26,38 +27,39 @@ export const PlantInfo = ({
 }: PlantInfoProps) => {
   return (
     <div className="flex flex-col py-4">
-      <div className="relative mx-auto mb-4 aspect-square w-full overflow-hidden rounded-md">
+      <div className="relative mx-auto mb-4 aspect-square w-full overflow-hidden rounded-md bg-black/30">
         <Image
-          src={`${imageUrl}/medium`}
+          src={getImageSrc(imageUrl, 'medium') || 'images/default-img.webp'}
           alt={name}
           fill
           placeholder="blur"
           blurDataURL={`${imageUrl}/small` || PLANT_PLACEHOLDER}
-          className="object-cover"
+          className="object-contain"
           priority
           unoptimized
         />
       </div>
 
-      <div className="relative mx-auto my-2 flex items-center justify-center">
-        <h1 className="text-center text-2xl font-bold text-gray-50">{name}</h1>
-        {isOwner && (
-          <Link
-            href={`/myplants/${id}/edit`}
-            className="absolute right-0 translate-x-6 text-gray-500">
-            <EditIcon
-              size={18}
-              className="[&_path]:stroke-gray-50"
-            />
-          </Link>
-        )}
+      <div className="relative mx-auto my-2 flex items-center justify-center px-8">
+        <div className="relative flex text-center text-xl font-bold text-gray-50 sm:text-2xl">
+          <span>{name}</span>
+
+          {/* 편집 버튼 */}
+          {isOwner && (
+            <Link
+              href={`/myplants/${id}/edit`}
+              className="text-gray-500">
+              <EditIcon className="absolute -right-8 size-6 sm:size-8 [&_path]:stroke-green-600 hover:[&_path]:stroke-green-700" />
+            </Link>
+          )}
+        </div>
       </div>
 
-      <div className="text-center text-sm text-gray-50">
+      <div className="text-center text-xs text-gray-50 sm:text-sm">
         <p>
           {plantType} • {location}
         </p>
-        <p>입양일: {formatDateKorean(acquiredDate)}</p>
+        <p>{formatDateKorean(acquiredDate)}</p>
       </div>
     </div>
   );
