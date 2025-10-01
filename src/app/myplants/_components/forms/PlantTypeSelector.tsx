@@ -25,7 +25,7 @@ const PlantTypeSelector = ({
           key={option.value}
           type="button"
           onClick={() => onChange(option.value)}
-          className={`rounded-md border px-3 py-2 text-sm transition-colors ${
+          className={`rounded-md border px-2 sm:px-3 py-2 text-xs sm:text-sm transition-colors ${
             value === option.value
               ? 'border-green-600 bg-green-600 text-white'
               : 'border-gray-300 text-gray-50 hover:text-green-600'
