@@ -3,17 +3,10 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition, useCallback } from 'react';
 import { Pagination } from '@/app/_components/common/Pagination';
-import Image from 'next/image';
 import Link from 'next/link';
-import { WaterIcon, NutrientIcon } from '@/app/_components/icons/Icons';
-import { getMyPlants } from '@/app/actions/plants';
 import { CachedPlant } from '@/types/cache/plant';
-import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
-
-interface MyPlantListProps {
-  plantsData: Awaited<ReturnType<typeof getMyPlants>> | null;
-  searchQuery: string;
-}
+import { MyPlantListProps } from '@/types/components/plants';
+import PlantItem from './PlantItem';
 
 export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
   const router = useRouter();
@@ -38,60 +31,44 @@ export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
   const pagination = plantsData?.pagination;
   const totalCount = pagination?.totalCount || 0;
   const isSearching = searchQuery.trim().length > 0;
+  const hasPages = pagination && pagination.totalPages > 1;
+
+  // null 데이터 처리
+  if (!plantsData) {
+    return (
+      <div className="py-4">
+        <div className="flex h-40 flex-col items-center justify-center rounded-lg border border-gray-50 text-center">
+          <p className="mb-2 text-gray-200">식물 목록을 불러올 수 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="py-8">
-      {/* 식물 목록 */}
+    <div className="py-4">
       {plants.length > 0 ? (
-        <div
-          className={`grid grid-cols-2 gap-3 transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-          {plants.map((plant: CachedPlant) => (
-            <Link
-              href={`/myplants/${plant.id}`}
-              key={plant.id}
-              className="relative flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-lg">
-              <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
-                <Image
-                  src={`${plant.image}/small`}
-                  alt={plant.name}
-                  fill
-                  placeholder="blur"
-                  blurDataURL={GRAY_PLACEHOLDER}
-                  className="object-cover brightness-80 filter transition-all duration-300 hover:brightness-100"
-                  priority={false}
-                  unoptimized
-                />
-                {/* 물/영양 아이콘 */}
-                <div className="absolute top-2 right-2 flex space-y-1 gap-x-2">
-                  {plant.needsWater && (
-                    <div className="rounded-full bg-blue-100 p-1.5">
-                      <WaterIcon
-                        size={16}
-                        className="[&_path]:fill-blue-600"
-                      />
-                    </div>
-                  )}
-                  {plant.needsNutrient && (
-                    <div className="rounded-full bg-amber-100 p-1.5">
-                      <NutrientIcon
-                        size={16}
-                        className="[&_path]:fill-amber-600"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="p-2">
-                <h3 className="font-medium text-gray-900">{plant.name}</h3>
-                <p className="text-xs text-gray-500">{plant.category}</p>{' '}
-              </div>
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className={`grid grid-cols-2 gap-3 transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+            {plants.map((plant: CachedPlant) => (
+              <PlantItem 
+                key={plant.id} 
+                plant={plant} 
+              />
+            ))}
+          </div>
+
+          {/* 페이지네이션 */}
+          {hasPages && (
+            <Pagination
+              currentPage={pagination!.currentPage}
+              totalPages={pagination!.totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
       ) : (
-        <div
-          className={`flex h-40 flex-col items-center justify-center rounded-lg border border-gray-50 text-center transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-          {totalCount === 0 && !isSearching ? (
+        <div className={`flex h-40 flex-col items-center justify-center rounded-lg border border-gray-50 text-center transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+          {!isSearching && totalCount === 0 ? (
             <>
               <p className="mb-2 text-gray-200">등록된 식물이 없습니다.</p>
               <Link
@@ -113,15 +90,6 @@ export const MyPlantList = ({ plantsData, searchQuery }: MyPlantListProps) => {
             <p className="mb-2 text-gray-200">표시할 식물이 없습니다.</p>
           )}
         </div>
-      )}
-
-      {/* 페이지네이션 - 검색 결과가 있고 페이지가 2개 이상일 때만 표시 */}
-      {pagination && pagination.totalPages > 1 && (
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
-        />
       )}
     </div>
   );
