@@ -33,15 +33,15 @@ export const DiaryList = ({ plantId, diaries }: DiaryListProps) => {
             href={`/diaries/${diary.id}`}
             className="flex rounded-lg bg-white p-3 shadow-sm hover:bg-gray-50">
             <div className="flex flex-1 flex-col py-1">
-              <h3 className="mb-1 line-clamp-1 leading-none font-medium">
+              <h3 className="mb-1 line-clamp-1 leading-none font-medium sm:text-base text-sm">
                 {diary.title}
               </h3>
-              <p className="line-clamp-2 text-sm text-gray-600">
+              <p className="line-clamp-2  text-xs sm:text-sm text-gray-600">
                 {diary.content}
               </p>
             </div>
 
-            <div className="ml-3 flex flex-col py-1 text-right text-xs text-gray-500">
+            <div className="ml-8 flex flex-col py-1 text-right text-xs text-gray-500">
               <div className="leading-none">
                 {formatDateKorean(diary.date)}
               </div>
