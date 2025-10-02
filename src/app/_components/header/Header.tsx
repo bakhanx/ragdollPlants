@@ -31,7 +31,6 @@ const variantClasses: Record<HeaderVariant, string> = {
 export const Header = ({
   id,
   showBack = false,
-  title = '랙돌플랜츠',
   variant = 'default',
   contentType,
   showContentMenu = false
@@ -43,10 +42,7 @@ export const Header = ({
         <HeaderLeft showBack={showBack} />
 
         {/* 중앙: 타이틀 */}
-        <HeaderCenter
-          title={title}
-          logoSrc={'/images/Profile.webp'}
-        />
+        <HeaderCenter logoSrc={'/images/default-img.webp'} />
 
         {/* 오른쪽: 알림, 메뉴 버튼 */}
         <Suspense

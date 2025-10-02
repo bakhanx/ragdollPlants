@@ -87,7 +87,7 @@ export interface DemoPagination {
 const DEMO_USER = {
   id: 'demo-user',
   name: '게스트',
-  image: '/images/Profile.webp'
+  image: '/images/default-img.webp'
 };
 
 // 기본 pagination 설정
@@ -369,8 +369,8 @@ export const DEMO_USER_PROFILE: DemoUserProfile = {
   loginId: 'demo-user',
   name: '게스트',
   email: null,
-  image: '/images/Profile.webp',
-  bio: '식물을 처음 키우기 시작한 초보입니다. 몬스테라와 스킨답서스를 키우고 있어요!',
+  image: '/images/default-img.webp',
+  bio: '식물을 처음 키우기 시작한 초보입니다.\n몬스테라와 스킨답서스를 키우고 있어요!',
   isProfilePublic: true,
   level: 2,
   experience: 150,
@@ -382,6 +382,7 @@ export const DEMO_USER_PROFILE: DemoUserProfile = {
   nutrientCount: 8,
   interests: ['실내식물', '초보가이드', '몬스테라'],
   _count: {
+    diaries: 7,
     plants: 2,
     followersList: 12,
     galleries: 2
