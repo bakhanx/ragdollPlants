@@ -48,7 +48,7 @@ export default function ProfileCard({
           href="/garden/profile"
           className="hover:opacity-80">
           <ProfileImage
-            src={profileImage || '/images/default-img.webp'}
+            src={profileImage}
             alt={nickname}
             showEditHint={true}
           />
