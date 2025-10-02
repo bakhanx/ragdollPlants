@@ -249,16 +249,13 @@ export async function createArticle(
     console.log('아티클 생성 완료:', { id: article.id, title: article.title });
 
     // 캐시 무효화
-    revalidateUserCache('articleCreate', user.id);
+    revalidateUserCache('articleCreate', '');
 
     // 성공 결과 반환
     return {
       success: true,
-      data: {
-        articleId: article.id,
-        redirectTo: `/articles/${article.id}`
-      },
-      message: '아티클이 성공적으로 생성되었습니다.'
+      message: '아티클이 성공적으로 생성되었습니다.',
+      redirectTo: `/articles/${article.id}`
     };
   } catch (error) {
     console.error('아티클 생성 오류:', error);
@@ -379,7 +376,9 @@ export async function updateArticle(id: number, formData: FormData) {
 }
 
 // 홈페이지용 최신 아티클 조회 내부 구현
-async function getLatestArticlesInternal(limit: number = 3): Promise<CachedArticle[]> {
+async function getLatestArticlesInternal(
+  limit: number = 3
+): Promise<CachedArticle[]> {
   const articles = await prisma.article.findMany({
     where: { isPublished: true, isActive: true },
     include: {

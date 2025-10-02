@@ -346,12 +346,12 @@ export async function createEvent(formData: FormData) {
     console.log('이벤트 생성 완료:', { id: event.id, title: event.title });
 
     // 캐시 무효화
-    revalidateUserCache('eventCreate', user.id);
+    revalidateUserCache('eventCreate', '');
 
     // 성공 결과 반환
     return {
       success: true,
-      eventId: event.id,
+      message: '이벤트가 성공적으로 생성되었습니다.',
       redirectTo: `/events/${event.id}`
     };
   } catch (error) {
@@ -452,7 +452,7 @@ export async function updateEvent(id: number, formData: FormData) {
     // 성공 결과 반환
     return {
       success: true,
-      eventId: updatedEvent.id,
+      message: '이벤트가 성공적으로 수정되었습니다.',
       redirectTo: `/events/${id}`
     };
   } catch (error) {
@@ -495,12 +495,13 @@ export async function deleteEvent(id: number) {
 
     console.log('이벤트 삭제 완료:', { id });
 
-    // 캐시 무효화
-    revalidateUserCache('eventCreate', user.id);
+    // 캐시 무효화 (관리자만 작성 가능하므로 userId 불필요)
+    revalidateUserCache('eventCreate', '');
 
     // 성공 결과 반환
     return {
       success: true,
+      message: '이벤트가 성공적으로 삭제되었습니다.',
       redirectTo: '/events'
     };
   } catch (error) {
