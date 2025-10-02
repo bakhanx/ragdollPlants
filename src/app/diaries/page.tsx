@@ -28,13 +28,11 @@ export default async function DiariesPage({ searchParams }: DiariesPageProps) {
           <div className="py-2">
             {/* 검색 */}
             <div className="mt-3 mb-6">
-              <div className="w-full max-w-xs">
-                <SearchInputWithNavigation
-                  placeholder="일기 제목 검색"
-                  defaultValue={searchQuery}
-                  basePath="/diaries"
-                />
-              </div>
+              <SearchInputWithNavigation
+                placeholder="일기 제목 검색"
+                defaultValue={searchQuery}
+                basePath="/diaries"
+              />
             </div>
 
             {/* 다이어리 목록 */}
