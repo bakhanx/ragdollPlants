@@ -74,13 +74,25 @@ export function usePlantCare(
   const wateringInterval = careInfo.wateringInterval || 7;
   const nutrientInterval = careInfo.nutrientInterval || 30;
 
-  // 다음 케어 날짜 계산
+  // 다음 케어 날짜 계산 (시간대 독립적)
   const calculateNextDate = (lastDate: string, interval: number): string => {
     if (!lastDate) return '';
-    const last = new Date(lastDate);
-    const next = new Date(last);
-    next.setDate(last.getDate() + interval);
-    return next.toISOString().split('T')[0];
+
+    // 문자열에서 직접 날짜 파싱 (시간대 무관)
+    const [year, month, day] = lastDate.split('-').map(Number);
+
+    // Date 객체 생성 (로컬 시간대 기준)
+    const date = new Date(year, month - 1, day); // month는 0부터 시작
+
+    // 일수 더하기
+    date.setDate(date.getDate() + interval);
+
+    // YYYY-MM-DD 형식으로 반환 (시간대 무관)
+    const nextYear = date.getFullYear();
+    const nextMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const nextDay = String(date.getDate()).padStart(2, '0');
+
+    return `${nextYear}-${nextMonth}-${nextDay}`;
   };
 
   const waterNextDate = calculateNextDate(lastWateredStr, wateringInterval);
@@ -131,20 +143,25 @@ export function usePlantCare(
     );
   };
 
-  //케어 데이터 업데이트 함수 (Optimistic)
+  //케어 데이터 업데이트 함수 (Optimistic) - 시간대 독립적
   const updateCareInfo = useCallback((careType: 'water' | 'nutrient') => {
-    const now = new Date().toISOString().split('T')[0];
+    // 로컬 시간대로 오늘 날짜 계산
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
 
     setCareInfo(prev => {
       if (careType === 'water') {
         return {
           ...prev,
-          lastWateredDate: now
+          lastWateredDate: todayStr
         };
       } else {
         return {
           ...prev,
-          lastNutrientDate: now
+          lastNutrientDate: todayStr
         };
       }
     });
