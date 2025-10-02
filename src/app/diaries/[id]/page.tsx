@@ -22,7 +22,9 @@ export default async function DiaryDetail(props: {
       content: diary.content,
       date: diary.date,
       status: diary.status as DiaryMoodStatus,
-      authorName: diary.author?.name || '익명'
+      authorName: diary.author?.name || '익명',
+      plantId : diary.plant?.id,
+      plantName: diary.plant?.name,
     };
 
     return (
