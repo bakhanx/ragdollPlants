@@ -11,7 +11,7 @@ export const plantUploadSchema = z.object({
     .max(50, '식물 이름은 50자 이하로 입력해주세요'),
   
   plantType: z
-    .enum(PLANT_CATEGORIES as [string, ...string[]], {
+    .enum([...PLANT_CATEGORIES], {
       errorMap: () => ({ message: '식물 종류를 선택해주세요' })
     }),
   
