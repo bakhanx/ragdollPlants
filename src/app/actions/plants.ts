@@ -319,15 +319,18 @@ export async function createPlant(formData: FormData) {
       );
     }
 
-    // 식물 정보 저장
+    // 시간대 독립적 날짜 계산
     const now = new Date();
-    const nextWateringDate = new Date(
-      now.getTime() +
-        (validatedData.wateringInterval || 7) * 24 * 60 * 60 * 1000
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const nextWateringDate = new Date(today);
+    nextWateringDate.setDate(
+      today.getDate() + (validatedData.wateringInterval || 7)
     );
-    const nextNutrientDate = new Date(
-      now.getTime() +
-        (validatedData.nutrientInterval || 30) * 24 * 60 * 60 * 1000
+
+    const nextNutrientDate = new Date(today);
+    nextNutrientDate.setDate(
+      today.getDate() + (validatedData.nutrientInterval || 30)
     );
 
     const plant = await prisma.plant.create({
@@ -344,9 +347,9 @@ export async function createPlant(formData: FormData) {
         nutrientInterval: validatedData.nutrientInterval,
         needsWater: false,
         needsNutrient: false,
-        lastWateredDate: now,
+        lastWateredDate: today,
         nextWateringDate: nextWateringDate,
-        lastNutrientDate: now,
+        lastNutrientDate: today,
         nextNutrientDate: nextNutrientDate,
         authorId: user.id,
         tags: []
@@ -579,16 +582,16 @@ export async function updateWatering(id: string) {
 
     const plant = await validatePlantOwnership(id, user.id);
 
-    // 물주기 기록 업데이트
+    // 시간대 독립적 날짜 계산
     const now = new Date();
-    const nextWateringDate = new Date(
-      now.getTime() + (plant.wateringInterval || 7) * 24 * 60 * 60 * 1000
-    );
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const nextWateringDate = new Date(today);
+    nextWateringDate.setDate(today.getDate() + (plant.wateringInterval || 7));
 
     const updatedPlant = await prisma.plant.update({
       where: { id },
       data: {
-        lastWateredDate: now,
+        lastWateredDate: today,
         nextWateringDate: nextWateringDate,
         needsWater: false,
         updatedAt: new Date()
@@ -632,16 +635,16 @@ export async function updateNutrient(id: string) {
 
     const plant = await validatePlantOwnership(id, user.id);
 
-    // 영양제 기록 업데이트
+    // 시간대 독립적 날짜 계산
     const now = new Date();
-    const nextNutrientDate = new Date(
-      now.getTime() + (plant.nutrientInterval || 30) * 24 * 60 * 60 * 1000
-    );
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const nextNutrientDate = new Date(today);
+    nextNutrientDate.setDate(today.getDate() + (plant.nutrientInterval || 30));
 
     const updatedPlant = await prisma.plant.update({
       where: { id },
       data: {
-        lastNutrientDate: now,
+        lastNutrientDate: today,
         nextNutrientDate: nextNutrientDate,
         needsNutrient: false,
         updatedAt: new Date()
