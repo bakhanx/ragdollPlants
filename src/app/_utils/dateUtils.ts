@@ -88,15 +88,23 @@ export function calculateProgressPercentage(
 ): number {
   if (!lastCareDate || !nextCareDate) return 0;
 
-  // 자정 기준으로 날짜 계산
-  const lastDate = new Date(lastCareDate + 'T00:00:00');
-  const nextDate = new Date(nextCareDate + 'T00:00:00');
+  // 완전히 시간대 독립적인 날짜 계산
+  // 문자열에서 직접 날짜 파싱
+  const [lastYear, lastMonth, lastDay] = lastCareDate.split('-').map(Number);
+  const [nextYear, nextMonth, nextDay] = nextCareDate.split('-').map(Number);
+  
+  const lastDate = new Date(lastYear, lastMonth - 1, lastDay);
+  const nextDate = new Date(nextYear, nextMonth - 1, nextDay);
+  
   const currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0); // 오늘 자정
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+  const currentDay = currentDate.getDate();
+  const todayDate = new Date(currentYear, currentMonth, currentDay);
 
   const lastTime = lastDate.getTime();
   const nextTime = nextDate.getTime();
-  const currentTime = currentDate.getTime();
+  const currentTime = todayDate.getTime();
 
   // 오늘 케어한 경우 100% 반환
   if (currentTime === lastTime) return 100;

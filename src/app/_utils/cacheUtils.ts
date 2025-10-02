@@ -5,6 +5,19 @@
  */
 
 /**
+ * Date 객체를 시간대 독립적인 YYYY-MM-DD 문자열로 변환
+ */
+function formatDateToString(date: Date | null | undefined): string | null {
+  if (!date) return null;
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * Plant 데이터를 캐시 안전한 형태로 변환
  */
 export function plantForCache<
@@ -39,11 +52,11 @@ export function plantForCache<
 } {
   return {
     ...plant,
-    purchaseDate: plant.purchaseDate?.toISOString() || null,
-    lastWateredDate: plant.lastWateredDate?.toISOString() || null,
-    nextWateringDate: plant.nextWateringDate?.toISOString() || null,
-    lastNutrientDate: plant.lastNutrientDate?.toISOString() || null,
-    nextNutrientDate: plant.nextNutrientDate?.toISOString() || null,
+    purchaseDate: formatDateToString(plant.purchaseDate),
+    lastWateredDate: formatDateToString(plant.lastWateredDate),
+    nextWateringDate: formatDateToString(plant.nextWateringDate),
+    lastNutrientDate: formatDateToString(plant.lastNutrientDate),
+    nextNutrientDate: formatDateToString(plant.nextNutrientDate),
     createdAt: plant.createdAt?.toISOString() || '',
     updatedAt: plant.updatedAt?.toISOString() || ''
   };
@@ -141,4 +154,3 @@ export function eventForCache<
     updatedAt: event.updatedAt?.toISOString() || ''
   };
 }
-
