@@ -2,7 +2,7 @@
  * Diary 관련 컴포넌트 Props 타입 정의
  */
 
-import { DiaryMoodStatus, Diary } from '../models/diary';
+import { DiaryMoodStatus } from '../models/diary';
 import { CachedDiary, DiariesResponse } from '../cache/diary';
 
 /**
@@ -41,8 +41,8 @@ export interface DiaryContentProps {
  * 일기 폼 컴포넌트 Props (생성 및 수정에 모두 사용)
  */
 export interface DiaryFormProps {
-  initialData?: Partial<Diary>;
-  onSubmit: (data: Diary) => Promise<void>;
+  initialData?: Partial<CachedDiary>;
+  onSubmit: (data: CachedDiary) => Promise<void>;
   isLoading?: boolean;
   plants?: Array<{ id: string; name: string }>;
 }
