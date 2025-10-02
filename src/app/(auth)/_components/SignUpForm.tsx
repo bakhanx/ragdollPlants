@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
 import { Input } from './Input';
 import { Button } from './Button';
 import { PasswordInput } from './PasswordInput';
@@ -12,7 +11,6 @@ import { signUpSchema, type SignUpData } from '@/lib/validations/auth';
 import { signUpAction } from '@/app/actions/auth';
 
 export const SignUpForm: React.FC = () => {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState<string>('');
 
@@ -183,8 +181,10 @@ export const SignUpForm: React.FC = () => {
 
         <Input
           {...register('phone')}
-          placeholder="연락처 (선택사항) - 010-0000-0000"
-          type="text"
+          placeholder="연락처 (선택사항) - 01012345678"
+          type="tel"
+          inputMode="numeric"
+          maxLength={11}
           error={errors.phone?.message}
         />
 
