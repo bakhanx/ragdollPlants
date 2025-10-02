@@ -171,7 +171,7 @@ export default async function SystemHealth() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
           {healthCards.map((card) => {
             const colors = getStatusColor(card.status);
             const StatusIcon = colors.status;
@@ -190,11 +190,11 @@ export default async function SystemHealth() {
                           <StatusIcon className={`ml-2 h-4 w-4 ${colors.icon}`} />
                         </div>
                       </dt>
-                      <dd className={`text-lg font-medium ${colors.text}`}>
+                      <dd className={`text-sm font-medium ${colors.text} min-h-10 flex items-center`}>
                         {card.message}
                       </dd>
                       {card.metric && (
-                        <dd className="text-sm text-gray-500 mt-1">
+                        <dd className="text-xs text-gray-500 mt-1 truncate" title={`${card.metricLabel}: ${card.metric}`}>
                           {card.metricLabel}: {card.metric}
                         </dd>
                       )}
