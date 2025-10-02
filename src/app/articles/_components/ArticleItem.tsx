@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import CategoryBadge from './CategoryBadge';
 import { CachedArticle } from '@/types/cache/article';
 import Image from 'next/image';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 /**
  * 개별 기사 아이템 컴포넌트
  */
@@ -17,7 +18,6 @@ export const ArticleItem = ({ post }: { post: CachedArticle }) => {
   }, [post.category?.id, post.title, post.content, post.tags]);
 
   // 이미지 소스 설정
-  const imageSource = post.image || '';
 
   return (
     <Link
@@ -27,7 +27,11 @@ export const ArticleItem = ({ post }: { post: CachedArticle }) => {
         {/* 이미지 */}
         <div className="relative h-48 w-full overflow-hidden">
           <Image
-            src={`${imageSource}/medium`}
+            src={
+              post.image
+                ? getImageSrc(post.image, 'medium')
+                : '/images/default-img.webp'
+            }
             alt={post.title}
             fill
             className="object-cover"
@@ -43,14 +47,14 @@ export const ArticleItem = ({ post }: { post: CachedArticle }) => {
 
         {/* 콘텐츠 */}
         <div className="p-4">
-          <h2 className="mb-2 line-clamp-2 text-lg font-bold text-gray-800">
+          <h2 className="mb-2 line-clamp-1 text-base font-bold text-gray-800 sm:text-lg">
             {post.title}
           </h2>
-          <p className="mb-3 line-clamp-2 text-sm text-gray-600">
+          <p className="mb-3 line-clamp-2 text-xs text-gray-600 sm:text-sm">
             {post.summary}
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <div>{post.author?.name && `by ${post.author.name}`}</div>
+            <div>{post.author?.name && `${post.author.name}`}</div>
             <div>{formatDate(post.createdAt)}</div>
           </div>
         </div>

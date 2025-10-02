@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import { ShareButton } from '@/app/_components/common/ShareButton';
+import { get } from 'http';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 interface ArticleImageProps {
-  imageUrl: string;
+  imageUrl: string | null;
   title: string;
   id: string | number;
 }
@@ -15,7 +17,7 @@ export default function ArticleImage({
   return (
     <div className="relative h-[calc(50vh-16px)] w-full">
       <Image
-        src={`${imageUrl}/large`}
+        src={imageUrl ? getImageSrc(imageUrl, "medium") : '/images/default-img.webp'}
         alt={title}
         fill
         className="rounded-xl object-cover"

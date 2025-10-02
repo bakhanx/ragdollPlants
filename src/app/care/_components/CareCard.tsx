@@ -7,6 +7,7 @@ import ProgressBar from './ProgressBar';
 import { usePlantCare, type PlantCareData } from '@/hooks/usePlantCare';
 import { useEffect } from 'react';
 import { PLANT_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 interface CareCardProps {
   plant: PlantCareData;
@@ -54,7 +55,9 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
           <Link href={`/myplants/${currentPlant.id}`}>
             <div className="relative size-20 shrink-0 cursor-pointer self-start transition-opacity hover:opacity-80">
               <Image
-                src={`${currentPlant.image}/small`}
+                src={
+                  getImageSrc(currentPlant.image, 'small') || PLANT_PLACEHOLDER
+                }
                 alt={currentPlant.name}
                 fill
                 placeholder="blur"
@@ -108,7 +111,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
               <button
                 onClick={handleWaterCare}
                 disabled={isWaterUpdating || !canWater}
-                className={`flex size-10 items-center justify-center rounded-full transition-all duration-300 ${
+                className={`flex size-8 items-center justify-center rounded-full transition-all duration-300 sm:size-10 ${
                   isWaterUpdating || !canWater
                     ? 'bg-gray-300'
                     : 'bg-blue-200 hover:bg-blue-300 active:scale-95'
@@ -116,7 +119,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                 aria-label="물주기 완료"
                 title={!canWater ? '아직 물을 줄 필요가 없습니다' : '물주기'}>
                 <Water2Icon
-                  className={`size-5 transition-all duration-300 ${
+                  className={`size-4 transition-all duration-300 sm:size-5 ${
                     canWater
                       ? 'text-blue-600'
                       : 'cursor-not-allowed text-transparent'
@@ -165,7 +168,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
               <button
                 onClick={handleNutrientCare}
                 disabled={isNutrientUpdating || !canNutrient}
-                className={`flex size-10 items-center justify-center rounded-full transition-all duration-300 ${
+                className={`flex size-8 items-center justify-center rounded-full transition-all duration-300 sm:size-10 ${
                   isNutrientUpdating || !canNutrient
                     ? 'bg-gray-300'
                     : 'bg-green-200 hover:bg-green-300 active:scale-95'
@@ -177,7 +180,7 @@ export const CareCard = ({ plant, hideImage = false }: CareCardProps) => {
                     : '영양제 주기'
                 }>
                 <NutrientIcon
-                  className={`size-6 transition-all duration-300 ${
+                  className={`size-4 transition-all duration-300 sm:size-6 ${
                     canNutrient
                       ? 'text-white [&>path]:fill-green-500'
                       : 'cursor-not-allowed text-white'

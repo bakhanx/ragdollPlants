@@ -1,6 +1,10 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { ShareButton } from '../../../_components/common/ShareButton';
+import { getImageSrc } from '@/app/_utils/imageUtils';
+import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 
 interface EventHeaderImageProps {
   imageUrl: string;
@@ -17,16 +21,23 @@ export const EventHeaderImage = ({
   isEarlyTerminated = false,
   eventId
 }: EventHeaderImageProps) => {
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <div className="relative mb-4 h-96 w-full overflow-hidden rounded-xl">
       <Image
-        src={`${imageUrl}/medium`}
+        src={
+          imageUrl ? getImageSrc(imageUrl, 'large') : '/images/default-img.webp'
+        }
         alt={title}
         fill
-        style={{objectFit: 'cover' }}
-        className={`${isEnded ? 'grayscale' : ''}`}
+        style={{ objectFit: 'cover' }}
+        className={`${isEnded ? 'grayscale' : ''} transition-opacity duration-500`}
+        blurDataURL={`${imageUrl}/small`}
+        placeholder="blur"
         priority
         unoptimized
+        onLoadingComplete={() => setIsLoading(false)}
       />
 
       {!isEnded && (
@@ -39,7 +50,7 @@ export const EventHeaderImage = ({
       )}
 
       {/* 오버레이 */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+      {/* <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" /> */}
 
       {/* 종료된 이벤트 표시 */}
       {isEnded && (
@@ -51,6 +62,11 @@ export const EventHeaderImage = ({
           </div>
         </div>
       )}
+
+      {isLoading && (
+        <div className="absolute inset-0 -z-10 animate-pulse rounded-xl bg-gray-300" />
+      )}
+
     </div>
   );
 };

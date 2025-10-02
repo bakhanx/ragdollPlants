@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { DiaryItemProps } from '@/types/components/diaries';
 import { formatDate } from '@/app/_utils/dateUtils';
 import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 export default function DiaryItem({ post, index }: DiaryItemProps) {
   return (
@@ -18,7 +19,11 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
         <div className="relative h-32 w-full overflow-hidden">
           <div className="absolute inset-0 bg-amber-50/50"></div>
           <Image
-            src={post.image ? `${post.image}/small` : '/images/default-img.webp'}
+            src={
+              post.image
+                ? getImageSrc(post.image, 'small')
+                : '/images/default-img.webp'
+            }
             alt={post.title}
             fill
             placeholder="blur"
@@ -35,18 +40,18 @@ export default function DiaryItem({ post, index }: DiaryItemProps) {
         </div>
 
         {/* 콘텐츠 영역 */}
-        <div className="flex-1 overflow-hidden bg-[linear-gradient(transparent_0px,transparent_16px,#c8ccd0_17px)] bg-[size:100%_18px] p-4 pt-2">
-          <h2 className="mb-3 line-clamp-1 rounded bg-amber-50/70 px-1 py-1 text-lg font-bold text-gray-800">
+        <div className="flex-1 overflow-hidden bg-[linear-gradient(transparent_0px,transparent_16px,#c8ccd0_17px)] bg-[size:100%_18px] sm:p-3 p-2 pt-2">
+          <h2 className="mb-3 line-clamp-1 rounded bg-yellow-100/50 px-1 py-1 text-sm sm:text-base font-bold text-gray-800">
             {post.title}
           </h2>
 
           <div className="relative">
-            <p className="mb-4 line-clamp-5 overflow-hidden px-1 text-sm leading-[18px] font-medium text-gray-700">
+            <p className="mb-4 line-clamp-5 overflow-hidden px-1 sm:text-sm text-xs leading-[18px] font-medium text-gray-700 pt-2 sm:pt-0">
               {post.content}
             </p>
 
             {/* 접착 테이프 효과 */}
-            <div className="absolute -top-2 left-1/2 h-2 w-16 -translate-x-1/2 transform rounded-full bg-amber-100/70"></div>
+            <div className="absolute -top-2 left-1/2 h-2 w-16 -translate-x-1/2 transform rounded-full bg-orange-500/20"></div>
           </div>
         </div>
       </article>

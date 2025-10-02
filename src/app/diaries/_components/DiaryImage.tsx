@@ -3,6 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { ShareButton } from '@/app/_components/common/ShareButton';
+import { get } from 'http';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 interface DiaryImageProps {
   imageUrl: string | null;
@@ -18,9 +20,9 @@ export default function DiaryImage({
   appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
 }: DiaryImageProps) {
   return (
-    <div className="relative h-[calc(50vh-16px)] w-full">
+    <div className="relative h-[calc(50vh-16px)] w-full bg-black/30">
       <Image
-        src={imageUrl ? `${imageUrl}/medium` : '/images/default-img.webp'}
+        src={imageUrl ? getImageSrc(imageUrl, "medium") : '/images/default-img.webp'}
         alt={title}
         fill
         className="object-cover"

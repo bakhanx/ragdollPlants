@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CachedEvent } from '@/types/cache/event';
 import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 interface EventCardProps {
   event: CachedEvent;
@@ -21,7 +22,9 @@ export default function EventCard({ event }: EventCardProps) {
       <div
         className={`relative h-40 w-full overflow-hidden rounded-lg transition-shadow hover:shadow-lg ${event.isEnded ? 'grayscale' : ''}`}>
         <Image
-          src={`${event.image}/medium`}
+          src={
+            event.image ? getImageSrc(event.image, "medium") : '/images/default-img.webp'
+          }
           alt={event.title}
           fill
           placeholder="blur"
@@ -33,7 +36,7 @@ export default function EventCard({ event }: EventCardProps) {
 
         {/* 오버레이 */}
         <div
-          className={`absolute inset-0 bg-gradient-to-t ${event.isEnded ? 'from-black/80 to-black/40' : 'from-black/70 to-transparent'}`}
+          className={`absolute inset-0 -z-50 bg-gradient-to-t ${event.isEnded ? 'from-black/80 to-black/40' : 'from-black/70 to-transparent'}`}
         />
 
         {/* 종료 뱃지 */}

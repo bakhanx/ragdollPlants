@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { GalleryImageModal } from './GalleryImageModal';
 import { GalleriesResponse } from '@/types/cache/gallery';
 import { GRAY_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 interface GalleryGridProps {
   initialData: GalleriesResponse | null;
@@ -141,7 +142,7 @@ export const GalleryGrid = ({
           <div className="relative cursor-pointer overflow-hidden rounded-2xl shadow-2xl transition-transform duration-300 hover:scale-[1.02]">
             <div className="relative aspect-[4/3]">
               <Image
-                src={`${featuredItem.image}/medium`}
+                src={getImageSrc(featuredItem.image, 'medium')}
                 alt={featuredItem.title}
                 fill
                 placeholder="blur"
@@ -220,7 +221,7 @@ export const GalleryGrid = ({
               <div className="group relative cursor-pointer overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 <div className="relative aspect-square">
                   <Image
-                    src={`${item.image}/small`}
+                    src={getImageSrc(item.image, 'small')}
                     alt={item.title}
                     sizes="224px"
                     quality={75}

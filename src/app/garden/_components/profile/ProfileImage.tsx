@@ -4,7 +4,7 @@ import { PROFILE_PLACEHOLDER } from '@/app/_constants/imagePlaceholders';
 import { getImageSrc } from '@/app/_utils/imageUtils';
 
 type ProfileImageProps = {
-  src: string;
+  src: string | null | undefined;
   alt: string;
   className?: string;
   showEditHint?: boolean;
@@ -16,12 +16,13 @@ export default function ProfileImage({
   className = '',
   showEditHint = false
 }: ProfileImageProps) {
+  console.log(src);
   return (
     <div className="shrink-0">
       <div
         className={`relative overflow-hidden rounded-2xl border-2 border-green-200 shadow-lg sm:size-28 size-24 ${className} group mt-1`}>
         <Image
-          src={getImageSrc(src, 'small')}
+          src={src ? getImageSrc(src, 'small') : '/images/default-img.webp'}
           alt={alt}
           fill
           placeholder="blur"
