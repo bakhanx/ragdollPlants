@@ -1,60 +1,54 @@
 export type DiaryMoodStatus = 'good' | 'normal' | 'bad';
 
-export interface Diary {
+import type { Diary as PrismaDiary } from '@prisma/client';
+
+export type Diary = PrismaDiary;
+
+export interface DiaryPreview {
   id: string;
   title: string;
   content: string;
-  date: Date | string;
   image: string | null;
-  status: string;
-  author?: {
+  status: DiaryMoodStatus;
+  viewCount: number;
+  likeCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  author: {
     id: string;
     name: string | null;
     image: string | null;
   };
   plant?: {
     id: string;
-    name: string;
+    plantName: string;
+    image: string | null;
   } | null;
-  plantId?: string | null;
-  tags?: string[];
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-}
-
-/**
- * 목록에서 사용할 간소화된 Diary 타입
- */
-export interface DiaryPreview {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  image: string;
-  status: DiaryMoodStatus;
-  author?: {
-    id: string;
-    name: string;
+  _count?: {
+    likes: number;
   };
 }
 
+/**
+ * Diary 생성 Input (폼 데이터용)
+ */
 export interface DiaryCreateInput {
   title: string;
   content: string;
-  image?: string;
+  image?: string | null;
   status: DiaryMoodStatus;
-  authorId?: string;
-  plantId?: string;
-  plantName?: string;
+  plantId?: string | null;
   tags?: string[];
 }
 
+/**
+ * Diary 수정 Input (폼 데이터용)
+ */
 export interface DiaryUpdateInput {
   title?: string;
   content?: string;
-  image?: string;
+  image?: string | null;
   status?: DiaryMoodStatus;
-  plantId?: string;
-  plantName?: string;
+  plantId?: string | null;
   tags?: string[];
 }
