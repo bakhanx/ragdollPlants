@@ -5,7 +5,6 @@ import {
   getCategoryColors,
   getCategoryLabel
 } from '@/app/_utils/categoryUtils';
-import { ArticleCategory } from '@/types/models/article';
 import { CategoryBadgeProps } from '@/types/components/articles';
 
 /**
@@ -14,7 +13,6 @@ import { CategoryBadgeProps } from '@/types/components/articles';
 export default function CategoryBadge({
   category,
   className = '',
-  size = 'md'
 }: CategoryBadgeProps) {
   const colors = getCategoryColors(category);
   const label = getCategoryLabel(category);
@@ -28,7 +26,7 @@ export default function CategoryBadge({
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full font-medium ${colors?.bg || 'bg-gray-100'} ${colors?.text || 'text-gray-800'} ${sizeClasses[size]} ${className} `}>
+      className={`px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs inline-flex items-center justify-center rounded-full font-semibold ${colors?.bg || 'bg-gray-100'} ${colors?.text || 'text-gray-800'} ${className} `}>
       {label}
     </span>
   );

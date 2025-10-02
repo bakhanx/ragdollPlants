@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { DiaryMoodStatus } from '@/types/models/diary';
 import { DiaryStatusProps } from '@/types/components/diaries';
 
 /**
@@ -32,7 +31,7 @@ export default function DiaryStatus({ status, className = '' }: DiaryStatusProps
 
   return (
     <div className={`flex items-center gap-1 ${colorClass} ${className}`}>
-      <span className="text-lg">{emoji}</span>
+      <span className="text-sm sm:text-base">{emoji}</span>
       <span className="font-medium">{text}</span>
     </div>
   );
