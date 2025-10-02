@@ -1,11 +1,10 @@
 "use client"
 
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 export function NavigationScrollManager() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   
   // 이전 경로 저장
   const prevPathRef = useRef(pathname);
@@ -18,7 +17,7 @@ export function NavigationScrollManager() {
       // 현재 경로를 이전 경로로 업데이트
       prevPathRef.current = pathname;
     }
-  }, [pathname, searchParams]);
+  }, [pathname]); 
   
   return null;
 }
