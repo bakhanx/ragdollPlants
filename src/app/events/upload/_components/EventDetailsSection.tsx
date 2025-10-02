@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input, Textarea } from '@/app/_components/common';
 import DatePickerField from '@/app/myplants/_components/forms/DatePickerField';
+import EventEditor from './EventEditor';
 
 export interface EventDetailsSectionProps {
   title: string;
@@ -85,13 +86,9 @@ export const EventDetailsSection = ({
         required
       />
 
-      <Textarea
-        id="content"
-        label="상세 내용"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        rows={5}
-        placeholder="이벤트 상세 내용을 입력해주세요."
+      <EventEditor
+        onChange={setContent}
+        initialContent={content}
       />
     </>
   );
