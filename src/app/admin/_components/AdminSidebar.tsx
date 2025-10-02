@@ -55,6 +55,8 @@ const navigation = [
     href: '/admin/system', 
     icon: CogIcon,
     children: [
+      { name: '시스템 상태', href: '/admin/system' },
+      { name: '캐시 관리', href: '/admin/cache' },
       { name: '데이터베이스', href: '/admin/system/database' },
       { name: '백업/복원', href: '/admin/system/backup' },
       { name: '시스템 설정', href: '/admin/system/settings' }
