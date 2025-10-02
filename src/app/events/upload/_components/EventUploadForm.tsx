@@ -7,6 +7,7 @@ import { LoadingOverlay } from '@/app/_components/common';
 import { ImageUploadSection } from './ImageUploadSection';
 import { EventDetailsSection } from './EventDetailsSection';
 import { SubmitButton } from './SubmitButton';
+import { createEvent, updateEvent } from '@/app/actions/events';
 
 export interface EventUploadFormProps {
   isLoading?: boolean;
@@ -38,7 +39,9 @@ export const EventUploadForm = ({
   const [endDate, setEndDate] = useState(
     initialData?.endDate ? initialData.endDate.split('T')[0] : ''
   );
-  const [description, setDescription] = useState(initialData?.description || '');
+  const [description, setDescription] = useState(
+    initialData?.description || ''
+  );
   const [content, setContent] = useState(initialData?.content || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,13 +52,22 @@ export const EventUploadForm = ({
     initialImage: initialData?.image || null
   });
 
-
+  // HTML 태그를 제거하고 실제 텍스트 내용이 있는지 확인
+  const stripHtmlTags = (html: string): string => {
+    return html.replace(/<[^>]*>/g, '').trim();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title || !subtitle || !startDate || !endDate || !description) {
       alert('모든 필수 항목을 입력해주세요.');
+      return;
+    }
+
+    // 에디터 내용 검사 - HTML 태그를 제거한 후 빈 문자열인지 확인
+    if (!stripHtmlTags(content)) {
+      alert('상세 내용을 입력해주세요.');
       return;
     }
 
@@ -82,14 +94,13 @@ export const EventUploadForm = ({
       formData.append('link', '#'); // 임시 링크
       formData.append('startDate', new Date(startDate).toISOString());
       formData.append('endDate', new Date(endDate).toISOString());
-      
+
       if (imageFile) {
         formData.append('image', imageFile);
       }
 
       // mode에 따라 다른 액션 함수 호출
       if (mode === 'edit' && initialData) {
-        const { updateEvent } = await import('@/app/actions/events');
         const result = await updateEvent(parseInt(initialData.id), formData);
         if (result.success) {
           alert('이벤트가 성공적으로 수정되었습니다.');
@@ -98,7 +109,6 @@ export const EventUploadForm = ({
           throw new Error(result.error || '이벤트 수정에 실패했습니다.');
         }
       } else {
-        const { createEvent } = await import('@/app/actions/events');
         const result = await createEvent(formData);
         if (result.success) {
           alert('이벤트가 성공적으로 등록되었습니다.');
@@ -110,7 +120,11 @@ export const EventUploadForm = ({
     } catch (error) {
       const actionText = mode === 'edit' ? '수정' : '등록';
       console.error(`이벤트 ${actionText} 실패:`, error);
-      alert(error instanceof Error ? error.message : `이벤트 ${actionText}에 실패했습니다. 다시 시도해주세요.`);
+      alert(
+        error instanceof Error
+          ? error.message
+          : `이벤트 ${actionText}에 실패했습니다. 다시 시도해주세요.`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -120,40 +134,48 @@ export const EventUploadForm = ({
     <>
       <LoadingOverlay
         isVisible={isSubmitting}
-        message={mode === 'edit' ? '이벤트를 수정하고 있어요...' : '이벤트를 등록하고 있어요...'}
-        description={mode === 'edit' ? '변경사항을 저장하고 있습니다.' : '새로운 이벤트를 만들고 있어요!'}
+        message={
+          mode === 'edit'
+            ? '이벤트를 수정하고 있어요...'
+            : '이벤트를 등록하고 있어요...'
+        }
+        description={
+          mode === 'edit'
+            ? '변경사항을 저장하고 있습니다.'
+            : '새로운 이벤트를 만들고 있어요!'
+        }
       />
-      
+
       <div className="mx-auto w-full max-w-md py-4">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6">
-        <ImageUploadSection
-          imagePreview={imagePreview}
-          onImageChange={handleSingleImageChange}
-        />
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6">
+          <ImageUploadSection
+            imagePreview={imagePreview}
+            onImageChange={handleSingleImageChange}
+          />
 
-        <EventDetailsSection
-          title={title}
-          setTitle={setTitle}
-          subtitle={subtitle}
-          setSubtitle={setSubtitle}
-          startDate={startDate}
-          setStartDate={setStartDate}
-          endDate={endDate}
-          setEndDate={setEndDate}
-          description={description}
-          setDescription={setDescription}
-          content={content}
-          setContent={setContent}
-        />
+          <EventDetailsSection
+            title={title}
+            setTitle={setTitle}
+            subtitle={subtitle}
+            setSubtitle={setSubtitle}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            description={description}
+            setDescription={setDescription}
+            content={content}
+            setContent={setContent}
+          />
 
-        <SubmitButton
-          isLoading={isLoading}
-          isSubmitting={isSubmitting}
-        />
-      </form>
-    </div>
+          <SubmitButton
+            isLoading={isLoading}
+            isSubmitting={isSubmitting}
+          />
+        </form>
+      </div>
     </>
   );
 };
