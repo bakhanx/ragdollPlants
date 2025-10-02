@@ -1,13 +1,14 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useNotificationStore } from '@/stores/notificationStore';
 import {
   getNotifications,
   getUnreadCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  deleteNotification
+  deleteNotification,
+  getNotificationsByPeriod
 } from '@/app/actions/notifications';
 import type { Notification } from '@prisma/client';
 
@@ -230,3 +231,95 @@ export const useNotifications = () => {
     deleteNotification: deleteNotif
   };
 };
+
+type PaginatedNotificationsPeriod = {
+  page: number;
+  notifications: Notification[];
+  periodLabel: string;
+};
+
+type UseNotificationsPaginatedReturn = {
+  periods: PaginatedNotificationsPeriod[];
+  hasMore: boolean;
+  loading: boolean;
+  loadingMore: boolean;
+  loadMore: () => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
+  refresh: () => Promise<void>;
+};
+
+export function useNotificationsPaginated(): UseNotificationsPaginatedReturn {
+  const [periods, setPeriods] = useState<PaginatedNotificationsPeriod[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loadInitial = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await getNotificationsByPeriod(0);
+      setPeriods([{
+        page: 0,
+        notifications: result.notifications,
+        periodLabel: result.periodLabel
+      }]);
+      setHasMore(result.hasMore);
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    
+    try {
+      setLoadingMore(true);
+      const nextPage = periods.length;
+      const result = await getNotificationsByPeriod(nextPage);
+      
+      setPeriods(prev => [...prev, {
+        page: nextPage,
+        notifications: result.notifications,
+        periodLabel: result.periodLabel
+      }]);
+      setHasMore(result.hasMore);
+    } catch (error) {
+      console.error('Failed to load more notifications:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, periods.length]);
+
+  const markAsRead = useCallback(async (id: string) => {
+    try {
+      await markNotificationAsRead(id);
+      // 로컬 상태 업데이트
+      setPeriods(prev => prev.map(period => ({
+        ...period,
+        notifications: period.notifications.map(notification =>
+          notification.id === id
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      })));
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadInitial();
+  }, [loadInitial]);
+
+  return {
+    periods,
+    hasMore,
+    loading,
+    loadingMore,
+    loadMore,
+    markAsRead,
+    refresh: loadInitial
+  };
+}
