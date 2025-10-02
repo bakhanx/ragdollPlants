@@ -34,8 +34,8 @@ const createGallerySchema = z.object({
   title: z
     .string()
     .min(1, '제목은 필수입니다')
-    .max(100, '제목은 100자 이하여야 합니다'),
-  description: z.string().optional(),
+    .max(20, '제목은 20자 이하여야 합니다'),
+  description: z.string().max(40, '설명은 40자 이하여야 합니다').optional(),
   plantId: z.string().optional(),
   plantName: z.string().optional(),
   tags: z.array(z.string()).optional()
@@ -205,7 +205,7 @@ async function getUserGalleriesInternal(
     orderBy: [
       { isFeatured: 'desc' }, // 대표 이미지 우선
       { displayOrder: 'asc' }, // 그 다음 순서대로
-      { createdAt: 'asc' } // 같은 순서면 오래된 순
+      { createdAt: 'desc' } // 같은 순서면 최신순
     ]
   });
 
@@ -269,7 +269,7 @@ export async function getUserGalleries(
     if (!targetUserId) {
       return {
         ...DEMO_GALLERIES_RESPONSE,
-        isOwner: true,
+        isOwner: false,
         isLoggedIn: false
       };
     }
