@@ -11,6 +11,8 @@ import {
 } from '@/app/actions/galleries';
 import { formatDateTime } from '@/app/_utils/dateUtils';
 import type { CachedGallery } from '@/types/cache/gallery';
+import { get } from 'http';
+import { getImageSrc } from '@/app/_utils/imageUtils';
 
 interface GalleryImageModalProps {
   item: CachedGallery;
@@ -244,6 +246,7 @@ export const GalleryImageModal = ({
               {/* 편집 버튼들 - 소유자만 */}
               {isOwner && !editMode && (
                 <div className="absolute top-4 left-4 z-20 flex space-x-2">
+                  {/* 빠른 편집 */}
                   <button
                     onClick={handleEdit}
                     className="rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/30">
@@ -260,6 +263,7 @@ export const GalleryImageModal = ({
                       />
                     </svg>
                   </button>
+                  {/* 대표 사진 설정 */}
                   <button
                     onClick={handleSetFeatured}
                     className="rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/30">
@@ -276,8 +280,9 @@ export const GalleryImageModal = ({
                       />
                     </svg>
                   </button>
+                  {/* 전체 편집 페이지 이동 */}
                   <Link
-                    href={`/galleries/${item.id}/edit`}
+                    href={`/galleries/manage`}
                     className="rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/30">
                     <svg
                       className="h-5 w-5"
@@ -292,6 +297,7 @@ export const GalleryImageModal = ({
                       />
                     </svg>
                   </Link>
+                  {/* 삭제 */}
                   <button
                     onClick={handleDelete}
                     className="rounded-full bg-red-500/20 p-2 text-white backdrop-blur-sm transition-colors hover:bg-red-500/30">
@@ -324,7 +330,7 @@ export const GalleryImageModal = ({
 
               {/* 실제 이미지 */}
               <Image
-                src={`${item.image}/large`}
+                src={getImageSrc(item.image, 'large')}
                 alt={item.title}
                 fill
                 className={`bg-black/60 object-contain transition-opacity duration-500 ${
@@ -336,7 +342,7 @@ export const GalleryImageModal = ({
               />
 
               {/* 이미지 정보 오버레이 */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50  via-transparent to-black/50 ">
                 <div className="absolute bottom-0 w-full p-4 text-white md:p-6">
                   {editMode ? (
                     // 편집 모드
@@ -351,8 +357,9 @@ export const GalleryImageModal = ({
                               title: e.target.value
                             }))
                           }
+                          maxLength={20}
                           className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white placeholder-white/60 focus:border-white/40 focus:outline-none"
-                          placeholder="제목을 입력하세요"
+                          placeholder="제목을 입력하세요 (최대 20자)"
                         />
                       </div>
                       <div>
@@ -364,9 +371,10 @@ export const GalleryImageModal = ({
                               description: e.target.value
                             }))
                           }
+                          maxLength={40}
                           className="w-full resize-none rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white placeholder-white/60 focus:border-white/40 focus:outline-none"
-                          placeholder="설명을 입력하세요"
-                          rows={3}
+                          placeholder="설명을 입력하세요 (최대 40자)"
+                          rows={2}
                         />
                       </div>
                       <div className="flex space-x-2">
@@ -387,10 +395,18 @@ export const GalleryImageModal = ({
                   ) : (
                     // 일반 모드
                     <>
+                    {/* 제목 */}
                       <h3 className="mb-2 text-lg leading-tight font-bold break-words md:text-xl">
                         {item.title}
                       </h3>
-                      <div className="flex items-center justify-between text-sm">
+                      {/* 내용 */}
+                      {item.description && (
+                        <p className="mt-2 text-sm leading-relaxed break-words opacity-90">
+                          {item.description}
+                        </p>
+                      )}
+                      {/* 날짜 & 좋아요 */}
+                      <div className="pt-3 flex items-center justify-between sm:text-sm text-xs">
                         <span className="opacity-90">
                           {formatDateTime(item.createdAt)}
                         </span>
@@ -399,11 +415,6 @@ export const GalleryImageModal = ({
                           <span className="font-medium">{item.likes}</span>
                         </div>
                       </div>
-                      {item.description && (
-                        <p className="mt-2 text-sm leading-relaxed break-words opacity-90">
-                          {item.description}
-                        </p>
-                      )}
                     </>
                   )}
                 </div>
