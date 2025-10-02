@@ -13,18 +13,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 카테고리 확인 및 생성
-    const categories = ['care-guide', 'plant-info'];
+    const categories = ['GUIDE', 'TIPS'];
     for (const categoryId of categories) {
       await prisma.category.upsert({
         where: { id: categoryId },
         update: {},
         create: {
           id: categoryId,
-          name: categoryId === 'care-guide' ? '관리 가이드' : '식물 정보',
-          description: categoryId === 'care-guide' ? '식물 관리 방법과 팁' : '다양한 식물 정보',
-          color: categoryId === 'care-guide' ? '#10B981' : '#3B82F6',
-          icon: categoryId === 'care-guide' ? '🌱' : '📚',
-          order: categoryId === 'care-guide' ? 1 : 2,
+          name: categoryId === 'GUIDE' ? '관리 가이드' : '식물 정보',
+          description: categoryId === 'GUIDE' ? '식물 관리 방법과 팁' : '다양한 식물 정보',
+          color: categoryId === 'GUIDE' ? '#10B981' : '#3B82F6',
+          icon: categoryId === 'GUIDE' ? '🌱' : '📚',
+          order: categoryId === 'GUIDE' ? 1 : 2,
         }
       });
     }
