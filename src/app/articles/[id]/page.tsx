@@ -52,7 +52,7 @@ export default async function ArticleDetailPage({
           <div className="w-full rounded-2xl">
             {/* 이미지 */}
             <ArticleImage
-              imageUrl={article.image || '/images/plant-default.png'}
+              imageUrl={article.image}
               title={article.title}
               id={id}
             />
