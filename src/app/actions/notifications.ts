@@ -137,3 +137,75 @@ export async function deleteNotification(notificationId: string) {
   // 삭제된 알림이 읽지 않은 상태였다면 true 반환 (카운트 감소용)
   return { wasUnread: !notification.isRead };
 }
+
+/**
+ * 14일 주기 기반 알림 목록 조회
+ * @param page 0: 최근 14일, 1: 15-28일 전, 2: 29-42일 전...
+ */
+export async function getNotificationsByPeriod(page: number = 0) {
+  const session = await getCurrentUser();
+
+  if (!session?.id) {
+    return {
+      notifications: [],
+      hasMore: false,
+      periodLabel: ''
+    };
+  }
+
+  // 14일 단위로 날짜 범위 계산
+  const now = new Date();
+  const startDaysAgo = page * 14;
+  const endDaysAgo = (page + 1) * 14;
+
+  const startDate = new Date(now);
+  startDate.setDate(now.getDate() - endDaysAgo);
+  startDate.setHours(0, 0, 0, 0);
+
+  const endDate = new Date(now);
+  endDate.setDate(now.getDate() - startDaysAgo);
+  endDate.setHours(23, 59, 59, 999);
+
+  const notifications = await prisma.notification.findMany({
+    where: {
+      recipientId: session.id,
+      createdAt: {
+        gte: startDate,
+        lte: endDate
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
+
+  // 다음 페이지가 있는지 확인
+  const nextPageStart = new Date(now);
+  nextPageStart.setDate(now.getDate() - (endDaysAgo + 14));
+
+  const hasMore =
+    (await prisma.notification.count({
+      where: {
+        recipientId: session.id,
+        createdAt: {
+          lt: startDate
+        }
+      }
+    })) > 0;
+
+  // 기간 라벨 생성
+  let periodLabel = '';
+  if (page === 0) {
+    periodLabel = '최근 14일';
+  } else {
+    const startDays = startDaysAgo + 1;
+    const endDays = endDaysAgo;
+    periodLabel = `${startDays}-${endDays}일 전`;
+  }
+
+  return {
+    notifications,
+    hasMore,
+    periodLabel
+  };
+}
