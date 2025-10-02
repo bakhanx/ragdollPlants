@@ -13,6 +13,19 @@ import { createCareCompletionNotification } from '@/lib/notifications/utils';
 // 케어 기록 타입 정의
 type CareType = 'water' | 'nutrient' | 'pruning' | 'repot' | 'fertilizer';
 
+/**
+ * Date 객체를 시간대 독립적인 YYYY-MM-DD 문자열로 변환
+ */
+function formatDateToString(date: Date | null): string {
+  if (!date) return '';
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
 // 사용자의 식물 케어 데이터 조회
 async function getUserPlantsForCareInternal(
   targetUserId: string
@@ -57,11 +70,11 @@ async function getUserPlantsForCareInternal(
     waterStatus: plant.needsWater,
     nutrientStatus: plant.needsNutrient,
     waterAmount: 150, // 기본값
-    lastWateredDate: plant.lastWateredDate?.toISOString().split('T')[0] || '',
-    nextWateringDate: plant.nextWateringDate?.toISOString().split('T')[0] || '',
+    lastWateredDate: formatDateToString(plant.lastWateredDate),
+    nextWateringDate: formatDateToString(plant.nextWateringDate),
     waterInterval: plant.wateringInterval,
-    lastNutrientDate: plant.lastNutrientDate?.toISOString().split('T')[0] || '',
-    nextNutrientDate: plant.nextNutrientDate?.toISOString().split('T')[0] || '',
+    lastNutrientDate: formatDateToString(plant.lastNutrientDate),
+    nextNutrientDate: formatDateToString(plant.nextNutrientDate),
     nutrientInterval: plant.nutrientInterval,
     temperature: plant.temperature || 22,
     humidity: plant.humidity || 50,
@@ -177,16 +190,24 @@ export async function addCareRecord(
   } = {};
 
   if (type === 'water') {
-    updateData.lastWateredDate = currentDate;
-    updateData.nextWateringDate = new Date(
-      currentDate.getTime() + plant.wateringInterval * 24 * 60 * 60 * 1000
-    );
+    // 시간대 독립적 날짜 계산
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const nextWatering = new Date(today);
+    nextWatering.setDate(today.getDate() + plant.wateringInterval);
+
+    updateData.lastWateredDate = today;
+    updateData.nextWateringDate = nextWatering;
     updateData.needsWater = false;
   } else if (type === 'nutrient') {
-    updateData.lastNutrientDate = currentDate;
-    updateData.nextNutrientDate = new Date(
-      currentDate.getTime() + plant.nutrientInterval * 24 * 60 * 60 * 1000
-    );
+    // 시간대 독립적 날짜 계산
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const nextNutrient = new Date(today);
+    nextNutrient.setDate(today.getDate() + plant.nutrientInterval);
+
+    updateData.lastNutrientDate = today;
+    updateData.nextNutrientDate = nextNutrient;
     updateData.needsNutrient = false;
   }
 
@@ -197,7 +218,7 @@ export async function addCareRecord(
 
   // 사용자 누적 카운트 업데이트 및 경험치 부여
   const experiencePoints = type === 'water' ? 10 : 15;
-  
+
   if (type === 'water') {
     await Promise.all([
       prisma.user.update({
