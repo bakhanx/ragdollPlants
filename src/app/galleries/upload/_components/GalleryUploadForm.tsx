@@ -160,12 +160,14 @@ export default function GalleryUploadForm() {
       <GalleryPreview
         imagePreview={imagePreview}
         title={title}
+        description={description}
         showOverlay={showOverlay}
         handleImageChange={handleImageChange}
       />
 
+
       {/* 제목 및 설명 폼 */}
-      <div className="space-y-4">
+      <div className="space-y-4 pt-4">
         <Input
           id="title"
           type="text"
@@ -173,8 +175,8 @@ export default function GalleryUploadForm() {
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
-          placeholder="작품명을 입력해주세요 (최대 30자)"
-          maxLength={30}
+          placeholder="작품명을 입력해주세요 (최대 20자)"
+          maxLength={20}
         />
 
         <div>
@@ -184,12 +186,12 @@ export default function GalleryUploadForm() {
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="갤러리에 대한 간단한 설명을 입력하세요..."
-            rows={3}
-            maxLength={200}
+            rows={2}
+            maxLength={40}
             resize="none"
           />
           <div className="mt-1 text-right text-xs text-gray-200">
-            {description.length} / 200
+            {description.length} / 40
           </div>
         </div>
       </div>
