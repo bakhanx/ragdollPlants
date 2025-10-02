@@ -51,7 +51,7 @@ export const EventInfo = ({ event, isAdmin }: EventInfoProps) => {
           <button
             onClick={handleToggleEnd}
             disabled={isSubmitting}
-            className="w-18 rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
+            className="w-18 rounded-md bg-red-600 px-2 font-bold py-2 text-xs text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
             {isSubmitting ? '처리 중...' : '조기 종료'}
           </button>
         </div>
@@ -72,10 +72,16 @@ export const EventInfo = ({ event, isAdmin }: EventInfoProps) => {
 
         <p className="mb-4 text-sm text-gray-600">기간: {period}</p>
         <div className="my-3 h-px bg-gray-200"></div>
-        <p className="mb-4 text-gray-700">{event.description}</p>
-        <div className="rounded-md bg-gray-50 p-3 whitespace-pre-line">
-          {event.content}
-        </div>
+        <p className="mb-4 text-gray-700 whitespace-pre-wrap">{event.description}</p>
+        <div
+          className="prose prose-green max-w-none rounded-md bg-gray-50 p-3 text-base leading-relaxed break-words [&_*]:break-words [&_div]:break-words [&_p]:break-words [&_p:empty]:min-h-[1.5em] [&_p:empty]:my-2 [&_p:empty]:block"
+          style={{
+            overflowWrap: 'anywhere',
+            wordBreak: 'break-word',
+            hyphens: 'auto'
+          }}
+          dangerouslySetInnerHTML={{ __html: event.content }}
+        />
       </div>
 
       <Link
