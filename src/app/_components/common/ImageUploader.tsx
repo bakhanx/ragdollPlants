@@ -97,15 +97,15 @@ export const ImageUploader = ({
 
       <div
         onClick={handleImageClick}
-        className={`relative w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 ${sizeClass}`}>
+        className={`relative  w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 ${sizeClass}`}>
         {imagePreview ? (
           <>
             <Image
-              src={getImageSrc(imagePreview, 'small')}
+              src={getImageSrc(imagePreview, 'medium')}
               alt="이미지 미리보기"
-              className="h-full w-full object-cover"
-              width={128}
-              height={128}
+              className="h-full w-full object-contain"
+              width={412}
+              height={412}
               priority
               unoptimized
             />

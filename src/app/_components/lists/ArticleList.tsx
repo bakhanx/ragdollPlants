@@ -48,7 +48,7 @@ export const ArticleList = ({ items }: ArticleListProps) => {
               key={article.id}>
               <div className="relative flex gap-x-2 rounded-md bg-[#ffffffa5] shadow-xl hover:text-green-600 ">
                 <div className="flex w-full items-center justify-between px-3">
-                  <h2 className="cursor-pointer truncate py-2 font-semibold underline">
+                  <h2 className="cursor-pointer truncate py-2 font-semibold">
                     {article.title}
                   </h2>
                   <div className="text-sm text-gray-600">

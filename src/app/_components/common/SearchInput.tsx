@@ -49,7 +49,7 @@ export const SearchInput = ({
   }, []);
 
   return (
-    <div className="relative flex items-center text-gray-50">
+    <div className="relative flex items-center text-gray-50 w-3/4">
       <input
         type="text"
         value={searchQuery}
@@ -66,7 +66,7 @@ export const SearchInput = ({
       {searchQuery && (
         <button
           onClick={() => handleInputChange('')}
-          className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-xl text-gray-200">
+          className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-xl text-gray-200 hover:text-green-600">
           ×
         </button>
       )}
