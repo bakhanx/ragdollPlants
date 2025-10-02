@@ -204,6 +204,12 @@ export async function getDiaryWithOwnership(id: string) {
             name: true,
             image: true
           }
+        },
+        plant:{
+          select: {
+            id: true,
+            name: true
+          }
         }
       }
     });
