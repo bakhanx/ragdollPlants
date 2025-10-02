@@ -17,7 +17,8 @@ import {
 import {
   PLANT_TYPE_OPTIONS,
   DEFAULT_WATERING_INTERVAL,
-  DEFAULT_NUTRIENT_INTERVAL
+  DEFAULT_NUTRIENT_INTERVAL,
+  PLANT_CATEGORIES
 } from '@/app/_constants/plantData';
 
 // 식물 데이터 타입 (편집 시 초기값용)
@@ -32,6 +33,9 @@ interface PlantData {
   wateringInterval: number;
   nutrientInterval: number;
 }
+
+// 식물 카테고리 타입
+type PlantCategoryType = typeof PLANT_CATEGORIES[number];
 
 // PlantForm Props 타입
 interface PlantFormProps {
@@ -58,7 +62,7 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
     if (mode === 'edit' && initialData) {
       return {
         plantName: initialData.name,
-        plantType: initialData.category,
+        plantType: initialData.category as PlantCategoryType,
         location: initialData.location || '',
         acquiredDate: initialData.purchaseDate
           ? initialData.purchaseDate.split('T')[0]
@@ -214,7 +218,7 @@ export const PlantForm = ({ mode, initialData }: PlantFormProps) => {
             <PlantTypeSelector
               options={PLANT_TYPE_OPTIONS}
               value={plantType}
-              onChange={value => setValue('plantType', value)}
+              onChange={value => setValue('plantType', value as PlantCategoryType)}
             />
             {errors.plantType && (
               <p className="mt-1 text-xs text-red-500">
