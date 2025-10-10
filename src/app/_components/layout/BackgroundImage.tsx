@@ -13,24 +13,10 @@ export const BackgroundImage = ({
   // CSS
   return (
     <div
-      className={`fixed top-0 left-0 -z-10 h-full w-full bg-cover bg-center ${className}`}
-      style={{ backgroundImage: `url(${src})` }}
+      className={`fixed top-0 left-0 -z-10 w-full bg-cover bg-center ${className}`}
+      style={{ backgroundImage: `url(${src})`, height: '100dvh' }}
     />
   );
-
-  // Next/Image
-  // return (
-  //   <div className={`fixed left-0 top-0 -z-10 h-full w-full overflow-hidden ${className}`}>
-  //     <Image
-  //       src={src}
-  //       alt="배경 이미지"
-  //       fill
-  //       className="object-cover object-center"
-  //       priority
-  //       sizes="100vw"
-  //     />
-  //   </div>
-  // );
 };
 
 export default BackgroundImage;
