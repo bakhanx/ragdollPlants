@@ -13,8 +13,8 @@ export const BackgroundImage = ({
   // CSS
   return (
     <div
-      className={`fixed top-0 left-0 -z-10 w-full bg-cover bg-center ${className}`}
-      style={{ backgroundImage: `url(${src})`, height: '100dvh' }}
+      className={`fixed top-0 left-0 -z-10 md:w-full md:h-full w-[768px] h-[1200px] bg-cover bg-center ${className}`}
+      style={{ backgroundImage: `url(${src})` }}
     />
   );
 };
