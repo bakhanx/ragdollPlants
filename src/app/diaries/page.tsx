@@ -5,6 +5,9 @@ import { Header } from '../_components/header/Header';
 import { SearchInputWithNavigation } from '../_components/common/SearchInputWithNavigation';
 import DiaryListWrapper from './_components/DiaryListWrapper';
 import DiaryCardsSkeleton from './_components/DiaryCardsSkeleton';
+import { PAGE_METADATA } from '../_constants/seoMetadata';
+
+export const metadata = PAGE_METADATA.diaries;
 
 interface DiariesPageProps {
   searchParams: Promise<{
