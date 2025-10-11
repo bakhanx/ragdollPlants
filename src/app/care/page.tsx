@@ -4,6 +4,9 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import BackgroundImage from '../_components/layout/BackgroundImage';
 import { CareCardListWrapper } from './_components/CareCardListWrapper';
 import { CareCardListSkeleton } from './_components/CareCardListSkeleton';
+import { PAGE_METADATA } from '../_constants/seoMetadata';
+
+export const metadata = PAGE_METADATA.care;
 
 // NextAuth v5 호환성 의심
 export const dynamic = 'force-dynamic';

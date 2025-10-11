@@ -4,6 +4,9 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import { GalleryGridSkeleton } from './_components/GalleryGridSkeleton';
 import { GalleryGridWrapper } from './_components/GalleryGridWrapper';
+import { PAGE_METADATA } from '../_constants/seoMetadata';
+
+export const metadata = PAGE_METADATA.galleries;
 
 // NextAuth v5 호환성 의심
 export const dynamic = 'force-dynamic';

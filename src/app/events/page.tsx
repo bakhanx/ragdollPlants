@@ -4,6 +4,9 @@ import { ContentsLayout } from '../_components/layout/ContentsLayout';
 import { Header } from '../_components/header/Header';
 import EventListWrapper from './_components/EventListWrapper';
 import EventCardsSkeleton from './_components/EventCardsSkeleton';
+import { PAGE_METADATA } from '../_constants/seoMetadata';
+
+export const metadata = PAGE_METADATA.events;
 
 export default async function EventsPage() {
   return (

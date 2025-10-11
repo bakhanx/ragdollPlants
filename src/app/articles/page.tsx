@@ -4,6 +4,9 @@ import { Header } from '@/app/_components/header/Header';
 import BackgroundImage from '@/app/_components/layout/BackgroundImage';
 import ArticleListWrapper from './_components/ArticleListWrapper';
 import ArticleCardsSkeleton from './_components/ArticleCardsSkeleton';
+import { PAGE_METADATA } from '@/app/_constants/seoMetadata';
+
+export const metadata = PAGE_METADATA.articles;
 
 export default async function ArticlesPage() {
   return (
