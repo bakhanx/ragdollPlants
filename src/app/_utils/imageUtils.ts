@@ -22,6 +22,11 @@ export const getImageSrc = (
   if (imageUrl.startsWith('data:')) {
     return imageUrl;
   }
+
+  // Data URL googleusercontent.com인 경우 그대로 반환
+  if (imageUrl.includes('googleusercontent.com')) {
+    return imageUrl;
+  }
   
   // Cloudflare Images인 경우 크기 변형 추가
   return `${imageUrl}/${size}`;
