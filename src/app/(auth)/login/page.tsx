@@ -15,6 +15,8 @@ import { signInSchema, type SignInData } from '@/lib/validations/auth';
 import { signInAction } from '@/app/actions/auth';
 import { getCurrentUserAction } from '@/app/actions/auth-client';
 import { useAuthStore } from '@/stores/authStore';
+import { signIn } from 'next-auth/react';
+import { GoogleIcon, NaverIcon } from '../../_components/icons';
 
 export default function Page() {
   const router = useRouter();
@@ -154,62 +156,45 @@ export default function Page() {
               disabled={isSubmitting}
               type="submit"
             />
-            <Button
-              text="Login With Google"
-              buttonType="normal"
-              onClick={() => {
-                // Google 로그인 로직 추가 예정
-                console.log('Google 로그인');
-              }}
-            />
+            {/* 소셜 로그인 구분선 */}
+            <div className="relative my-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              
+            </div>
 
-            {/* 임시 Admin 로그인 버튼 */}
-            <Button
-              text="Admin 로그인 (임시)"
-              buttonType="normal"
-              onClick={async e => {
-                e.preventDefault();
-                setIsSubmitting(true);
-                setServerMessage('');
-
-                try {
-                  const formData = new FormData();
-                  formData.append('email', 'ragdollplants@gamil.com');
-                  formData.append('password', 'admin7777');
-
-                  const result = await signInAction(formData);
-
-                  if (result.success) {
-                    try {
-                      const userResult = await getCurrentUserAction();
-                      if (userResult.success) {
-                        setUser(userResult.user);
-                      }
-                    } catch (error) {
-                      console.error(
-                        'Admin 로그인 후 사용자 정보 로드 오류:',
-                        error
-                      );
-                    }
-
-                    setServerMessage(
-                      result.message || 'Admin 로그인이 완료되었습니다.'
-                    );
-                    router.push('/');
-                  } else {
-                    setServerMessage(
-                      result.message || 'Admin 로그인에 실패했습니다.'
-                    );
-                  }
-                } catch (error) {
-                  console.error('Admin 로그인 중 오류:', error);
-                  setServerMessage('Admin 로그인 중 오류가 발생했습니다.');
-                } finally {
-                  setIsSubmitting(false);
-                }
-              }}
+            {/* 구글 로그인 버튼 */}
+            <button
+              type="button"
+              onClick={() => signIn('google', { callbackUrl: '/' })}
               disabled={isSubmitting}
-            />
+              className="relative flex w-full items-center rounded-lg border-2 border-white bg-white px-4 py-3 text-gray-700 shadow-sm transition-colors hover:border-green-600 hover:bg-gray-200 disabled:opacity-50" >
+              <GoogleIcon
+                size={20}
+                className="absolute left-4"
+              />
+              <span className="flex-1 text-center text-sm font-medium">
+                구글 계정으로 로그인
+              </span>
+            </button>
+
+            {/* 네이버 로그인 버튼 (준비중) */}
+            <button
+              type="button"
+              onClick={() => {
+                // TODO: 네이버 로그인 구현 예정
+              }}
+              disabled={true}
+              className="relative flex w-full cursor-not-allowed items-center rounded-lg bg-green-600 px-4 py-3 text-gray-100 opacity-50 shadow-sm">
+              <NaverIcon
+                size={20}
+                className="absolute left-4"
+              />
+              <span className="flex-1 text-center text-sm font-medium">
+                네이버 계정으로 로그인 (준비중)
+              </span>
+            </button>
 
             {/* 게스트 로그인 버튼 */}
             <Button
