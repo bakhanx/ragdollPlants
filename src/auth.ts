@@ -5,11 +5,38 @@ import Google from 'next-auth/providers/google';
 import GitHub from 'next-auth/providers/github';
 import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
+import { AdapterUser } from 'next-auth/adapters';
+
+// OAuth 사용자를 위한 커스텀 PrismaAdapter
+function createCustomPrismaAdapter() {
+  const baseAdapter = PrismaAdapter(prisma);
+  
+  return {
+    ...baseAdapter,
+    async createUser(data: Partial<AdapterUser>) {
+      // OAuth 사용자인 경우 loginId와 name 자동 생성
+      if (!data.loginId && data.email) {
+        const emailPrefix = data.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+        const timestamp = Date.now().toString().slice(-6);
+        data.loginId = `${emailPrefix}_${timestamp}`;
+        
+        // unique name
+        if (data.name) {
+          const timestamp6 = Date.now().toString().slice(-6); 
+          data.name = `${data.name}_${timestamp6}`;
+        }
+      }
+      
+      // 기본 createUser 호출
+      return baseAdapter.createUser!(data as AdapterUser);
+    }
+  };
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true,
-  adapter: PrismaAdapter(prisma),
+  adapter: createCustomPrismaAdapter(),
   providers: [
     // OAuth 제공자들
     Google({

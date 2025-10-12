@@ -106,13 +106,13 @@ export default async function GardenPage({ searchParams }: PageProps) {
           
           {/* Button */}
           {isOwner && (
-            <div className="absolute top-7 right-4 flex gap-2">
+            <div className="absolute top-7 right-4 flex gap-1">
               {/* Edit */}
               <Link
                 href="/garden/profile"
                 className="rounded-full bg-white/80 p-2 shadow-sm transition-colors hover:bg-white/100"
                 aria-label="프로필 편집">
-                <EditIcon className="size-4 text-gray-600 sm:size-6" />
+                <EditIcon className="size-4 text-gray-600" />
               </Link>
 
               {/* Logout */}
