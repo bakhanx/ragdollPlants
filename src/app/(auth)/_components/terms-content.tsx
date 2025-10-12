@@ -187,7 +187,7 @@ export const termsContent: Record<'service' | 'privacy' | 'marketing', TermsCont
             <div className="bg-blue-50 p-4 rounded-lg mt-2">
               <p><strong>개인정보보호책임자</strong></p>
               <p>담당부서: 개발팀</p>
-              <p>연락처: privacy@ragdollplants.com</p>
+              <p>연락처: bkndev7@gmail.com</p>
             </div>
           </div>
         </section>
@@ -252,7 +252,7 @@ export const termsContent: Record<'service' | 'privacy' | 'marketing', TermsCont
             <ul className="list-disc ml-6 space-y-1">
               <li>마이페이지 &gt; 알림 설정에서 변경</li>
               <li>수신된 이메일의 &quot;수신거부&quot; 링크 클릭</li>
-              <li>고객센터(help@ragdollplants.com)를 통한 요청</li>
+              <li>고객센터(bkndev7@gmail.com)를 통한 요청</li>
               <li>개인정보보호책임자에게 서면, 전화, 이메일로 연락</li>
             </ul>
           </div>
