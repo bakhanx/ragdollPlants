@@ -4,6 +4,8 @@ import './globals.css';
 import { NavigationScrollManager } from './_components/utils/navigationScrollManager';
 import { ScrollToTopButton } from './_components/common/ScrollToTopButton';
 import { AuthProvider } from './_components/AuthProvider';
+import { HomeJsonLd } from './_components/seo/JsonLd';
+import { PAGE_METADATA } from './_constants/seoMetadata';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,10 +17,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin']
 });
 
-export const metadata: Metadata = {
-  title: 'RagdollPlants - 식물 관리의 모든 것',
-  description: '당신의 식물을 더 건강하게 관리할 수 있는 서비스'
-};
+export const metadata: Metadata = PAGE_METADATA.home;
 
 export default function RootLayout({
   children
@@ -39,6 +38,9 @@ export default function RootLayout({
         />
       </head>
       <body className="">
+        {/* JSON-LD 구조화된 데이터 */}
+        <HomeJsonLd />
+        
         <AuthProvider>
           <main className="relative flex min-h-screen items-center justify-center">
             {children}
