@@ -88,9 +88,6 @@ const getCachedEvents = unstable_cache(
 // 모든 이벤트 조회 (캐시 적용)
 export async function getEvents(): Promise<EventsResponse> {
   try {
-    const user = await getCurrentUser().catch(() => null);
-
-    // 비로그인 사용자도 이벤트 조회 가능 (공개 데이터)
     return getCachedEvents();
   } catch (error) {
     console.error('이벤트 목록 조회 오류:', error);
