@@ -48,7 +48,10 @@ export default async function middleware(request: NextRequest) {
   // JWT 토큰 검증
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET
+    secret: process.env.NEXTAUTH_SECRET,
+    cookieName: process.env.NODE_ENV === 'production' 
+      ? '__Secure-authjs.session-token' 
+      : 'authjs.session-token'
   });
   
   if (process.env.NODE_ENV === 'production') {
