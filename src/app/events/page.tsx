@@ -8,6 +8,9 @@ import { PAGE_METADATA } from '../_constants/seoMetadata';
 
 export const metadata = PAGE_METADATA.events;
 
+// SSG 활성화 - on-demand revalidation만 사용
+export const revalidate = false;
+
 export default async function EventsPage() {
   return (
     <>
