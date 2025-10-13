@@ -1,18 +1,8 @@
 import React, { Suspense } from 'react';
-import dynamic from 'next/dynamic';
 import { HeaderLeft } from './HeaderLeft';
 import { HeaderCenter } from './HeaderCenter';
 import { ContentType } from '@/app/_services/contentService';
-
-// HeaderRight를 클라이언트에서만 렌더링
-const DynamicHeaderRight = dynamic(
-  () => import('./HeaderRight').then(mod => ({ default: mod.HeaderRight })),
-  {
-    loading: () => (
-      <div className="h-9 w-9 animate-pulse rounded-xl bg-white/30" />
-    ),
-  }
-);
+import { HeaderRight } from './HeaderRight';
 
 // 헤더 변형 타입
 type HeaderVariant = 'default' | 'transparent' | 'glass';
@@ -53,11 +43,13 @@ export const Header = ({
         <HeaderCenter logoSrc={'/images/default-img.webp'} />
 
         {/* 오른쪽: 알림, 메뉴 버튼 - 클라이언트에서만 렌더링 */}
-        <DynamicHeaderRight
-          showContentMenu={showContentMenu}
-          contentType={contentType}
-          contentId={id}
-        />
+        <Suspense>
+          <HeaderRight
+            showContentMenu={showContentMenu}
+            contentType={contentType}
+            contentId={id}
+          />
+        </Suspense>
       </div>
     </>
   );
