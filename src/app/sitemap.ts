@@ -81,25 +81,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    // 동적 페이지들 - 갤러리 (공개+활성화된 것만)
-    const galleries = await prisma.gallery.findMany({
-      where: { 
-        isPublic: true,
-        isActive: true 
-      },
-      select: { id: true, updatedAt: true },
-      orderBy: { updatedAt: 'desc' },
-      take: 1000,
-    });
+    // 동적 페이지들 - 갤러리 디테일은 제외 (404 오류 방지)
+    // const galleries = await prisma.gallery.findMany({ ... });
+    // const galleryPages = galleries.map((gallery) => ({ ... }));
 
-    const galleryPages = galleries.map((gallery) => ({
-      url: `${baseUrl}/galleries/${gallery.id}`,
-      lastModified: gallery.updatedAt,
-      changeFrequency: 'monthly' as const,
-      priority: 0.5,
-    }));
-
-    return [...staticPages, ...articlePages, ...eventPages, ...galleryPages];
+    return [...staticPages, ...articlePages, ...eventPages];
   } catch (error) {
     console.error('사이트맵 생성 중 오류:', error);
     // DB 연결 실패시 기본 정적 페이지들만 반환
