@@ -32,11 +32,28 @@ const PROTECTED_DYNAMIC_PATHS = [
 
 
 export default async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // 프로덕션 환경에서만 디버그 로그 출력
+  if (process.env.NODE_ENV === 'production') {
+    console.log('🔍 Middleware Debug:', {
+      path: pathname,
+      hasSecret: !!process.env.NEXTAUTH_SECRET,
+      secretLength: process.env.NEXTAUTH_SECRET?.length,
+      nextAuthUrl: process.env.NEXTAUTH_URL,
+      cookies: request.cookies.getAll().map(c => ({ name: c.name, hasValue: !!c.value }))
+    });
+  }
+  
   // JWT 토큰 검증
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET
   });
+  
+  if (process.env.NODE_ENV === 'production') {
+    console.log('🔍 Token Result:', token ? 'Found token' : 'No token', token?.email);
+  }
 
   // NextAuth 세션 형태로 변환
   const session = token
@@ -51,7 +68,6 @@ export default async function middleware(request: NextRequest) {
       }
     : null;
 
-  const { pathname } = request.nextUrl;
 
   // 이미 로그인한 사용자가 /login에 접근하면 메인으로 리다이렉트
   if (pathname === '/login' && session?.user) {
