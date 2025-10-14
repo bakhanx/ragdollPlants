@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import BackgroundImage from '../../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../../_components/layout/ContentsLayout';
 import { PasswordInput } from '../_components/PasswordInput';
@@ -20,7 +20,6 @@ import { GoogleIcon, NaverIcon } from '../../_components/icons';
 
 export default function Page() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState<string>('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -30,27 +29,33 @@ export default function Page() {
     register,
     handleSubmit,
     formState: { errors },
-    setError,
-    setValue
+    setError
   } = useForm<SignInData>({
     resolver: zodResolver(signInSchema),
     mode: 'onBlur'
   });
 
-  // URL 파라미터에서 계정 존재 에러 확인
-  useEffect(() => {
-    const error = searchParams.get('error');
-    const email = searchParams.get('email');
-    const provider = searchParams.get('provider');
-    
-    if (error === 'account-exists' && email && provider) {
-      setServerMessage(
-        `${email} 계정이 이미 존재합니다. ${provider} 대신 비밀번호로 로그인해주세요.`
-      );
-      // 이메일 필드에 자동 입력
-      setValue('email', email);
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signIn('google', { redirect: false });
+      
+      if (result?.error === 'DUPLICATE_ACCOUNT') {
+        alert('소셜 로그인이 작동하지 않습니다. 이메일과 비밀번호로 로그인해주세요.');
+        return;
+      }
+      
+      if (!result?.ok) {
+        alert('로그인에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+      
+      // 성공시 메인 페이지로 이동
+      router.push('/');
+    } catch (error) {
+      console.error('Google 로그인 오류:', error);
+      alert('로그인 중 오류가 발생했습니다.');
     }
-  }, [searchParams, setValue]);
+  };
 
   const onSubmit = async (data: SignInData) => {
     setIsSubmitting(true);
@@ -187,7 +192,7 @@ export default function Page() {
             {/* 구글 로그인 버튼 */}
             <button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/' })}
+              onClick={handleGoogleLogin}
               disabled={isSubmitting}
               className="relative flex w-full items-center rounded-lg border-2 border-white bg-white px-4 py-3 text-gray-700 shadow-sm transition-colors hover:border-green-600 hover:bg-gray-200 disabled:opacity-50" >
               <GoogleIcon
