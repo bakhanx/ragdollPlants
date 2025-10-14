@@ -115,18 +115,46 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       if (user.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
-          select: { isActive: true }
+          select: { id: true, isActive: true, password: true }
         });
 
         if (dbUser && !dbUser.isActive) {
           return false;
         }
+
+        // OAuth 로그인 시 기존 계정이 있고 비밀번호가 설정되어 있으면
+        if (account && account.type === 'oauth' && dbUser && dbUser.password) {
+          // 이미 OAuth Account가 연결되어 있는지 확인
+          const existingAccount = await prisma.account.findFirst({
+            where: {
+              userId: dbUser.id,
+              provider: account.provider
+            }
+          });
+
+          // OAuth Account가 없으면 로그인 페이지로 리다이렉트 (명확한 안내 메시지)
+          if (!existingAccount) {
+            const providerNames: Record<string, string> = {
+              google: 'Google',
+              naver: 'Naver'
+            };
+            const providerName = providerNames[account.provider] || account.provider;
+            
+            return `/login?error=account-exists&email=${encodeURIComponent(user.email!)}&provider=${providerName}`;
+          }
+        }
       }
       return true;
+    },
+    async redirect({ url, baseUrl }) {
+      // 로그아웃 후 리다이렉트 처리
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     }
   },
   pages: {
