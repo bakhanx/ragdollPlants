@@ -136,15 +136,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
           });
 
-          // OAuth Account가 없으면 로그인 페이지로 리다이렉트 (명확한 안내 메시지)
+          // OAuth Account가 없으면 에러 던지기 (기존 계정 존재)
           if (!existingAccount) {
-            const providerNames: Record<string, string> = {
-              google: 'Google',
-              naver: 'Naver'
-            };
-            const providerName = providerNames[account.provider] || account.provider;
-            
-            return `/login?error=account-exists&email=${encodeURIComponent(user.email!)}&provider=${providerName}`;
+            throw new Error('DUPLICATE_ACCOUNT');
           }
         }
       }
