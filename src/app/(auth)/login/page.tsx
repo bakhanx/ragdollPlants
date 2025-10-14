@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import BackgroundImage from '../../_components/layout/BackgroundImage';
 import { ContentsLayout } from '../../_components/layout/ContentsLayout';
 import { PasswordInput } from '../_components/PasswordInput';
@@ -20,6 +20,7 @@ import { GoogleIcon, NaverIcon } from '../../_components/icons';
 
 export default function Page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState<string>('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -29,11 +30,27 @@ export default function Page() {
     register,
     handleSubmit,
     formState: { errors },
-    setError
+    setError,
+    setValue
   } = useForm<SignInData>({
     resolver: zodResolver(signInSchema),
     mode: 'onBlur'
   });
+
+  // URL 파라미터에서 계정 존재 에러 확인
+  useEffect(() => {
+    const error = searchParams.get('error');
+    const email = searchParams.get('email');
+    const provider = searchParams.get('provider');
+    
+    if (error === 'account-exists' && email && provider) {
+      setServerMessage(
+        `${email} 계정이 이미 존재합니다. ${provider} 대신 비밀번호로 로그인해주세요.`
+      );
+      // 이메일 필드에 자동 입력
+      setValue('email', email);
+    }
+  }, [searchParams, setValue]);
 
   const onSubmit = async (data: SignInData) => {
     setIsSubmitting(true);
@@ -98,6 +115,9 @@ export default function Page() {
         <div className="mb-8 flex flex-col pt-8 text-center text-white">
           <p className="text-sm tracking-wide">
             로그인 해주세요. 식물들이 기다리고 있어요~
+          </p>
+          <p className="mt-2 text-xs text-gray-200">
+            이미 계정이 있다면 비밀번호로 로그인하세요
           </p>
         </div>
 
