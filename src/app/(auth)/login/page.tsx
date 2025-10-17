@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -17,6 +17,41 @@ import { getCurrentUserAction } from '@/app/actions/auth-client';
 import { useAuthStore } from '@/stores/authStore';
 import { signIn } from 'next-auth/react';
 import { GoogleIcon, NaverIcon } from '../../_components/icons';
+
+// URL에서 OAuth 에러 파싱 (중복 계정 에러만 처리)
+function parseOAuthError(): string {
+  try {
+    if (typeof window === 'undefined') return '';
+
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+
+    // 이미 가입된 이메일 에러
+    if (error === 'OAuthAccountNotLinked') {
+      return '이미 이메일과 비밀번호로 가입된 계정입니다. 직접 로그인해주세요.';
+    }
+
+    return '';
+  } catch (error) {
+    console.error('OAuth 에러 파싱 실패:', error);
+    return '';
+  }
+}
+
+// URL 정리 (쿼리 파라미터 제거)
+function cleanupURL() {
+  try {
+    if (typeof window === 'undefined') return;
+
+    const url = new URL(window.location.href);
+    if (url.search.length > 0) {
+      const cleanUrl = `${url.origin}${url.pathname}`;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  } catch (error) {
+    console.error('URL 정리 실패:', error);
+  }
+}
 
 export default function Page() {
   const router = useRouter();
@@ -35,25 +70,24 @@ export default function Page() {
     mode: 'onBlur'
   });
 
+  // 컴포넌트 마운트시 OAuth 에러 확인
+  useEffect(() => {
+    const oauthError = parseOAuthError();
+    if (oauthError) {
+      setServerMessage(oauthError);
+      cleanupURL();
+    }
+  }, []);
+
   const handleGoogleLogin = async () => {
     try {
-      const result = await signIn('google', { redirect: false });
-      
-      if (result?.error === 'DUPLICATE_ACCOUNT') {
-        alert('소셜 로그인이 작동하지 않습니다. 이메일과 비밀번호로 로그인해주세요.');
-        return;
-      }
-      
-      if (!result?.ok) {
-        alert('로그인에 실패했습니다. 다시 시도해주세요.');
-        return;
-      }
-      
-      // 성공시 메인 페이지로 이동
-      router.push('/');
+      await signIn('google', {
+        redirect: true,
+        callbackUrl: '/login'
+      });
     } catch (error) {
       console.error('Google 로그인 오류:', error);
-      alert('로그인 중 오류가 발생했습니다.');
+      setServerMessage('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -186,7 +220,6 @@ export default function Page() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
-              
             </div>
 
             {/* 구글 로그인 버튼 */}
@@ -194,7 +227,7 @@ export default function Page() {
               type="button"
               onClick={handleGoogleLogin}
               disabled={isSubmitting}
-              className="relative flex w-full items-center rounded-lg border-2 border-white bg-white px-4 py-3 text-gray-700 shadow-sm transition-colors hover:border-green-600 hover:bg-gray-200 disabled:opacity-50" >
+              className="relative flex w-full items-center rounded-lg border-2 border-white bg-white px-4 py-3 text-gray-700 shadow-sm transition-colors hover:border-green-600 hover:bg-gray-200 disabled:opacity-50">
               <GoogleIcon
                 size={20}
                 className="absolute left-4"
