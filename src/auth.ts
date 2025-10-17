@@ -136,9 +136,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
           });
 
-          // OAuth Account가 없으면 에러 던지기 (기존 계정 존재)
+          // NextAuth 표준 에러 반환 (기존 계정 존재)
           if (!existingAccount) {
-            throw new Error('DUPLICATE_ACCOUNT');
+            return '/login?error=OAuthAccountNotLinked';
           }
         }
       }
