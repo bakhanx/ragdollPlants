@@ -91,6 +91,18 @@ export default function Page() {
     }
   };
 
+  const handleNaverLogin = async () => {
+    try {
+      await signIn('naver', {
+        redirect: true,
+        callbackUrl: '/login'
+      });
+    } catch (error) {
+      console.error('Naver 로그인 오류:', error);
+      setServerMessage('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
+  };
+
   const onSubmit = async (data: SignInData) => {
     setIsSubmitting(true);
     setServerMessage('');
@@ -240,10 +252,8 @@ export default function Page() {
             {/* 네이버 로그인 버튼 (준비중) */}
             <button
               type="button"
-              onClick={() => {
-                // TODO: 네이버 로그인 구현 예정
-              }}
-              disabled={true}
+              onClick={handleNaverLogin}
+              // disabled={true}
               className="relative flex w-full cursor-not-allowed items-center rounded-lg bg-green-600 px-4 py-3 text-gray-100 opacity-50 shadow-sm">
               <NaverIcon
                 size={20}
